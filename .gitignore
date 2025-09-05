@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Spring Boot devtools
+spring-boot-devtools.log
