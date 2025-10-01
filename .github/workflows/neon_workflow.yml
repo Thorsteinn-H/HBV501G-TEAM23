@@ -35,6 +35,8 @@ jobs:
         with:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           branch_name: preview/pr-${{ github.event.number }}-${{ needs.setup.outputs.branch }}
+          username: ${{ secrets.NEON_USERNAME }}
+          role: neondb_owner
           api_key: ${{ secrets.NEON_API_KEY }}
 
   delete_neon_branch:
