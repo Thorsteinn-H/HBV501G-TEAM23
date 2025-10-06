@@ -1,5 +1,8 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
+import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
+import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,4 +21,27 @@ import java.util.List;
 
 @Controller
 public class FavouriteController {
+    private FavoriteService favoriteService;
+
+    @Autowired
+    public FavouriteController(FavoriteService FavoriteService){
+        this.favoriteService = FavoriteService;
+    }
+
+    public static List<Favorites> getAllFavorites(){
+        return null;
+    }
+
+    public static Favorites addPlayerFavorite(Long id){
+        return null;
+    }
+
+    public static Favorites addMatchToFavorites(Long id){
+        return null;
+    }
+
+    public static void removeFavorite(Long id){
+
+    }
+
 }
