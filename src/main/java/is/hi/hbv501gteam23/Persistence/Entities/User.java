@@ -1,71 +1,42 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing: User entity for authentication and authorization
- */
+import lombok.*;
 
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
+    @Column(name = "user_name", nullable = false, length = 120)
     private String name;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "email", nullable = false, unique = true, length = 320)
+    private String email;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "createdAt", nullable = false)
+    private LocalDate createdAt;
+
+    @Column(name = "passwordHash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    @Column(name = "role", nullable = false)
+    private String role;
 }
