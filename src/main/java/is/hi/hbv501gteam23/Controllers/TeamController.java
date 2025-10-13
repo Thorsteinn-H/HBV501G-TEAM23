@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,7 +16,8 @@ import java.util.List;
  * Lýsing:
  **/
 
-@Controller
+@RestController
+@RequestMapping("/team")
 public class TeamController {
     private TeamService teamService;
 
@@ -26,27 +25,35 @@ public class TeamController {
     public TeamController(TeamService teamService){
         this.teamService = teamService;
     }
-    public static List<Team> getAllTeams(){
-        return null;
+
+    @GetMapping
+    public List<Team> getAllTeams(){
+        return teamService.listAll();
     }
 
-    public static Team getTeam(Long id){
-        return null;
+    @GetMapping("/{id}")
+    public Team getTeam(@PathVariable Long id){
+        return teamService.getById(id);
     }
 
-    public static Team createTeam(Team team){
-        return null;
+    @PostMapping
+    public Team createTeam(Team team){
+        return teamService.create(team);
     }
 
-    public static void deleteTeam(Long id){
+    @DeleteMapping("/{id}")
+    public void deleteTeam(@PathVariable Long id){
+        teamService.delete(id);
 
     }
 
-    public static Team updateTeam(Team team){
-        return null;
+    @PutMapping("/{team}")
+    public Team updateTeam(@PathVariable Team team){
+        return teamService.update(team);
     }
 
-    public static List<Team> getByVenue(Long id){
-        return null;
+    @GetMapping("/{venue}")
+    public List<Team> getByVenue(@PathVariable Long id){
+        return teamService.getByVenue(id);
     }
 }

@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,7 +17,8 @@ import java.util.List;
  * Lýsing:
  **/
 
-@Controller
+@RestController
+@RequestMapping("/favorite")
 public class FavouriteController {
     private FavoriteService favoriteService;
 
@@ -28,19 +27,24 @@ public class FavouriteController {
         this.favoriteService = FavoriteService;
     }
 
-    public static List<Favorites> getAllFavorites(){
-        return null;
+    @GetMapping
+    public List<Favorites> getAllFavorites(){
+        return favoriteService.listAll();
     }
 
-    public static Favorites addPlayerFavorite(Long id){
-        return null;
+    @PostMapping("/{id}")
+    public Favorites addPlayerFavorite(@PathVariable Long id){
+        return favoriteService.addPlayerFavorite(id);
     }
 
-    public static Favorites addMatchToFavorites(Long id){
-        return null;
+    @PostMapping("/{id}")
+    public Favorites addMatchToFavorites(@PathVariable Long id){
+        return favoriteService.addMatchFavorite(id);
     }
 
-    public static void removeFavorite(Long id){
+    @DeleteMapping("/{id}")
+    public void removeFavorite(@PathVariable Long id){
+        favoriteService.removeFavorite(id);
 
     }
 

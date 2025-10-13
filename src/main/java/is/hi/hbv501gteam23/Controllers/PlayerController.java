@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 /**
@@ -19,7 +17,8 @@ import java.util.List;
  * Lýsing:
  **/
 
-@Controller
+@RestController
+@RequestMapping("/player")
 public class PlayerController {
     private PlayerService playerService;
 
@@ -28,27 +27,34 @@ public class PlayerController {
         this.playerService = PlayerService;
     }
 
-    public static List<Player> getAllPlayers() {
-        return null;
+    @GetMapping
+    public  List<Player> getAllPlayers() {
+        return playerService.listAll();
     }
 
-    public static Player getPlayerById(Long id) {
-        return null;
+    @GetMapping("/{id}")
+    public Player getPlayerById(@PathVariable Long id) {
+        return playerService.getById(id);
     }
 
-    public static List<Player> getPlayerByName(String name) {
-        return null;
+    @GetMapping("/{name}")
+    public List<Player> getPlayerByName(@PathVariable String name) {
+        return playerService.searchByName(name);
     }
 
-    public static Player createPlayer(Player player){
-        return null;
+    @PostMapping
+    public Player createPlayer(Player player){
+        return playerService.create(player);
     }
 
-    public static Player updatePlayer(Player player){
-        return null;
+    @PutMapping("/{player}")
+    public Player updatePlayer(Player player){
+        return playerService.update(player);
     }
 
-    public static void deletePlayer(Player player){
+    @DeleteMapping("/{player}")
+    public void deletePlayer(@PathVariable Long player){
+        playerService.delete(player);
 
     }
 

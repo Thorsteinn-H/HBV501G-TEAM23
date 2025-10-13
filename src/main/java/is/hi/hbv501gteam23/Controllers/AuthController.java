@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 /**
@@ -18,7 +16,8 @@ import java.util.List;
  * Lýsing:
  **/
 
-@Controller
+@RestController
+@RequestMapping("/user")
 public class AuthController {
 
     private AuthService authService;
@@ -29,19 +28,24 @@ public class AuthController {
     }
 
 
-    public static Boolean login(String username, String password){
-        return Boolean.TRUE;
+    @GetMapping
+    public Boolean login(@PathVariable String username, @PathVariable String password){
+
+        return authService.login(username,password);
     }
 
-    public static User register(String username, String password){
-        return null;
+    @PostMapping
+    public User register(@PathVariable String username, @PathVariable String password){
+        return authService.register(username,password);
     }
 
-    public static void logout(){
+    @PostMapping
+    public void logout(){
 
     }
 
-    public static void remove(User user){
+    @DeleteMapping("/user/{id}")
+    public void remove(@PathVariable Long id){
 
     }
 }
