@@ -1,22 +1,30 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
+import java.util.List;
 
 @Service
 public class MatchServiceImplementation implements MatchService {
-    private MatchRepository matchRepository;
+    private final MatchRepository matchRepository;
 
     @Autowired
     public MatchServiceImplementation(MatchRepository matchRepository) {
         this.matchRepository = matchRepository;
+    }
+
+    @Override
+    public List<Match> listAll() {
+        return matchRepository.findAll();
+    }
+
+    @Override
+    public Match getById(Long id) {
+        return matchRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Match not found with id " + id))
     }
 }

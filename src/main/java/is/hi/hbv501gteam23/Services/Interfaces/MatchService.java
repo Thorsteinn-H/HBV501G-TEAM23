@@ -1,9 +1,10 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
+import is.hi.hbv501gteam23.Persistence.Entities.Match;
+
+import java.util.List;
+
 public interface MatchService {
+    List<Match> listAll();
+    Match getById(Long id);
 }
