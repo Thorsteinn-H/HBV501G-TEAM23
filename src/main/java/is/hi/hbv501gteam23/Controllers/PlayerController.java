@@ -1,21 +1,45 @@
 package is.hi.hbv501gteam23.Controllers;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
 
-@Controller
+@RestController
+@RequestMapping("/players")
+@RequiredArgsConstructor
 public class PlayerController {
+    private final PlayerService playerService;
+
+    @GetMapping
+    public List<Player> getAllPlayers() {
+        return playerService.getAllPlayers();
+    }
+
+    @GetMapping("/{id}")
+    public Player getPlayerById(@PathVariable Long id) {
+        return playerService.getPlayerById(id);
+    }
+
+    @GetMapping("/search")
+    public List<Player> searchPlayersByName(@RequestParam String name) {
+        return playerService.searchPlayersByName(name);
+    }
+
+    @PostMapping
+    public Player createPlayer(@RequestBody Player player) {
+        return playerService.createPlayer(player);
+    }
+
+    @PutMapping
+    public Player updatePlayer(@RequestBody Player player) {
+        return playerService.updatePlayer(player);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
+    }
 }

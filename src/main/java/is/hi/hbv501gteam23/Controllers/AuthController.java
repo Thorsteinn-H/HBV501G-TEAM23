@@ -1,7 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import is.hi.hbv501gteam23.Persistence.Entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
