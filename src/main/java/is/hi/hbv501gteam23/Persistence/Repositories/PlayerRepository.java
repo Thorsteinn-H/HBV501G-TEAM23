@@ -8,8 +8,8 @@ import java.util.List;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
     List<Player> findByNameContainingIgnoreCase(String name);
-    List<Player> findByTeamName(String teamName);
+    List<Player> findByTeam_Name(String teamName);
     List<Player> findByPosition(String position);
-    List<Player> findByNationality(String nationality);
+    List<Player> findByCountry(String country);
     List<Player> findByGoalsGreaterThan(int goals);
 }

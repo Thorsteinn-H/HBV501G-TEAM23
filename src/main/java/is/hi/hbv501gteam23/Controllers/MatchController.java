@@ -3,6 +3,7 @@ package is.hi.hbv501gteam23.Controllers;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,14 +15,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/match")
+@RequiredArgsConstructor
 public class MatchController {
-    private MatchService matchService;
+    private final MatchService matchService;
 
-    @Autowired
-    public MatchController(MatchService MatchService){
-        this.matchService = MatchService;
-    }
-
+    /*
     @GetMapping
     public List<Match> getAllMatches(){
         return matchService.listAll();
@@ -62,4 +60,5 @@ public class MatchController {
     public List<Match> getMatchesByPlayer(@PathVariable Long player){
         return matchService.findByPlayerId(player);
     }
+    */
 }

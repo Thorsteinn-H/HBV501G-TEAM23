@@ -1,63 +1,45 @@
 package is.hi.hbv501gteam23.Controllers;
 
-
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
-import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
 
 @RestController
-@RequestMapping("/player")
+@RequestMapping("/players")
+@RequiredArgsConstructor
 public class PlayerController {
-    private PlayerService playerService;
-
-    @Autowired
-    public PlayerController(PlayerService PlayerService){
-        this.playerService = PlayerService;
-    }
+    private final PlayerService playerService;
 
     @GetMapping
-    public  List<Player> getAllPlayers() {
-        return playerService.listAll();
+    public List<Player> getAllPlayers() {
+        return playerService.getAllPlayers();
     }
 
     @GetMapping("/{id}")
     public Player getPlayerById(@PathVariable Long id) {
-        return playerService.getById(id);
+        return playerService.getPlayerById(id);
     }
 
-    @GetMapping("/{name}")
-    public List<Player> getPlayerByName(@PathVariable String name) {
-        return playerService.searchByName(name);
+    @GetMapping("/search")
+    public List<Player> searchPlayersByName(@RequestParam String name) {
+        return playerService.searchPlayersByName(name);
     }
 
     @PostMapping
-    public Player createPlayer(Player player){
-        return playerService.create(player);
+    public Player createPlayer(@RequestBody Player player) {
+        return playerService.createPlayer(player);
     }
 
-    @PutMapping("/{player}")
-    public Player updatePlayer(Player player){
-        return playerService.update(player);
+    @PutMapping
+    public Player updatePlayer(@RequestBody Player player) {
+        return playerService.updatePlayer(player);
     }
 
-    @DeleteMapping("/{player}")
-    public void deletePlayer(@PathVariable Long player){
-        playerService.delete(player);
-
+    @DeleteMapping("/{id}")
+    public void deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
     }
-
-
-
 }

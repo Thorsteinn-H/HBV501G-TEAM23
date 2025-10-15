@@ -28,6 +28,10 @@ public class Player {
     @Column(name = "player_country", length = 80)
     private String country;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
+
     @Column(name = "player_position", length = 40)
     private String position;
 

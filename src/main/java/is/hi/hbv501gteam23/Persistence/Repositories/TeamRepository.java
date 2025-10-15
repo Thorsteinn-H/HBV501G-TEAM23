@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Team findByName(String name);
-    List<Team> findByVenueContainingIgnoreCase(String venue);
+    List<Team> findByVenue_Id(Long venueId);
 }
