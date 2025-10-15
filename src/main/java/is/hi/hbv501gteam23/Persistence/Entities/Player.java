@@ -1,14 +1,40 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
+import lombok.*;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
+import java.time.LocalDate;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "player")
 public class Player {
+    @Id
+    @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "player_sequence")
+    @Column(name = "player_id")
+    private Long id;
+
+    @Column(name = "player_name", nullable = false, length = 120)
+    private String name;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "player_country", length = 80)
+    private String country;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
+
+    @Column(name = "player_position", length = 40)
+    private String position;
+
+    @Column(name = "goals", nullable = false)
+    private Integer goals;
 }
