@@ -23,6 +23,7 @@ public class Team {
     @Column(name = "team_country", nullable = false, length = 80)
     private String country;
 
-    @Column(name = "venue_id")
-    private Long venueId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id")
+    private Venue venue;
 }
