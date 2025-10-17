@@ -32,9 +32,13 @@ public class Player {
     @JoinColumn(name = "team_id", nullable = false)
     private Team team;
 
+    public enum PlayerPosition { GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD }
+    @Enumerated(EnumType.STRING)
     @Column(name = "player_position", length = 40)
-    private String position;
+    private PlayerPosition position;
 
     @Column(name = "goals", nullable = false)
     private Integer goals;
 }
+
+
