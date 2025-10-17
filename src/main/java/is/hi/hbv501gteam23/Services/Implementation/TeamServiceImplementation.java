@@ -1,15 +1,12 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
+import java.util.List;
 
 @Service
 public class TeamServiceImplementation implements TeamService {
@@ -18,5 +15,45 @@ public class TeamServiceImplementation implements TeamService {
     @Autowired
     public TeamServiceImplementation(TeamRepository teamRepository) {
         this.teamRepository = teamRepository;
+    }
+
+    @Override
+    public Team findById(long id){
+        return teamRepository.findById(id);
+    }
+
+    @Override
+    public Team findByName(String name){
+        return teamRepository.findByName(name);
+    }
+
+    @Override
+    public Team findByCountry(String country){
+        return teamRepository.findByCountry(country);
+    }
+
+    @Override
+    public List<Team> findByVenue(Long venueId){
+        return teamRepository.findByVenue(venueId);
+    }
+
+    @Override
+    public List<Team> findAll(){
+        return teamRepository.findAll();
+    }
+
+    @Override
+    public void delete(Long id){
+        teamRepository.delete(id);
+    }
+
+    @Override
+    public Team create(Team team){
+        return teamRepository.save(team);
+    }
+
+    @Override
+    public Team  update(Team team){
+        return teamRepository.save(team);
     }
 }

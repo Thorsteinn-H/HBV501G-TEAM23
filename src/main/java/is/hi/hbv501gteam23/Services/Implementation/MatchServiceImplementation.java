@@ -25,6 +25,6 @@ public class MatchServiceImplementation implements MatchService {
     @Override
     public Match getById(Long id) {
         return matchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Match not found with id " + id))
+                .orElseThrow(() -> new RuntimeException("Match not found with id " + id));
     }
 }
