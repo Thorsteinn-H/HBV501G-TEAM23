@@ -40,6 +40,11 @@ public class PlayerServiceImplementation implements PlayerService {
         return playerRepository.findByTeam_NameIgnoreCase(teamName);
     }
 
+    @Override
+    public List<Player> getByTeamId(Long teamId) {
+        return playerRepository.findByTeamId(teamId);
+    }
+
 
     @Override public Player createPlayer(String name, LocalDate dob, String country,
                                          Player.PlayerPosition position, Integer goals, Long teamId) {

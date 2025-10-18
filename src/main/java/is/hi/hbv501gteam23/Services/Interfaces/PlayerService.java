@@ -11,6 +11,7 @@ public interface PlayerService {
     Player getPlayerById(Long id);
     Player searchPlayersByName(String name);
     List<Player> getByTeamName(String team);
+    List<Player> getByTeamId(Long teamId);
     Player createPlayer(String name, LocalDate dob, String country,
                         Player.PlayerPosition position, Integer goals, Long teamId);
     Player updatePlayer(Player player);

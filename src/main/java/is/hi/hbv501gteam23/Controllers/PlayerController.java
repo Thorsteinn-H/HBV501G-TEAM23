@@ -2,8 +2,10 @@ package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.CreatePlayerRequest;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
+import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +57,14 @@ public class PlayerController {
     @GetMapping("/team={teamName}")
     public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
         return playerService.getByTeamName(teamName)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @GetMapping("/team/{teamId}")
+    public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
+        return playerService.getByTeamId(teamId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
