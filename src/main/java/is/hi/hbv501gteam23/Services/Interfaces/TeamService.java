@@ -8,7 +8,7 @@ public interface TeamService {
     List<Team> getAllTeams();
     Team getTeamById(Long id);
     Team findByName(String name);
-    Team findByCountry(String country);
+    List<Team> findByCountry(String country);
     List<Team> findByVenueId(Long venueId);
     Team create(Team team);
     Team update(Team team);

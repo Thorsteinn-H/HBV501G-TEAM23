@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Team findByName(String name);
-    Team findByCountry(String country);
+    List<Team> getByCountry(String country);
 
     @Query("SELECT t FROM Team t WHERE t.venue.id = :venueId")
     List<Team> findByVenueId(Long venueId);
