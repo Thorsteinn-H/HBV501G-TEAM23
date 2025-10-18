@@ -5,6 +5,11 @@ import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import java.util.List;
 
 public interface MatchService {
-    List<Match> listAll();
-    Match getById(Long id);
+    List<Match> getAllMatches();
+    Match getMatchById(Long id);
+    List<Match> getMatchesByTeamId(Long teamId);
+    List<Match> getMatchesByYear(int year);
+    Match updateMatch(Match match);
+    Match createMatch(Match match);
+    void deleteMatch(Long id);
 }

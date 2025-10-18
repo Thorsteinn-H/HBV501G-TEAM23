@@ -9,8 +9,6 @@ import java.util.List;
 
 @Repository
 public interface MatchRepository extends JpaRepository<Match, Long> {
-    List<Match> findByHomeTeamName(String teamName);
-    List<Match> findByAwayTeamName(String teamName);
-    List<Match> findByHomeTeamNameAndAwayTeamName(String homeTeam, String awayTeam);
-    List<Match> findByDateBetween(LocalDate start,LocalDate end);
+    List<Match> findByHomeTeam_IdOrAwayTeam_Id(Long teamId1, Long teamId2);
+    List<Match> findByDateBetween(LocalDate start, LocalDate end);
 }

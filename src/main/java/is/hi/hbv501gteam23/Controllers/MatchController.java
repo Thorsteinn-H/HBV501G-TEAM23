@@ -1,64 +1,77 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
-import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/match")
+@RequestMapping("/matches")
 @RequiredArgsConstructor
 public class MatchController {
     private final MatchService matchService;
 
-    /*
     @GetMapping
-    public List<Match> getAllMatches(){
-        return matchService.listAll();
+    public List<MatchResponse> getAllMatches() {
+        return matchService.getAllMatches()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Match getMatchById(@PathVariable Long id){
-        return matchService.getById(id);
+    public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
+        return toResponse(matchService.getMatchById(id));
     }
 
     @PostMapping
     public Match createMatch(Match match){
-        return matchService.create(match);
+        return matchService.createMatch(match);
     }
 
     @PutMapping("/{match}")
     public Match updateMatch(@PathVariable Match match){
-        return matchService.update(match);
+        return matchService.updateMatch(match);
     }
 
     @DeleteMapping("/{id}")
     public void deleteMatch(@PathVariable Long id){
-        matchService.delete(id);
-
+        matchService.deleteMatch(id);
     }
 
-    @GetMapping("/{year}")
-    public List<Match> getMatchesByYear(@PathVariable int year){
-        return matchService.getByYear(year);
+    @GetMapping("/year={year}")
+    public List<MatchResponse> getMatchesByYear(@PathVariable int year) {
+        return matchService.getMatchesByYear(year)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    @GetMapping("/team/{team}")
-    public List<Match> getMatchesByTeam(@PathVariable Long team){
-        return matchService.getByTeam(team);
+    @GetMapping("/team/{teamId}")
+    public List<MatchResponse> getMatchesByTeam(@PathVariable Long teamId) {
+        return matchService.getMatchesByTeamId(teamId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    @GetMapping("/player/{player}")
-    public List<Match> getMatchesByPlayer(@PathVariable Long player){
-        return matchService.findByPlayerId(player);
+    private MatchDto.MatchResponse toResponse(Match m) {
+        return new MatchDto.MatchResponse(
+                m.getId(),
+                m.getDate(),
+                m.getHomeTeam() != null ? m.getHomeTeam().getId()   : null,
+                m.getHomeTeam() != null ? m.getHomeTeam().getName() : null,
+                m.getAwayTeam() != null ? m.getAwayTeam().getId()   : null,
+                m.getAwayTeam() != null ? m.getAwayTeam().getName() : null,
+                m.getVenue()    != null ? m.getVenue().getId()      : null,
+                m.getVenue()    != null ? m.getVenue().getName()    : null,
+                m.getHomeGoals(),
+                m.getAwayGoals()
+        );
     }
-    */
 }
