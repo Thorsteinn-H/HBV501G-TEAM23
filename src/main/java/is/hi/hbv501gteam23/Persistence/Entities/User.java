@@ -28,9 +28,6 @@ public class User {
     @Column(name = "gender")
     private String gender;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
     @Column(name = "createdAt", nullable = false)
     private LocalDate createdAt;
 
