@@ -33,8 +33,8 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     @Override
-    public List<Team> findByVenue(Long venueId){
-        return teamRepository.findByVenue(venueId);
+    public List<Team> findByVenueId(Long venueId){
+        return teamRepository.findByVenueId(venueId);
     }
 
     @Override
@@ -43,8 +43,8 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     @Override
-    public void delete(Long id){
-        teamRepository.delete(id);
+    public void deleteByid(Long id){
+        teamRepository.deleteById(id);
     }
 
     @Override

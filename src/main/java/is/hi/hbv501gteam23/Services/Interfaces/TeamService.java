@@ -8,10 +8,10 @@ public interface TeamService {
     Team findById(long id);
     Team findByName(String name);
     Team findByCountry(String country);
-    List<Team> findByVenue(Long venueId);
+    List<Team> findByVenueId(Long venueId);
     List<Team> findAll();
     Team create(Team team);
     Team update(Team team);
-    void delete(Long id);
+    void deleteByid(Long id);
 
 }

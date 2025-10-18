@@ -41,11 +41,9 @@ public class TeamController {
     public void deleteTeam(@PathVariable Long id){
         Team team = teamService.findById(id);
         if(team!=null){
-            //Print ekkert team til að eyða
             return;
         }
-        //Liði eytt
-        teamService.delete(id);
+        teamService.deleteByid(id);
 
     }
 
@@ -60,8 +58,8 @@ public class TeamController {
     }
 
     @GetMapping("/{venue}")
-    public List<Team> getByVenue(@PathVariable Long id){
-        return teamService.findByVenue(id);
+    public List<Team> getByVenueId(@PathVariable Long id){
+        return teamService.findByVenueId(id);
     }
 
     @GetMapping("/{country}")
