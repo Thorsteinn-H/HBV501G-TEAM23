@@ -200,3 +200,4 @@ README.html
 .idea
 .exercism
 Secrets.txt
+.env

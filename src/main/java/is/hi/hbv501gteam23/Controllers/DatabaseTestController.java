@@ -6,8 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class DatabaseTestController {
@@ -16,17 +15,50 @@ public class DatabaseTestController {
     private JdbcTemplate jdbcTemplate;
 
     @GetMapping("/test-db")
-    public String testDatabaseConnection(Model model) {
+    public String showAllTables(Model model) {
         try {
-            // Try to query a simple table that should exist in your database
-            // If you have a 'users' table, you can use that, otherwise, you might need to adjust the query
-            List<Map<String, Object>> results = jdbcTemplate.queryForList("SELECT * FROM users LIMIT 10");
-            model.addAttribute("results", results);
-            model.addAttribute("connectionStatus", "success");
-            model.addAttribute("message", "Successfully connected to the database!");
+            // Simple connection test first
+            jdbcTemplate.execute("SELECT 1");
+            
+            // Get application tables (exclude Spring Session tables and other system tables)
+            List<String> tableNames = jdbcTemplate.queryForList(
+                "SELECT table_name " +
+                "FROM information_schema.tables " +
+                "WHERE table_schema = 'public' " +
+                "AND table_type = 'BASE TABLE' " +
+                "AND table_name NOT LIKE 'spring_%' " +
+                "AND table_name NOT LIKE 'database%' " +
+                "AND table_name NOT LIKE 'pg_%' " +
+                "ORDER BY table_name", 
+                String.class
+            );
+            
+            // Get row count for each table
+            Map<String, Object> tableInfo = new LinkedHashMap<>();
+            for (String tableName : tableNames) {
+                try {
+                    int count = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM \"" + tableName + "\"", 
+                        Integer.class
+                    );
+                    tableInfo.put(tableName, count + " rows");
+                } catch (Exception e) {
+                    tableInfo.put(tableName, "Error: " + e.getMessage());
+                }
+            }
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("tables", tableInfo);
+            result.put("tableCount", tableNames.size());
+            
+            model.addAttribute("result", result);
+            model.addAttribute("status", "success");
+            model.addAttribute("message", "Successfully connected to the database.");
+            
         } catch (Exception e) {
-            model.addAttribute("connectionStatus", "error");
-            model.addAttribute("message", "Error connecting to database: " + e.getMessage());
+            model.addAttribute("status", "error");
+            model.addAttribute("message", "Database error: " + e.getMessage());
+            e.printStackTrace();
         }
         return "database-test";
     }
