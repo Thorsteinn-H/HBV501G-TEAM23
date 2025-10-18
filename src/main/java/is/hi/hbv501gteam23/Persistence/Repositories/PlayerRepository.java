@@ -7,7 +7,7 @@ import java.util.List;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-    List<Player> findByNameContainingIgnoreCase(String name);
+    Player findByNameContainingIgnoreCase(String name);
     List<Player> findByTeam_Name(String teamName);
     List<Player> findByPosition(String position);
     List<Player> findByCountry(String country);

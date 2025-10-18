@@ -51,9 +51,9 @@ public class PlayerController {
      * @param name query substring to match against player names
      * @return list of matching {@link Player} entities
      */
-    @GetMapping("/search")
-    public List<Player> searchPlayersByName(@RequestParam String name) {
-        return playerService.searchPlayersByName(name);
+    @GetMapping("/name={name}")
+    public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
+        return toResponse(playerService.searchPlayersByName(name));
     }
 
     // Start/part of Use case 1 doesn't work yet.

@@ -31,7 +31,7 @@ public class PlayerServiceImplementation implements PlayerService {
     }
 
     @Override
-    public List<Player> searchPlayersByName(String name) {
+    public Player searchPlayersByName(String name) {
         return playerRepository.findByNameContainingIgnoreCase(name);
     }
 

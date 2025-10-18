@@ -59,8 +59,7 @@ public class TeamController {
 
     @GetMapping("/name={name}")
     public TeamResponse getTeamByName(@PathVariable("name") String name) {
-        Team team = teamService.findByName(name); // returns Team (or Optional<Team>)
-        return toResponse(team);
+        return toResponse(teamService.findByName(name));
     }
 
     @GetMapping("/venue/{venueId}")

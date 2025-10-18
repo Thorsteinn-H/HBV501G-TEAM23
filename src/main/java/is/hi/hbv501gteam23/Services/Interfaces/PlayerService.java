@@ -8,7 +8,7 @@ import java.util.List;
 public interface PlayerService {
     List<Player> getAllPlayers();
     Player getPlayerById(Long id);
-    List<Player> searchPlayersByName(String name);
+    Player searchPlayersByName(String name);
     Player createPlayer(String name, LocalDate dob, String country,
                         Player.PlayerPosition position, Integer goals, Long teamId);
     Player updatePlayer(Player player);
