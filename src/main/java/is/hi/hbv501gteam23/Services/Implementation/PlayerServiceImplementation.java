@@ -31,9 +31,20 @@ public class PlayerServiceImplementation implements PlayerService {
     }
 
     @Override
-    public List<Player> searchPlayersByName(String name) {
+    public Player searchPlayersByName(String name) {
         return playerRepository.findByNameContainingIgnoreCase(name);
     }
+
+    @Override
+    public List<Player> getByTeamName(String teamName) {
+        return playerRepository.findByTeam_NameIgnoreCase(teamName);
+    }
+
+    @Override
+    public List<Player> getByTeamId(Long teamId) {
+        return playerRepository.findByTeamId(teamId);
+    }
+
 
     @Override public Player createPlayer(String name, LocalDate dob, String country,
                                          Player.PlayerPosition position, Integer goals, Long teamId) {

@@ -1,8 +1,11 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.CreatePlayerRequest;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
+import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,15 +49,27 @@ public class PlayerController {
     }
 
     //optional not UC8
-    /**
-     * Searches players by name.
-     * @param name query substring to match against player names
-     * @return list of matching {@link Player} entities
-     */
-    @GetMapping("/search")
-    public List<Player> searchPlayersByName(@RequestParam String name) {
-        return playerService.searchPlayersByName(name);
+    @GetMapping("/name={name}")
+    public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
+        return toResponse(playerService.searchPlayersByName(name));
     }
+
+    @GetMapping("/team={teamName}")
+    public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
+        return playerService.getByTeamName(teamName)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @GetMapping("/team/{teamId}")
+    public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
+        return playerService.getByTeamId(teamId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
 
     // Start/part of Use case 1 doesn't work yet.
     /**

@@ -29,12 +29,12 @@ public class TeamServiceImplementation implements TeamService {
 
     @Override
     public Team findByName(String name){
-        return teamRepository.findByName(name);
+        return teamRepository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
-    public Team findByCountry(String country){
-        return teamRepository.findByCountry(country);
+    public List<Team> findByCountry(String country){
+        return teamRepository.getByCountry(country);
     }
 
     @Override

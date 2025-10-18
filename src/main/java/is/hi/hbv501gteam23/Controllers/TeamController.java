@@ -1,15 +1,9 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
-import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 
@@ -63,14 +57,25 @@ public class TeamController {
         return teamService.update(team);
     }
 
-    @GetMapping("/by-venue/{venueId}")
-    public List<Team> getByVenueId(@PathVariable Long id){
-        return teamService.findByVenueId(id);
+    @GetMapping("/name={name}")
+    public TeamResponse getTeamByName(@PathVariable("name") String name) {
+        return toResponse(teamService.findByName(name));
     }
 
-    @GetMapping("/by-country/{country}")
-    public Team getByCountry(@PathVariable String country){
-        return teamService.findByCountry(country);
+    @GetMapping("/venue/{venueId}")
+    public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
+        return teamService.findByVenueId(venueId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @GetMapping("/country={country}")
+    public List<TeamResponse> getByCountry(@PathVariable("country") String country) {
+        return teamService.findByCountry(country)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     private TeamDto.TeamResponse toResponse(Team t) {
