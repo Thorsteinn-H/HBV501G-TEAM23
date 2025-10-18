@@ -35,6 +35,12 @@ public class PlayerServiceImplementation implements PlayerService {
         return playerRepository.findByNameContainingIgnoreCase(name);
     }
 
+    @Override
+    public List<Player> getByTeamName(String teamName) {
+        return playerRepository.findByTeam_NameIgnoreCase(teamName);
+    }
+
+
     @Override public Player createPlayer(String name, LocalDate dob, String country,
                                          Player.PlayerPosition position, Integer goals, Long teamId) {
         var team = teamRepository.findById(teamId)
