@@ -57,6 +57,12 @@ public class TeamController {
         return teamService.update(team);
     }
 
+    @GetMapping("/name={name}")
+    public TeamResponse getTeamByName(@PathVariable("name") String name) {
+        Team team = teamService.findByName(name); // returns Team (or Optional<Team>)
+        return toResponse(team);
+    }
+
     @GetMapping("/venue/{venueId}")
     public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
         return teamService.findByVenueId(venueId)

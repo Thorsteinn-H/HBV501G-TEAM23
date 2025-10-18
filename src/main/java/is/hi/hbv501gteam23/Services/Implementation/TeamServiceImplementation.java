@@ -29,7 +29,7 @@ public class TeamServiceImplementation implements TeamService {
 
     @Override
     public Team findByName(String name){
-        return teamRepository.findByName(name);
+        return teamRepository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
