@@ -25,6 +25,16 @@ public class AdminController {
 
     // ===================== TEAMS =====================
 
+    /**
+     * Creates a new team.
+     *
+     * <p>
+     *     This method saves a new {@link Team} entity to the database.
+     * </p>
+     *
+     * @param team the {@link Team} object to be created
+     * @return the created {@link Team} entity
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
     public Team createTeam(Team team){
@@ -34,12 +44,31 @@ public class AdminController {
         return teamService.create(team);
     }
 
+    /**
+     * Deletes a team.
+     *
+     * <p>
+     *     This method deletes a {@link Team} entity in the database.
+     * </p>
+     *
+     * @param id the id of the team to be deleted.
+     *
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/teams/{id}")
     public void deleteTeam(@PathVariable Long id){
         teamService.deleteTeam(id);
     }
 
+    /**
+     * Updates a team
+     *
+     * <p>
+     *     This method updates a {@link Team} entity in the database.
+     * </p>
+     * @param team the {@link Team} object to be updated.
+     * @return the updated {@link Team} entity
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/teams/{id}")
     public Team updateTeam(@PathVariable Team team){
@@ -94,18 +123,45 @@ public class AdminController {
 
     // ===================== MATCHES =====================
 
+    /**
+     * Creates a match
+     *
+     * <p>
+     *     This method saves a new {@link Match} entity to the database.
+     * </p>
+     * @param match the {@link Match} object to be created
+     * @return the created {@link Match} entity
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
     public Match createMatch(Match match){
         return matchService.createMatch(match);
     }
 
+    /**
+     * Updates an existing match with new data
+     *
+     * <p>
+     *     This method updates a {@link Match} entity in the database.
+     * </p>
+     * @param match the {@link Match} object to be updated.
+     * @return the updated {@link Match} entity
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/matches/{id}")
     public Match updateMatch(@PathVariable Match match){
         return matchService.updateMatch(match);
     }
 
+    /**
+     * Deletes a match by its id
+     *
+     * <p>
+     *     This method deletes a {@link Match} entity in the database.
+     * </p>
+     *
+     * @param id the id of the match to be deleted
+     */
     // @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/matches/{id}")
     public void deleteMatch(@PathVariable Long id){

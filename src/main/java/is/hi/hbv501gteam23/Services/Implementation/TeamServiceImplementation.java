@@ -1,18 +1,22 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
+    private final PlayerRepository playerRepository;
 
     /**
      * Retrieves all teams
@@ -75,7 +79,9 @@ public class TeamServiceImplementation implements TeamService {
      * @param id the id of the team to delete
      */
     @Override
-    public void deleteByid(Long id){
+    @Transactional
+    public void deleteTeam(Long id){
+        playerRepository.clearTeamByTeamId(id);
         teamRepository.deleteById(id);
     }
 

@@ -54,48 +54,6 @@ public class MatchController {
     }
 
     /**
-     * Creates a match
-     *
-     * <p>
-     *     This method saves a new {@link Match} entity to the database.
-     * </p>
-     * @param match the {@link Match} object to be created
-     * @return the created {@link Match} entity
-     */
-    @PostMapping
-    public Match createMatch(Match match){
-        return matchService.createMatch(match);
-    }
-
-    /**
-     * Updates an existing match with new data
-     *
-     * <p>
-     *     This method updates a {@link Match} entity in the database.
-     * </p>
-     * @param match the {@link Match} object to be updated.
-     * @return the updated {@link Match} entity
-     */
-    @PutMapping("/{match}")
-    public Match updateMatch(@PathVariable Match match){
-        return matchService.updateMatch(match);
-    }
-
-    /**
-     * Deletes a match by its id
-     *
-     * <p>
-     *     This method deletes a {@link Match} entity in the database.
-     * </p>
-     *
-     * @param id the id of the match to be deleted
-     */
-    @DeleteMapping("/{id}")
-    public void deleteMatch(@PathVariable Long id){
-        matchService.deleteMatch(id);
-    }
-
-    /**
      * Retrieves all matches that were played during a specific year
      *
      * <p>This endpoint return a list of matches that played during a specific year</p>
