@@ -1,5 +1,9 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.time.LocalDate;
+
 public final class TeamDto {
     /**
      * Request body for creating a new team
@@ -13,6 +17,19 @@ public final class TeamDto {
      * @param venueId the ID of the venue the team plays home games
      */
     public record CreateTeamRequest(
+            String name,
+            String country,
+            Long venueId
+    ) {}
+
+    /**
+     *
+     * @param name
+     * @param country
+     * @param venueId
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchTeamRequest(
             String name,
             String country,
             Long venueId

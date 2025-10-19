@@ -1,8 +1,11 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import java.util.List;
 public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
+    private final VenueRepository venueRepository;
 
     /**
      * Retrieves all teams
@@ -97,13 +101,25 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Updates an existing team with new data
      *
-     * @param team the {@link Team} entity with updated fields
-     * @return the updated {@link Team} entity
+     * @param id
+     * @param body
+     * @return
      */
     @Override
-    public Team  update(Team team){
-        return teamRepository.save(team);
+    @Transactional
+    public Team patchTeam(Long id, TeamDto.PatchTeamRequest body) {
+        Team t = teamRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Team " + id + " not found"));
+
+        if (body.name() != null)    t.setName(body.name());
+        if (body.country() != null) t.setCountry(body.country());
+        if (body.venueId() != null) {
+            Venue v = venueRepository.findById(body.venueId())
+                    .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));
+            t.setVenue(v);
+        }
+
+        return teamRepository.save(t);
     }
 }

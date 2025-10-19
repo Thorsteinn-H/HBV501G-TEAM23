@@ -61,22 +61,19 @@ public class AdminController {
     }
 
     /**
-     * Updates a team
      *
-     * <p>
-     *     This method updates a {@link Team} entity in the database.
-     * </p>
-     * @param team the {@link Team} object to be updated.
-     * @return the updated {@link Team} entity
+     * @param id
+     * @param body
+     * @return
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/teams/{id}")
-    public Team updateTeam(@PathVariable Team team){
-        Long id = team.getId();
-        if(id!=null) {
-            return null;
-        }
-        return teamService.update(team);
+    @PatchMapping("/teams/{id}")
+    public ResponseEntity<TeamDto.TeamResponse> patchTeam(
+            @PathVariable Long id,
+            @RequestBody TeamDto.PatchTeamRequest body
+    ) {
+        Team updated = teamService.patchTeam(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     // ===================== PLAYERS =====================

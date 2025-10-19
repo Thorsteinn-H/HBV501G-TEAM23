@@ -113,6 +113,7 @@ public class PlayerServiceImplementation implements PlayerService {
      * @return
      */
     @Override
+    @Transactional
     public Player patchPlayer(Long id, PlayerDto.PatchPlayerRequest body) {
         Player p = playerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Player " + id + " not found"));
@@ -122,7 +123,6 @@ public class PlayerServiceImplementation implements PlayerService {
         if (body.country() != null)     p.setCountry(body.country());
         if (body.position() != null)    p.setPosition(body.position());
         if (body.goals() != null)       p.setGoals(body.goals());
-
         if (body.teamId() != null) {
             Team team = teamRepository.findById(body.teamId())
                     .orElseThrow(() -> new EntityNotFoundException("Team " + body.teamId() + " not found"));

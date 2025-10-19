@@ -14,6 +14,7 @@ import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -78,6 +79,7 @@ public class MatchServiceImplementation implements MatchService {
      * @return
      */
     @Override
+    @Transactional
     public Match patchMatch(Long id, MatchDto.PatchMatchRequest body) {
         Match m = matchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
@@ -85,7 +87,6 @@ public class MatchServiceImplementation implements MatchService {
         if (body.date() != null)      m.setDate(body.date());
         if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
         if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
-
         if (body.homeTeamId() != null) {
             Team home = teamRepository.findById(body.homeTeamId())
                     .orElseThrow(() -> new EntityNotFoundException("Team " + body.homeTeamId() + " not found"));
