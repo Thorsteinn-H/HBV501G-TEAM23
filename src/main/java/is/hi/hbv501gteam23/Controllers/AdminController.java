@@ -1,12 +1,5 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
@@ -18,11 +11,17 @@ import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@RestController
 @Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -39,14 +38,13 @@ public class AdminController {
      * <p>
      *     This method saves a new {@link Team} entity to the database.
      * </p>
-     *
      * @param team the {@link Team} object to be created
      * @return the created {@link Team} entity
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
-    public Team createTeam(Team team){
-        if(teamService.findByName(team.getName())!=null) {
+    public Team createTeam(Team team) {
+        if (teamService.findByName(team.getName()) != null) {
             return null;
         }
         return teamService.create(team);
@@ -58,13 +56,12 @@ public class AdminController {
      * <p>
      *     This method deletes a {@link Team} entity in the database.
      * </p>
-     *
      * @param id the id of the team to be deleted.
      *
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/teams/{id}")
-    public void deleteTeam(@PathVariable Long id){
+    public void deleteTeam(@PathVariable Long id) {
         teamService.deleteTeam(id);
     }
 
@@ -79,22 +76,23 @@ public class AdminController {
 
         // Return the admin dashboard view
         return "admin/dashboard";
+    }
+
     /**
      * Updates a team
      *
      * <p>
      *     This method updates a {@link Team} entity in the database.
      * </p>
+     * @param id the ID of the team to update
      * @param team the {@link Team} object to be updated.
      * @return the updated {@link Team} entity
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/teams/{id}")
-    public Team updateTeam(@PathVariable Team team){
-        Long id = team.getId();
-        if(id!=null) {
-            return null;
-        }
+    @ResponseBody
+    public Team updateTeam(@PathVariable Long id, @RequestBody Team team) {
+        team.setId(id);
         return teamService.update(team);
     }
 
@@ -110,7 +108,7 @@ public class AdminController {
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/players")
-    public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
+    public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body){
         Player created = playerService.createPlayer(
                 body.name(), body.dateOfBirth(), body.country(),
                 body.position(), body.goals(), body.teamId()
@@ -126,7 +124,9 @@ public class AdminController {
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/players/{id}")
-    public Player updatePlayer(@RequestBody Player player) {
+    @ResponseBody
+    public Player updatePlayer(@PathVariable Long id, @RequestBody Player player) {
+        player.setId(id);
         return playerService.updatePlayer(player);
     }
 
@@ -136,7 +136,7 @@ public class AdminController {
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/players/{id}")
-    public void deletePlayer(@PathVariable Long id) {
+    public void deletePlayer(@PathVariable Long id){
         playerService.deletePlayer(id);
     }
 
@@ -153,7 +153,7 @@ public class AdminController {
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
-    public Match createMatch(Match match){
+    public Match createMatch (Match match){
         return matchService.createMatch(match);
     }
 
@@ -168,7 +168,9 @@ public class AdminController {
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/matches/{id}")
-    public Match updateMatch(@PathVariable Match match){
+    @ResponseBody
+    public Match updateMatch(@PathVariable Long id, @RequestBody Match match) {
+        match.setId(id);
         return matchService.updateMatch(match);
     }
 
@@ -189,7 +191,7 @@ public class AdminController {
 
     // ===================== MAPPERS =====================
 
-    private PlayerDto.PlayerResponse toResponse(Player p) {
+    private PlayerDto.PlayerResponse toResponse (Player p){
         return new PlayerDto.PlayerResponse(
                 p.getId(),
                 p.getName(),
@@ -197,31 +199,31 @@ public class AdminController {
                 p.getGoals(),
                 p.getCountry(),
                 p.getDateOfBirth(),
-                p.getTeam() != null ? p.getTeam().getId()   : null,
+                p.getTeam() != null ? p.getTeam().getId() : null,
                 p.getTeam() != null ? p.getTeam().getName() : null
         );
     }
 
-    private TeamDto.TeamResponse toResponse(Team t) {
+    private TeamDto.TeamResponse toResponse (Team t){
         return new TeamDto.TeamResponse(
                 t.getId(),
                 t.getName(),
                 t.getCountry(),
-                t.getVenue().getId(),
-                t.getVenue().getName()
+                t.getVenue() != null ? t.getVenue().getId() : null,
+                t.getVenue() != null ? t.getVenue().getName() : null
         );
     }
 
-    private MatchDto.MatchResponse toResponse(Match m) {
+    private MatchDto.MatchResponse toResponse (Match m){
         return new MatchDto.MatchResponse(
                 m.getId(),
                 m.getDate(),
-                m.getHomeTeam() != null ? m.getHomeTeam().getId()   : null,
+                m.getHomeTeam() != null ? m.getHomeTeam().getId() : null,
                 m.getHomeTeam() != null ? m.getHomeTeam().getName() : null,
-                m.getAwayTeam() != null ? m.getAwayTeam().getId()   : null,
+                m.getAwayTeam() != null ? m.getAwayTeam().getId() : null,
                 m.getAwayTeam() != null ? m.getAwayTeam().getName() : null,
-                m.getVenue()    != null ? m.getVenue().getId()      : null,
-                m.getVenue()    != null ? m.getVenue().getName()    : null,
+                m.getVenue() != null ? m.getVenue().getId() : null,
+                m.getVenue() != null ? m.getVenue().getName() : null,
                 m.getHomeGoals(),
                 m.getAwayGoals()
         );
