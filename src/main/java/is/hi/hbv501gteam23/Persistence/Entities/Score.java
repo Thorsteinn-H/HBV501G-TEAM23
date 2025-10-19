@@ -3,12 +3,6 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing:
- **/
-
 @Getter
 @Setter
 @Builder

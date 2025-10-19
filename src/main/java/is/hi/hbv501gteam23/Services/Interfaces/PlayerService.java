@@ -2,8 +2,7 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
-
-
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -63,12 +62,12 @@ public interface PlayerService {
                         Player.PlayerPosition position, Integer goals, Long teamId);
 
     /**
-     * Updates an existing player with new data
-     *
-     * @param player the {@link Player} entity with updated fields
-     * @return the updated {@link Player} entity
+     * Updates existing player
+     * @param id the id of the player to update
+     * @param body partial update payload for the player
+     * @return 200 OK with the updated {@link PlayerDto.PlayerResponse};
      */
-    Player updatePlayer(Player player);
+    Player patchPlayer(Long id, PlayerDto.PatchPlayerRequest body);
 
     /**
      * Deletes a player by its id

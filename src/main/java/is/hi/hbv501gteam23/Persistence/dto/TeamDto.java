@@ -1,5 +1,7 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public final class TeamDto {
     /**
      * Request body for creating a new team
@@ -13,6 +15,22 @@ public final class TeamDto {
      * @param venueId the ID of the venue the team plays home games
      */
     public record CreateTeamRequest(
+            String name,
+            String country,
+            Long venueId
+    ) {}
+
+    /**
+     * Updating body for Team
+     * All fields are optional; only non-null values will be applied.
+     *      Typical uses include renaming a team, changing the country,
+     *      or reassigning the team to a different venue.
+     * @param name     new team name (optional)
+     * @param country  new team country (optional)
+     * @param venueId  id of the target venue (optional; must reference an existing venue)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchTeamRequest(
             String name,
             String country,
             Long venueId

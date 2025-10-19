@@ -1,4 +1,5 @@
 package is.hi.hbv501gteam23.Persistence.dto;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 
 public class MatchDto {
@@ -18,6 +19,29 @@ public class MatchDto {
      * @param awayGoals away teams goals
      */
     public record CreateMatchRequest(
+            LocalDate date,
+            Long homeTeamId,
+            Long awayTeamId,
+            Long venueId,
+            Integer homeGoals,
+            Integer awayGoals
+    ) {}
+
+    /**
+     * Updating body for Match
+     * * All fields are optional; only non-null values will be applied.
+     *      Typical uses include renaming a team, changing the country,
+     *      or reassigning the team to a different venue.
+     *
+     * @param date when the match took place
+     * @param homeTeamId the id of the home team
+     * @param awayTeamId the id of the away team
+     * @param venueId the id of the home teams venue
+     * @param homeGoals home teams goals
+     * @param awayGoals away teams goals
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchMatchRequest(
             LocalDate date,
             Long homeTeamId,
             Long awayTeamId,

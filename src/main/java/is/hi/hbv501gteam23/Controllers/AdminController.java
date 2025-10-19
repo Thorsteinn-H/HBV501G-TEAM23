@@ -17,12 +17,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Controller
+/**
+ * REST controller that exposes read/write operations for {@link Team}, {@link Match} and {@link Player} resources.
+ * Base path is /admin
+ * Only endpoints are {push, patch, delete} for Admin role to perform.
+ */
+@RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
@@ -79,21 +83,22 @@ public class AdminController {
     }
 
     /**
-     * Updates a team
+     * Partially updates existing team
      *
-     * <p>
-     *     This method updates a {@link Team} entity in the database.
-     * </p>
-     * @param id the ID of the team to update
-     * @param team the {@link Team} object to be updated.
-     * @return the updated {@link Team} entity
+     * @param id the id of the team to update
+     * @param body partial update payload for the team
+     * @return 200 OK with the updated {@link TeamDto.TeamResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/teams/{id}")
-    @ResponseBody
-    public Team updateTeam(@PathVariable Long id, @RequestBody Team team) {
-        team.setId(id);
-        return teamService.update(team);
+    @PatchMapping("/teams/{id}")
+    public ResponseEntity<TeamDto.TeamResponse> patchTeam(
+            @PathVariable Long id,
+            @RequestBody TeamDto.PatchTeamRequest body
+    ) {
+        Team updated = teamService.patchTeam(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     // ===================== PLAYERS =====================
@@ -118,16 +123,22 @@ public class AdminController {
     }
 
     /**
-     * Updates an existing player.
-     * @param player player entity carrying the updated state
-     * @return the updated {@link Player} entity
+     * Partially updates existing player
+     *
+     * @param id the id of the player to update
+     * @param body partial update payload for the player
+     * @return 200 OK with the updated {@link PlayerDto.PlayerResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/players/{id}")
-    @ResponseBody
-    public Player updatePlayer(@PathVariable Long id, @RequestBody Player player) {
-        player.setId(id);
-        return playerService.updatePlayer(player);
+    @PatchMapping("/players/{id}")
+    public ResponseEntity<PlayerDto.PlayerResponse> patchPlayer(
+            @PathVariable Long id,
+            @RequestBody PlayerDto.PatchPlayerRequest body
+    ) {
+        Player updated = playerService.patchPlayer(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     /**
@@ -158,20 +169,22 @@ public class AdminController {
     }
 
     /**
-     * Updates an existing match with new data
+     * Partially updates existing match
      *
-     * <p>
-     *     This method updates a {@link Match} entity in the database.
-     * </p>
-     * @param match the {@link Match} object to be updated.
-     * @return the updated {@link Match} entity
+     * @param id the id of the match to update
+     * @param body partial update payload for the match
+     * @return 200 OK with the updated {@link MatchDto.MatchResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/matches/{id}")
-    @ResponseBody
-    public Match updateMatch(@PathVariable Long id, @RequestBody Match match) {
-        match.setId(id);
-        return matchService.updateMatch(match);
+    @PatchMapping("/matches/{id}")
+    public ResponseEntity<MatchDto.MatchResponse> patchMatch(
+            @PathVariable Long id,
+            @RequestBody MatchDto.PatchMatchRequest body
+    ) {
+        Match updated = matchService.patchMatch(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     /**
@@ -191,7 +204,12 @@ public class AdminController {
 
     // ===================== MAPPERS =====================
 
-    private PlayerDto.PlayerResponse toResponse (Player p){
+    /**
+     * Maps a {@link Player} entity to a {@link PlayerDto.PlayerResponse} DTO.
+     * @param p player entity
+     * @return mapped {@link PlayerDto.PlayerResponse}
+     */
+    private PlayerDto.PlayerResponse toResponse(Player p) {
         return new PlayerDto.PlayerResponse(
                 p.getId(),
                 p.getName(),
@@ -204,7 +222,12 @@ public class AdminController {
         );
     }
 
-    private TeamDto.TeamResponse toResponse (Team t){
+    /**
+     * Maps a {@link Team} entity to a {@link TeamDto.TeamResponse} DTO.
+     * @param t team entity
+     * @return mapped {@link TeamDto.TeamResponse}
+     */
+    private TeamDto.TeamResponse toResponse(Team t) {
         return new TeamDto.TeamResponse(
                 t.getId(),
                 t.getName(),
@@ -214,7 +237,12 @@ public class AdminController {
         );
     }
 
-    private MatchDto.MatchResponse toResponse (Match m){
+    /**
+     * Maps a {@link Match} entity to a {@link MatchDto.MatchResponse} DTO.
+     * @param m match entity
+     * @return mapped {@link MatchDto.MatchResponse}
+     */
+    private MatchDto.MatchResponse toResponse(Match m) {
         return new MatchDto.MatchResponse(
                 m.getId(),
                 m.getDate(),
