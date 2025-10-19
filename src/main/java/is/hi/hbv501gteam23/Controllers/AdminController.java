@@ -101,14 +101,19 @@ public class AdminController {
     }
 
     /**
-     * Updates an existing player.
-     * @param player player entity carrying the updated state
-     * @return the updated {@link Player} entity
+     *
+     * @param id
+     * @param body
+     * @return
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/players/{id}")
-    public Player updatePlayer(@RequestBody Player player) {
-        return playerService.updatePlayer(player);
+    @PatchMapping("/players/{id}")
+    public ResponseEntity<PlayerDto.PlayerResponse> patchPlayer(
+            @PathVariable Long id,
+            @RequestBody PlayerDto.PatchPlayerRequest body
+    ) {
+        Player updated = playerService.patchPlayer(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     /**

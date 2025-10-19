@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 
 import java.time.LocalDate;
@@ -21,6 +22,16 @@ public final class PlayerDto {
      * @param teamId the ID of a team the player belongs too
      */
     public record CreatePlayerRequest(
+            String name,
+            LocalDate dateOfBirth,
+            String country,
+            Player.PlayerPosition position,
+            Integer goals,
+            Long teamId
+    ) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchPlayerRequest(
             String name,
             LocalDate dateOfBirth,
             String country,
