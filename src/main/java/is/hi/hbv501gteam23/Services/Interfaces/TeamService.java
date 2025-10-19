@@ -66,6 +66,6 @@ public interface TeamService {
      *
      * @param id the id of the team to delete
      */
-    void deleteByid(Long id);
+    void deleteTeam(Long id);
 
 }

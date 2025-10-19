@@ -100,53 +100,6 @@ public class PlayerController {
                 .toList();
     }
 
-
-    // Start/part of Use case 1 doesn't work yet.
-    /**
-     * Creates a new player.
-     *
-     * @param body request payload containing player properties and target {@code teamId}
-     * @return a 201 response with the created {@link PlayerResponse} body
-     * @throws jakarta.persistence.EntityNotFoundException if {@code teamId} does not exist
-     */
-    @PostMapping
-    public ResponseEntity<PlayerResponse> createPlayer(@RequestBody CreatePlayerRequest body) {
-        Player created = playerService.createPlayer(
-                body.name(), body.dateOfBirth(), body.country(),
-                body.position(), body.goals(), body.teamId()
-        );
-        URI location = URI.create("/api/players/" + created.getId());
-        return ResponseEntity.created(location).body(toResponse(created));
-    }
-
-    /**
-     * Updates an existing player.
-     *
-     * <p>
-     *     This method updates a {@link Player} entity in the database.
-     * </p>
-     * @param player player entity carrying the updated state
-     * @return the updated {@link Player} entity
-     */
-    @PutMapping
-    public Player updatePlayer(@RequestBody Player player) {
-        return playerService.updatePlayer(player);
-    }
-
-    /**
-     * Deletes a player by id.
-     *
-     * <p>
-     *     This method deletes a {@link Player} entity in the database.
-     * </p>
-     *
-     * @param id identifier of the player to remove
-     */
-    @DeleteMapping("/{id}")
-    public void deletePlayer(@PathVariable Long id) {
-        playerService.deletePlayer(id);
-    }
-
     /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
      * @param p player entity

@@ -2,6 +2,9 @@ package is.hi.hbv501gteam23.Persistence.Repositories;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -51,4 +54,12 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
      * @return A list of players that have scored equal or greater amount of goals
      */
     List<Player> findByGoalsGreaterThan(int goals);
+
+    /**
+     *
+     * @param teamId
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Player p set p.team = null where p.team.id = :teamId")
+    void clearTeamByTeamId(@Param("teamId") Long teamId);
 }

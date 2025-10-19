@@ -28,8 +28,8 @@ public class Player {
     @Column(name = "player_country", length = 80)
     private String country;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "team_id", nullable = true)
     private Team team;
 
     public enum PlayerPosition { GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD }
@@ -40,5 +40,3 @@ public class Player {
     @Column(name = "goals", nullable = false)
     private Integer goals;
 }
-
-

@@ -53,63 +53,6 @@ public class TeamController {
     }
 
     /**
-     * Creates a new team.
-     *
-     * <p>
-     *     This method saves a new {@link Team} entity to the database.
-     * </p>
-     *
-     * @param team the {@link Team} object to be created
-     * @return the created {@link Team} entity
-     */
-    @PostMapping
-    public Team createTeam(Team team){
-        if(teamService.findByName(team.getName())!=null)
-        {
-            return null;
-        }
-        return teamService.create(team);
-    }
-
-    /**
-     * Deletes a team.
-     *
-     * <p>
-     *     This method deletes a {@link Team} entity in the database.
-     * </p>
-     *
-     * @param id the id of the team to be deleted.
-     *
-     */
-    @DeleteMapping("/{id}")
-    public void deleteTeam(@PathVariable Long id){
-        Team team = teamService.getTeamById(id);
-        if(team!=null){
-            return;
-        }
-        teamService.deleteByid(id);
-
-    }
-
-    /**
-     * Updates a team
-     *
-     * <p>
-     *     This method updates a {@link Team} entity in the database.
-     * </p>
-     * @param team the {@link Team} object to be updated.
-     * @return the updated {@link Team} entity
-     */
-    @PutMapping("/{team}")
-    public Team updateTeam(@PathVariable Team team){
-        Long id = team.getId();
-        if(id!=null){
-            return null;
-        }
-        return teamService.update(team);
-    }
-
-    /**
      * Retrieves team by name
      *
      * <p>
