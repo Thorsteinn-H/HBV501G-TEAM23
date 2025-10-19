@@ -1,11 +1,9 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.CreatePlayerRequest;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
-import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

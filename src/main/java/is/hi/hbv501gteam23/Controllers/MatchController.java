@@ -1,11 +1,8 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
-import is.hi.hbv501gteam23.Persistence.Entities.Player;
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
-import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

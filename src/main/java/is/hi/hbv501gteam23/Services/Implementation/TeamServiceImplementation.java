@@ -1,12 +1,10 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
-import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

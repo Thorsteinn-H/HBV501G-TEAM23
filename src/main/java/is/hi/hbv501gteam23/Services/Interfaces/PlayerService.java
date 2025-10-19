@@ -1,8 +1,8 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Match;
+
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
+
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,6 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.Repositories;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Match;
+
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
