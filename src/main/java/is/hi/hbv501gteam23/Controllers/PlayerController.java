@@ -27,8 +27,11 @@ public class PlayerController {
 
     //UC7
     /**
-     * Lists all players.
-     * @return list of players mapped to {@link PlayerResponse} DTOs
+     * Retrieves all players.
+     * <p>
+     *      This method retrieves all {@link Player} entities from the database
+     * </p>
+     * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping
     public List<PlayerResponse> getAllPlayers() {
@@ -39,8 +42,12 @@ public class PlayerController {
     //UC8
     /**
      * Retrieves a single player by id.
-     * @param id database identifier of the player
-     * @return the player mapped to a {@link PlayerResponse} DTO
+     *
+     * <p>
+     *      This method retrieves a {@link Player} entity from the database with a specific identifier.
+     * </p>
+     * @param id the id of the player to be retrieved.
+     * @return the player mapped to a {@link PlayerResponse}
      * @throws jakarta.persistence.EntityNotFoundException if the player is not found
      */
     @GetMapping("/{id}")
@@ -48,12 +55,28 @@ public class PlayerController {
         return toResponse(playerService.getPlayerById(id));
     }
 
-    //optional not UC8
+    /**
+     * Retrieves a player by name
+     *
+     * <p>
+     *     This method retrieves a {@link Player} entity from the database with a specific name.
+     * </p>
+     * @param name the name of the player in database
+     * @return the player mapped to a {@link PlayerResponse}
+     */
     @GetMapping("/name={name}")
     public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
         return toResponse(playerService.searchPlayersByName(name));
     }
 
+    /**
+     * Retrieves all players by team name
+     * <p>
+     *      This method retrieves all {@link Player} entities from the database with a specific name.
+     * </p>
+     * @param teamName the name of the team in database
+     * @return list of players mapped to {@link PlayerResponse}
+     */
     @GetMapping("/team={teamName}")
     public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
         return playerService.getByTeamName(teamName)
@@ -62,6 +85,15 @@ public class PlayerController {
                 .toList();
     }
 
+    /**
+     * Retrieves all players by team identifier
+     *
+     * <p>
+     *     This method retrieves all {@link Player} entities with a specific team.
+     * </p>
+     * @param teamId the identifier of the team in database
+     * @return list of players mapped to {@link PlayerResponse}
+     */
     @GetMapping("/team/{teamId}")
     public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
         return playerService.getByTeamId(teamId)
@@ -74,10 +106,10 @@ public class PlayerController {
     // Start/part of Use case 1 doesn't work yet.
     /**
      * Creates a new player.
+     *
      * @param body request payload containing player properties and target {@code teamId}
      * @return a 201 response with the created {@link PlayerResponse} body
      * @throws jakarta.persistence.EntityNotFoundException if {@code teamId} does not exist
-     * @apiNote Part of “Use case 1” (as noted in code comments) though not fully implemented in UX yet.
      */
     @PostMapping
     public ResponseEntity<PlayerResponse> createPlayer(@RequestBody CreatePlayerRequest body) {
@@ -91,6 +123,10 @@ public class PlayerController {
 
     /**
      * Updates an existing player.
+     *
+     * <p>
+     *     This method updates a {@link Player} entity in the database.
+     * </p>
      * @param player player entity carrying the updated state
      * @return the updated {@link Player} entity
      */
@@ -101,6 +137,11 @@ public class PlayerController {
 
     /**
      * Deletes a player by id.
+     *
+     * <p>
+     *     This method deletes a {@link Player} entity in the database.
+     * </p>
+     *
      * @param id identifier of the player to remove
      */
     @DeleteMapping("/{id}")
@@ -110,7 +151,7 @@ public class PlayerController {
 
     /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
-     * @param p player entity (non-null)
+     * @param p player entity
      * @return mapped {@link PlayerResponse}
      */
     private PlayerResponse toResponse(Player p) {
