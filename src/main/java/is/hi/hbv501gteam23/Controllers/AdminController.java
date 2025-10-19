@@ -45,7 +45,7 @@ public class AdminController {
      * @param team the {@link Team} object to be created
      * @return the created {@link Team} entity
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
     public Team createTeam(Team team) {
         if (teamService.findByName(team.getName()) != null) {
@@ -63,7 +63,7 @@ public class AdminController {
      * @param id the id of the team to be deleted.
      *
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/teams/{id}")
     public void deleteTeam(@PathVariable Long id) {
         teamService.deleteTeam(id);
@@ -91,7 +91,7 @@ public class AdminController {
      *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
      *         400 if the payload is invalid                               *Not implemented yet*
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/teams/{id}")
     public ResponseEntity<TeamDto.TeamResponse> patchTeam(
             @PathVariable Long id,
@@ -111,7 +111,7 @@ public class AdminController {
      * @throws jakarta.persistence.EntityNotFoundException if {@code teamId} does not exist
      * @apiNote Part of “Use case 1” (as noted in code comments) though not fully implemented in UX yet.
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/players")
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body){
         Player created = playerService.createPlayer(
@@ -131,7 +131,7 @@ public class AdminController {
      *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
      *         400 if the payload is invalid                               *Not implemented yet*
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/players/{id}")
     public ResponseEntity<PlayerDto.PlayerResponse> patchPlayer(
             @PathVariable Long id,
@@ -145,7 +145,7 @@ public class AdminController {
      * Deletes a player by id.
      * @param id identifier of the player to remove
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/players/{id}")
     public void deletePlayer(@PathVariable Long id){
         playerService.deletePlayer(id);
@@ -162,7 +162,7 @@ public class AdminController {
      * @param match the {@link Match} object to be created
      * @return the created {@link Match} entity
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
     public Match createMatch (Match match){
         return matchService.createMatch(match);
@@ -177,7 +177,7 @@ public class AdminController {
      *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
      *         400 if the payload is invalid                               *Not implemented yet*
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/matches/{id}")
     public ResponseEntity<MatchDto.MatchResponse> patchMatch(
             @PathVariable Long id,
@@ -196,7 +196,7 @@ public class AdminController {
      *
      * @param id the id of the match to be deleted
      */
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/matches/{id}")
     public void deleteMatch(@PathVariable Long id){
         matchService.deleteMatch(id);
