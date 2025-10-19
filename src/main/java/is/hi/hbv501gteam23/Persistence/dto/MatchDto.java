@@ -1,4 +1,7 @@
 package is.hi.hbv501gteam23.Persistence.dto;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import is.hi.hbv501gteam23.Persistence.Entities.Player;
+
 import java.time.LocalDate;
 
 public class MatchDto {
@@ -18,6 +21,16 @@ public class MatchDto {
      * @param awayGoals away teams goals
      */
     public record CreateMatchRequest(
+            LocalDate date,
+            Long homeTeamId,
+            Long awayTeamId,
+            Long venueId,
+            Integer homeGoals,
+            Integer awayGoals
+    ) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchMatchRequest(
             LocalDate date,
             Long homeTeamId,
             Long awayTeamId,

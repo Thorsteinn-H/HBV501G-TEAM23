@@ -101,7 +101,6 @@ public class AdminController {
     }
 
     /**
-     *
      * @param id
      * @param body
      * @return
@@ -144,18 +143,19 @@ public class AdminController {
     }
 
     /**
-     * Updates an existing match with new data
      *
-     * <p>
-     *     This method updates a {@link Match} entity in the database.
-     * </p>
-     * @param match the {@link Match} object to be updated.
-     * @return the updated {@link Match} entity
+     * @param id
+     * @param body
+     * @return
      */
     // @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/matches/{id}")
-    public Match updateMatch(@PathVariable Match match){
-        return matchService.updateMatch(match);
+    @PatchMapping("/matches/{id}")
+    public ResponseEntity<MatchDto.MatchResponse> patchMatch(
+            @PathVariable Long id,
+            @RequestBody MatchDto.PatchMatchRequest body
+    ) {
+        Match updated = matchService.patchMatch(id, body);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     /**

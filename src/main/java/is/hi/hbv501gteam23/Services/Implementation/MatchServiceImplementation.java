@@ -1,7 +1,15 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchServiceImplementation implements MatchService {
     private final MatchRepository matchRepository;
+    private final TeamRepository teamRepository;
+    private final VenueRepository venueRepository;
 
     /**
      * Retrieves all matches
@@ -62,17 +72,37 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Updates an existing match with new data
      *
-     * @param match the {@link Match} entity with updated fields
-     * @return the updated {@link Match} entity
+     * @param id
+     * @param body
+     * @return
      */
     @Override
-    public Match updateMatch(Match match) {
-        if (match.getId() == null || !matchRepository.existsById(match.getId())) {
-            throw new EntityNotFoundException("Match " + match.getId() + " not found");
+    public Match patchMatch(Long id, MatchDto.PatchMatchRequest body) {
+        Match m = matchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
+
+        if (body.date() != null)      m.setDate(body.date());
+        if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
+        if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
+
+        if (body.homeTeamId() != null) {
+            Team home = teamRepository.findById(body.homeTeamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.homeTeamId() + " not found"));
+            m.setHomeTeam(home);
         }
-        return matchRepository.save(match);
+        if (body.awayTeamId() != null) {
+            Team away = teamRepository.findById(body.awayTeamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.awayTeamId() + " not found"));
+            m.setAwayTeam(away);
+        }
+        if (body.venueId() != null) {
+            Venue v = venueRepository.findById(body.venueId())
+                    .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));
+            m.setVenue(v);
+        }
+
+        return matchRepository.save(m);
     }
 
     /**
