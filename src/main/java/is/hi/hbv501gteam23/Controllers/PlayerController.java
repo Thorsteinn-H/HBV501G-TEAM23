@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.CreatePlayerRequest;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
@@ -24,8 +25,11 @@ public class PlayerController {
 
     //UC7
     /**
-     * Lists all players.
-     * @return list of players mapped to {@link PlayerResponse} DTOs
+     * Retrieves all players.
+     * <p>
+     *      This method retrieves all {@link Player} entities from the database
+     * </p>
+     * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping
     public List<PlayerResponse> getAllPlayers() {
@@ -36,8 +40,12 @@ public class PlayerController {
     //UC8
     /**
      * Retrieves a single player by id.
-     * @param id database identifier of the player
-     * @return the player mapped to a {@link PlayerResponse} DTO
+     *
+     * <p>
+     *      This method retrieves a {@link Player} entity from the database with a specific identifier.
+     * </p>
+     * @param id the id of the player to be retrieved.
+     * @return the player mapped to a {@link PlayerResponse}
      * @throws jakarta.persistence.EntityNotFoundException if the player is not found
      */
     @GetMapping("/{id}")
@@ -45,57 +53,56 @@ public class PlayerController {
         return toResponse(playerService.getPlayerById(id));
     }
 
-    //optional not UC8
     /**
-     * Searches players by name.
-     * @param name query substring to match against player names
-     * @return list of matching {@link Player} entities
+     * Retrieves a player by name
+     *
+     * <p>
+     *     This method retrieves a {@link Player} entity from the database with a specific name.
+     * </p>
+     * @param name the name of the player in database
+     * @return the player mapped to a {@link PlayerResponse}
      */
-    @GetMapping("/search")
-    public List<Player> searchPlayersByName(@RequestParam String name) {
-        return playerService.searchPlayersByName(name);
-    }
-
-    // Start/part of Use case 1 doesn't work yet.
-    /**
-     * Creates a new player.
-     * @param body request payload containing player properties and target {@code teamId}
-     * @return a 201 response with the created {@link PlayerResponse} body
-     * @throws jakarta.persistence.EntityNotFoundException if {@code teamId} does not exist
-     * @apiNote Part of “Use case 1” (as noted in code comments) though not fully implemented in UX yet.
-     */
-    @PostMapping
-    public ResponseEntity<PlayerResponse> createPlayer(@RequestBody CreatePlayerRequest body) {
-        Player created = playerService.createPlayer(
-                body.name(), body.dateOfBirth(), body.country(),
-                body.position(), body.goals(), body.teamId()
-        );
-        URI location = URI.create("/api/players/" + created.getId());
-        return ResponseEntity.created(location).body(toResponse(created));
+    @GetMapping("/name={name}")
+    public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
+        return toResponse(playerService.searchPlayersByName(name));
     }
 
     /**
-     * Updates an existing player.
-     * @param player player entity carrying the updated state
-     * @return the updated {@link Player} entity
+     * Retrieves all players by team name
+     * <p>
+     *      This method retrieves all {@link Player} entities from the database with a specific name.
+     * </p>
+     * @param teamName the name of the team in database
+     * @return list of players mapped to {@link PlayerResponse}
      */
-    @PutMapping
-    public Player updatePlayer(@RequestBody Player player) {
-        return playerService.updatePlayer(player);
+    @GetMapping("/team={teamName}")
+    public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
+        return playerService.getByTeamName(teamName)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     /**
-     * Deletes a player by id.
-     * @param id identifier of the player to remove
+     * Retrieves all players by team identifier
+     *
+     * <p>
+     *     This method retrieves all {@link Player} entities with a specific team.
+     * </p>
+     * @param teamId the identifier of the team in database
+     * @return list of players mapped to {@link PlayerResponse}
      */
-    @DeleteMapping("/{id}")
-    public void deletePlayer(@PathVariable Long id) {
-        playerService.deletePlayer(id);
+    @GetMapping("/team/{teamId}")
+    public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
+        return playerService.getByTeamId(teamId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
-     * @param p player entity (non-null)
+     * @param p player entity
      * @return mapped {@link PlayerResponse}
      */
     private PlayerResponse toResponse(Player p) {

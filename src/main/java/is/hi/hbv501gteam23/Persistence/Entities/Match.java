@@ -22,9 +22,11 @@ public class Match {
     @Column(name = "match_date")
     private LocalDate date;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true)
-    @JoinColumn(name = "score_id", unique = true)
-    private Score score;
+    @Column(name = "home_goals", nullable = false)
+    private Integer homeGoals = 0;
+
+    @Column(name = "away_goals", nullable = false)
+    private Integer awayGoals = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "home_team_id")
