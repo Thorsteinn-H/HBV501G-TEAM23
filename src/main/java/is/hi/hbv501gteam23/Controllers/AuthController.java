@@ -5,7 +5,9 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -14,19 +16,23 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AuthController {
     private final AuthService authService;
-
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+    public String login(@RequestParam String email, 
+                       @RequestParam String password, 
+                       HttpSession session,
+                       Model model) {
         User user = authService.login(email, password);
         if (user != null) {
-            return ResponseEntity.ok(user);
+            // Store only user ID in session
+            session.setAttribute("userId", user.getId());
+            return "redirect:/api/auth/success";
         }
-        return ResponseEntity.badRequest().body("Invalid email or password");
+        return "redirect:/api/auth/login?error";
     }
     @GetMapping("/login")
     public String login() {
@@ -34,48 +40,70 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> userData) {
-        String email = userData.get("email");
-        String name = userData.get("user_name");
-        String password = userData.get("password");
-        String gender = userData.get("gender");
+    public String register(@RequestParam String email, 
+                         @RequestParam String user_name,
+                         @RequestParam String password,
+                         @RequestParam(required = false) String gender,
+                         Model model) {
         
-        if (email == null || name == null || password == null) {
-            return ResponseEntity.badRequest().body("Email, name, and password are required");
+        if (email == null || user_name == null || password == null) {
+            return "redirect:/api/auth/register?error=missing_fields";
         }
         
         if (authService.findByEmail(email) != null) {
-            return ResponseEntity.badRequest().body("Email already in use");
+            return "redirect:/api/auth/register?error=email_in_use";
         }
         
         // Create new user with required fields
         User user = new User();
         user.setEmail(email);
-        user.setName(name);
+        user.setName(user_name);
         user.setGender(gender);
         user.setCreatedAt(LocalDate.now());
         user.setRole("User");
         
         try {
-            // Set the password hash on the user object
-            // The service will handle the actual hashing in its implementation
-            user.setPasswordHash(password); // Note: In a real app, this should be hashed first
+            user.setPasswordHash(password);
             User newUser = authService.register(user);
-            return ResponseEntity.ok(newUser);
+            model.addAttribute("user", newUser);
+            return "redirect:/api/auth/success";
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error creating user: " + e.getMessage());
+            return "redirect:/api/auth/register?error=registration_failed";
         }
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model, @RequestParam(required = false) String error) {
+        if (error != null) {
+            switch (error) {
+                case "missing_fields":
+                    model.addAttribute("error", "Email, name, and password are required");
+                    break;
+                case "email_in_use":
+                    model.addAttribute("error", "Email already in use");
+                    break;
+                case "registration_failed":
+                    model.addAttribute("error", "Registration failed. Please try again.");
+                    break;
+            }
+        }
         return "signup";
     }
-
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        // In a real application, you would invalidate the session/token here
-        return ResponseEntity.ok("Logged out successfully");
+    
+    @GetMapping("/success")
+    public String success(HttpSession session, Model model) {
+        // Get user ID from session and fetch the user
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/api/auth/login";
+        }
+        User user = authService.findById(userId);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/api/auth/login";
+        }
+        model.addAttribute("user", user);
+        return "LoggedInUser";
     }
 
     @DeleteMapping("/user/{id}")
