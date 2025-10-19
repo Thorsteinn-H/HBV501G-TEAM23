@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -107,10 +106,18 @@ public class PlayerServiceImplementation implements PlayerService {
     }
 
     /**
+     * Partially updates a {@link Player} by id.
+     * Applies only non-null fields from {@code body}. Supported fields:
+     * {@code name}, {@code dateOfBirth}, {@code country}, {@code position},
+     * {@code goals}, {@code teamId}. If {@code teamId} is present, it must
+     * reference an existing team.
      *
-     * @param id
-     * @param body
-     * @return
+     * @param id   the id of the player to update
+     * @param body partial update payload for the player
+     * @return the updated {@link Player}
+     *
+     * @throws jakarta.persistence.EntityNotFoundException
+     *         if the player does not exist, or if a provided {@code teamId} cannot be found
      */
     @Override
     @Transactional

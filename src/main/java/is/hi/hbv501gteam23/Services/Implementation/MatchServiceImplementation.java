@@ -1,21 +1,17 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
-import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
-import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
-import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -73,10 +69,19 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
+     * Partially updates a {@link Match} identified by {@code id}.
+     * Applies only the non-null fields from {@code body}. Supported fields:
+     * {@code date}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
+     * {@code homeGoals}, {@code awayGoals}. Team and venue identifiers (if present)
+     * are looked up and validated before being set.
      *
-     * @param id
-     * @param body
-     * @return
+     * @param id   the id of the match to update
+     * @param body partial update payload
+     * @return the updated {@link Match}
+     *
+     * @throws jakarta.persistence.EntityNotFoundException
+     *  *         if the match does not exist, or if any referenced team/venue id in the
+     *  *         payload cannot be found
      */
     @Override
     @Transactional

@@ -11,7 +11,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -101,10 +100,17 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
+     * Partially updates a {@link Team} by id.
+     * Applies only non-null fields from {@code body}. Supported fields:
+     * {@code name}, {@code country}, and {@code venueId}. If {@code venueId} is present,
+     * it must reference an existing venue.
      *
-     * @param id
-     * @param body
-     * @return
+     * @param id   the id of the team to update
+     * @param body partial update payload for the team
+     * @return the updated {@link Team}
+     *
+     * @throws jakarta.persistence.EntityNotFoundException
+     *         if the team does not exist, or if a provided {@code venueId} cannot be found
      */
     @Override
     @Transactional

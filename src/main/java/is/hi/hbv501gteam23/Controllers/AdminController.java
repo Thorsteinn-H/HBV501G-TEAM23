@@ -12,9 +12,13 @@ import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 
+/**
+ * REST controller that exposes read/write operations for {@link Team}, {@link Match} and {@link Player} resources.
+ * Base path is /admin
+ * Only endpoints are {push, patch, delete} for Admin role to perform.
+ */
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -61,10 +65,13 @@ public class AdminController {
     }
 
     /**
+     * Partially updates existing team
      *
-     * @param id
-     * @param body
-     * @return
+     * @param id the id of the team to update
+     * @param body partial update payload for the team
+     * @return 200 OK with the updated {@link TeamDto.TeamResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/teams/{id}")
@@ -98,9 +105,13 @@ public class AdminController {
     }
 
     /**
-     * @param id
-     * @param body
-     * @return
+     * Partially updates existing player
+     *
+     * @param id the id of the player to update
+     * @param body partial update payload for the player
+     * @return 200 OK with the updated {@link PlayerDto.PlayerResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/players/{id}")
@@ -140,10 +151,13 @@ public class AdminController {
     }
 
     /**
+     * Partially updates existing match
      *
-     * @param id
-     * @param body
-     * @return
+     * @param id the id of the match to update
+     * @param body partial update payload for the match
+     * @return 200 OK with the updated {@link MatchDto.MatchResponse};
+     *         404 if the match (or a referenced team/venue) is not found; *Not implemented yet*
+     *         400 if the payload is invalid                               *Not implemented yet*
      */
     // @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/matches/{id}")
@@ -172,6 +186,11 @@ public class AdminController {
 
     // ===================== MAPPERS =====================
 
+    /**
+     * Maps a {@link Player} entity to a {@link PlayerDto.PlayerResponse} DTO.
+     * @param p player entity
+     * @return mapped {@link PlayerDto.PlayerResponse}
+     */
     private PlayerDto.PlayerResponse toResponse(Player p) {
         return new PlayerDto.PlayerResponse(
                 p.getId(),
@@ -185,6 +204,11 @@ public class AdminController {
         );
     }
 
+    /**
+     * Maps a {@link Team} entity to a {@link TeamDto.TeamResponse} DTO.
+     * @param t team entity
+     * @return mapped {@link TeamDto.TeamResponse}
+     */
     private TeamDto.TeamResponse toResponse(Team t) {
         return new TeamDto.TeamResponse(
                 t.getId(),
@@ -195,6 +219,11 @@ public class AdminController {
         );
     }
 
+    /**
+     * Maps a {@link Match} entity to a {@link MatchDto.MatchResponse} DTO.
+     * @param m match entity
+     * @return mapped {@link MatchDto.MatchResponse}
+     */
     private MatchDto.MatchResponse toResponse(Match m) {
         return new MatchDto.MatchResponse(
                 m.getId(),

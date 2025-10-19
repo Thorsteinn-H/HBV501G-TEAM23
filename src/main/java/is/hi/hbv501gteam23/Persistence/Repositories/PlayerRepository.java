@@ -56,8 +56,9 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     List<Player> findByGoalsGreaterThan(int goals);
 
     /**
-     *
-     * @param teamId
+     * This serves as a purpose when a team is deleted
+     *      and the id is set to null on each player of the team
+     * @param teamId the id of a team
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Player p set p.team = null where p.team.id = :teamId")

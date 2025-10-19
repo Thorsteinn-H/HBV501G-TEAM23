@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
-
 import java.util.List;
 
 public interface MatchService {
@@ -40,10 +39,10 @@ public interface MatchService {
 
 
     /**
-     *
-     * @param id
-     * @param body
-     * @return
+     * Updates existing match
+     * @param id the id of the match to update
+     * @param body partial update payload for the match
+     * @return 200 OK with the updated {@link MatchDto.MatchResponse};
      */
     Match patchMatch(Long id, MatchDto.PatchMatchRequest body);
 

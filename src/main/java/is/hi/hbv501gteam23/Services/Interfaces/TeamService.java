@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
-
 import java.util.List;
 
 public interface TeamService {
@@ -55,10 +54,10 @@ public interface TeamService {
     Team create(Team team);
 
     /**
-     *
-     * @param id
-     * @param body
-     * @return
+     * Updates existing team
+     * @param id the id of the team to update
+     * @param body partial update payload for the team
+     * @return 200 OK with the updated {@link TeamDto.TeamResponse};
      */
     Team patchTeam(Long id, TeamDto.PatchTeamRequest body);
 
