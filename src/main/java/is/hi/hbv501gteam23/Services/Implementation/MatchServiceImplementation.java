@@ -1,12 +1,17 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,6 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchServiceImplementation implements MatchService {
     private final MatchRepository matchRepository;
+    private final TeamRepository teamRepository;
+    private final VenueRepository venueRepository;
 
     /**
      * Retrieves all matches
@@ -62,17 +69,46 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Updates an existing match with new data
+     * Partially updates a {@link Match} identified by {@code id}.
+     * Applies only the non-null fields from {@code body}. Supported fields:
+     * {@code date}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
+     * {@code homeGoals}, {@code awayGoals}. Team and venue identifiers (if present)
+     * are looked up and validated before being set.
      *
-     * @param match the {@link Match} entity with updated fields
-     * @return the updated {@link Match} entity
+     * @param id   the id of the match to update
+     * @param body partial update payload
+     * @return the updated {@link Match}
+     *
+     * @throws jakarta.persistence.EntityNotFoundException
+     *  *         if the match does not exist, or if any referenced team/venue id in the
+     *  *         payload cannot be found
      */
     @Override
-    public Match updateMatch(Match match) {
-        if (match.getId() == null || !matchRepository.existsById(match.getId())) {
-            throw new EntityNotFoundException("Match " + match.getId() + " not found");
+    @Transactional
+    public Match patchMatch(Long id, MatchDto.PatchMatchRequest body) {
+        Match m = matchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
+
+        if (body.date() != null)      m.setDate(body.date());
+        if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
+        if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
+        if (body.homeTeamId() != null) {
+            Team home = teamRepository.findById(body.homeTeamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.homeTeamId() + " not found"));
+            m.setHomeTeam(home);
         }
-        return matchRepository.save(match);
+        if (body.awayTeamId() != null) {
+            Team away = teamRepository.findById(body.awayTeamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.awayTeamId() + " not found"));
+            m.setAwayTeam(away);
+        }
+        if (body.venueId() != null) {
+            Venue v = venueRepository.findById(body.venueId())
+                    .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));
+            m.setVenue(v);
+        }
+
+        return matchRepository.save(m);
     }
 
     /**

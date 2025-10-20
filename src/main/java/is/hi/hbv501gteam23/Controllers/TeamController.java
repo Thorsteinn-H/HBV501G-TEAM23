@@ -6,14 +6,11 @@ import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
-
-
 import java.util.List;
 
 /**
  * REST controller that exposes read/write operations for {@link Team} resources.
- * Base path is api/players
- * <p>Other endpoints (search, create, update, delete) support administration and UX helpers.</p>
+ * Base path is /players
  */
 @RestController
 @RequestMapping("/teams")

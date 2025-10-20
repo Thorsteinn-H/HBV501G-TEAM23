@@ -1,7 +1,7 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
-
 import java.time.LocalDate;
 
 public final class PlayerDto {
@@ -21,6 +21,29 @@ public final class PlayerDto {
      * @param teamId the ID of a team the player belongs too
      */
     public record CreatePlayerRequest(
+            String name,
+            LocalDate dateOfBirth,
+            String country,
+            Player.PlayerPosition position,
+            Integer goals,
+            Long teamId
+    ) {}
+
+    /**
+     * Update body for updating player
+     * All fields are optional; only non-null values will be applied.
+     *      Typical uses include renaming a team, changing the country,
+     *      or reassigning the team to a different venue.
+     *
+     * @param name the name of the player
+     * @param dateOfBirth the date of players birth
+     * @param country players country of origin
+     * @param position the position a players plays for the team
+     * @param goals how many goals a player has scored
+     * @param teamId the ID of a team the player belongs too
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record PatchPlayerRequest(
             String name,
             LocalDate dateOfBirth,
             String country,

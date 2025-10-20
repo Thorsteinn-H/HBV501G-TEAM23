@@ -2,20 +2,15 @@ package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
-import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.CreatePlayerRequest;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
 import java.util.List;
 
 /**
  * REST controller that exposes read/write operations for {@link Player} resources.
- * Base path is api/players
- * <p>Other endpoints (search, create, update, delete) support administration and UX helpers.</p>
+ * Base path is /players
  */
 @RestController
 @RequestMapping("/players")
