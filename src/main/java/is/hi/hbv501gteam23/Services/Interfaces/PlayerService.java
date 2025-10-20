@@ -48,6 +48,14 @@ public interface PlayerService {
     List<Player> getByTeamId(Long teamId);
 
     /**
+     * Retrieves a list of active players
+     *
+     * @param isActive the active status of the player
+     * @return a list of all {@link Player} entities with active status
+     */
+    List<Player> getActivePlayers(Boolean isActive);
+
+    /**
      * Creates a new player
      *
      * @param name     the name of the player

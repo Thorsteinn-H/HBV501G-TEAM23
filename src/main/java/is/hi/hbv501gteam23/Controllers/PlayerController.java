@@ -95,6 +95,14 @@ public class PlayerController {
                 .toList();
     }
 
+    @GetMapping("/isActive={isActive}")
+    public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
+        return playerService.getActivePlayers(isActive)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
      * @param p player entity
@@ -104,6 +112,7 @@ public class PlayerController {
         return new PlayerResponse(
                 p.getId(),
                 p.getName(),
+                p.isActive(),
                 p.getPosition(),
                 p.getGoals(),
                 p.getCountry(),
