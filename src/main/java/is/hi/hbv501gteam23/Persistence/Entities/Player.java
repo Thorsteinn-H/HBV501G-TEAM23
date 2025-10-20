@@ -21,6 +21,9 @@ public class Player {
     @Column(name = "player_name", nullable = false, length = 120)
     private String name;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 

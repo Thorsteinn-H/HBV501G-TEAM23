@@ -64,6 +64,19 @@ public class TeamController {
     }
 
     /**
+     *
+     * @param isActive the active status of a team
+     * @return
+     */
+    @GetMapping("/isActive={isActive}")
+    public List<TeamResponse> getActiveTeams(@PathVariable("isActive") Boolean isActive) {
+        return teamService.findByActiveStatus(isActive)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
      * Retrieves a list of teams by their venue.
      *
      * <p>
@@ -108,6 +121,7 @@ public class TeamController {
         return new TeamDto.TeamResponse(
                 t.getId(),
                 t.getName(),
+                t.isActive(),
                 t.getCountry(),
                 t.getVenue().getId(),
                 t.getVenue().getName()

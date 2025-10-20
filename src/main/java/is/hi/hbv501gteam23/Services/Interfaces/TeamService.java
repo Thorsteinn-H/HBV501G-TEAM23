@@ -38,12 +38,20 @@ public interface TeamService {
     List<Team> findByCountry(String country);
 
     /**
-     * Retrieves all team in with a specific venue
+     * Retrieves all teams in a specific venue
      *
      * @param venueId the id of the team
      * @return a list of {@link Team} entities involving the specified team
      */
     List<Team> findByVenueId(Long venueId);
+
+    /**
+     * Retrieves all teams with the same active status
+     *
+     * @param isActive the active status of a team
+     * @return a list of {@link Team} entities with the same active status
+     */
+    List<Team> findByActiveStatus(Boolean isActive);
 
     /**
      * Creates a new team

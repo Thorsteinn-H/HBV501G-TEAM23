@@ -20,6 +20,9 @@ public class Team {
     @Column(name = "team_name", nullable = false, length = 120)
     private String name;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
     @Column(name = "team_country", nullable = false, length = 80)
     private String country;
 

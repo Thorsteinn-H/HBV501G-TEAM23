@@ -66,7 +66,7 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves all team in with a specific venue
+     * Retrieves all teams in a specific venue
      *
      * @param venueId the id of the team
      * @return a list of {@link Team} entities involving the specified team
@@ -74,6 +74,17 @@ public class TeamServiceImplementation implements TeamService {
     @Override
     public List<Team> findByVenueId(Long venueId){
         return teamRepository.findByVenueId(venueId);
+    }
+
+    /**
+     * Retrieves all teams with a specific active status
+     *
+     * @param isActive the active status of a team
+     * @return a list of teams with the same active status
+     */
+    @Override
+    public List<Team> findByActiveStatus(Boolean isActive){
+        return teamRepository.findByIsActive(isActive);
     }
 
     /**
@@ -120,6 +131,7 @@ public class TeamServiceImplementation implements TeamService {
 
         if (body.name() != null)    t.setName(body.name());
         if (body.country() != null) t.setCountry(body.country());
+        if (body.isActive() != null) t.setActive(body.isActive());
         if (body.venueId() != null) {
             Venue v = venueRepository.findById(body.venueId())
                     .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));

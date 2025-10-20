@@ -33,4 +33,11 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
      */
     @Query("SELECT t FROM Team t WHERE t.venue.id = :venueId")
     List<Team> findByVenueId(Long venueId);
+
+    /**
+     * Retrieves all teams with a specific active status
+     * @param isActive the active status of a team
+     * @return List of all teams that have the same active status
+     */
+    List<Team> findByIsActive(Boolean isActive);
 }

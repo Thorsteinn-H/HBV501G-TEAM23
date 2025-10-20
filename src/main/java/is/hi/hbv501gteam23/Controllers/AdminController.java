@@ -213,6 +213,7 @@ public class AdminController {
         return new PlayerDto.PlayerResponse(
                 p.getId(),
                 p.getName(),
+                p.isActive(),
                 p.getPosition(),
                 p.getGoals(),
                 p.getCountry(),
@@ -231,6 +232,7 @@ public class AdminController {
         return new TeamDto.TeamResponse(
                 t.getId(),
                 t.getName(),
+                t.isActive(),
                 t.getCountry(),
                 t.getVenue() != null ? t.getVenue().getId() : null,
                 t.getVenue() != null ? t.getVenue().getName() : null

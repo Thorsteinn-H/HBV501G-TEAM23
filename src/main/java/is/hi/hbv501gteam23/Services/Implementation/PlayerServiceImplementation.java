@@ -78,6 +78,16 @@ public class PlayerServiceImplementation implements PlayerService {
         return playerRepository.findByTeamId(teamId);
     }
 
+    /**
+     * Retrieves a list of active players
+     *
+     * @param isActive the active status of the player
+     * @return a list of all {@link Player} entities with active status
+     */
+    @Override
+    public List<Player> getActivePlayers(Boolean isActive) {
+        return playerRepository.findByIsActive(isActive);
+    }
 
     /**
      * Creates a new player
@@ -130,6 +140,7 @@ public class PlayerServiceImplementation implements PlayerService {
         if (body.country() != null)     p.setCountry(body.country());
         if (body.position() != null)    p.setPosition(body.position());
         if (body.goals() != null)       p.setGoals(body.goals());
+        if (body.isActive() != null)    p.setActive(body.isActive());
         if (body.teamId() != null) {
             Team team = teamRepository.findById(body.teamId())
                     .orElseThrow(() -> new EntityNotFoundException("Team " + body.teamId() + " not found"));
