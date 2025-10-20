@@ -1,6 +1,5 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 

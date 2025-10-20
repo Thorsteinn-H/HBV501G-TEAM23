@@ -6,13 +6,11 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
  * REST controller that exposes read/write operations for {@link Match} resources.
- * Base path is api/matches
- * <p>Other endpoints (search, create, update, delete) support administration and UX helpers.</p>
+ * Base path is /matches
  */
 @RestController
 @RequestMapping("/matches")

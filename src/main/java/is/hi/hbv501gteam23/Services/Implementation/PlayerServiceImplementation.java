@@ -1,13 +1,15 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PlayerServiceImplementation implements PlayerService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
@@ -103,14 +106,36 @@ public class PlayerServiceImplementation implements PlayerService {
     }
 
     /**
-     * Updates an existing player with new data
+     * Partially updates a {@link Player} by id.
+     * Applies only non-null fields from {@code body}. Supported fields:
+     * {@code name}, {@code dateOfBirth}, {@code country}, {@code position},
+     * {@code goals}, {@code teamId}. If {@code teamId} is present, it must
+     * reference an existing team.
      *
-     * @param player the {@link Player} entity with updated fields
-     * @return the updated {@link Player} entity
+     * @param id   the id of the player to update
+     * @param body partial update payload for the player
+     * @return the updated {@link Player}
+     *
+     * @throws jakarta.persistence.EntityNotFoundException
+     *         if the player does not exist, or if a provided {@code teamId} cannot be found
      */
     @Override
-    public Player updatePlayer(Player player) {
-        return playerRepository.save(player);
+    @Transactional
+    public Player patchPlayer(Long id, PlayerDto.PatchPlayerRequest body) {
+        Player p = playerRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Player " + id + " not found"));
+
+        if (body.name() != null)        p.setName(body.name());
+        if (body.dateOfBirth() != null) p.setDateOfBirth(body.dateOfBirth());
+        if (body.country() != null)     p.setCountry(body.country());
+        if (body.position() != null)    p.setPosition(body.position());
+        if (body.goals() != null)       p.setGoals(body.goals());
+        if (body.teamId() != null) {
+            Team team = teamRepository.findById(body.teamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.teamId() + " not found"));
+            p.setTeam(team);
+        }
+        return playerRepository.save(p);
     }
 
     /**
