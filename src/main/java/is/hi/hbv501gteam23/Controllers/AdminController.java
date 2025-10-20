@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * Base path is /admin
  * Only endpoints are {push, patch, delete} for Admin role to perform.
  */
-@RestController
+@Controller
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
@@ -69,8 +69,8 @@ public class AdminController {
         teamService.deleteTeam(id);
     }
 
-    @GetMapping("")
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
         // Get the current authentication object
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
