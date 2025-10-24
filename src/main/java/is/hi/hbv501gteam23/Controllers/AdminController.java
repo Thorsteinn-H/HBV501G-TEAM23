@@ -69,8 +69,8 @@ public class AdminController {
         teamService.deleteTeam(id);
     }
 
-    @GetMapping("")
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard")
     public String adminDashboard(Model model) {
         // Get the current authentication object
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
