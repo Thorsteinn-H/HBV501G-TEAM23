@@ -31,30 +31,37 @@ public class AuthController {
                        HttpSession session,
                        Model model) {
         try {
-            // This method is now just a fallback, as Spring Security will handle the actual authentication
-            return "redirect:/api/auth/loggedin";
+            User user = authService.login(email, password);
+            if (user != null) {
+                // Store user info in session
+                session.setAttribute("userId", user.getId());
+                session.setAttribute("userName", user.getName());
+                return "redirect:/api/auth/loggedin";
+            }
+            return "redirect:/api/auth/login?error=invalid_credentials";
         } catch (Exception e) {
-            return "redirect:/api/auth/login?error";
+            return "redirect:/api/auth/login?error=" + e.getMessage();
         }
     }
     
     @GetMapping("/loggedin")
     public String loggedIn(HttpSession session, Model model) {
         // Get the authenticated user's username from the security context
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
-        } else {
-            username = principal.toString();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return "redirect:/api/auth/login?error=not_authenticated";
         }
+        
+        String username = authentication.getName();
         
         // Get the user from the database
         User user = authService.findByEmail(username);
         if (user == null) {
             return "redirect:/api/auth/login?error=user_not_found";
         }
+        
+        // Ensure favorites entry exists
+        authService.ensureFavoritesExists(user.getId());
         
         // Store user info in session
         session.setAttribute("userId", user.getId());
@@ -92,6 +99,10 @@ public class AuthController {
         
         // Save user and log them in
         User savedUser = authService.register(newUser);
+        
+        // Ensure favorites entry exists
+        authService.ensureFavoritesExists(savedUser.getId());
+        
         session.setAttribute("userId", savedUser.getId());
         session.setAttribute("userName", savedUser.getName());
         
