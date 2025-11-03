@@ -13,4 +13,10 @@ public interface AuthService {
     User findById(Long id);
     boolean validatePassword(String rawPassword, String hashedPassword);
     void softDeleteUser(Long id);
+
+    /**
+     * Ensures that a favorites entry exists for the given user
+     * @param userId The ID of the user
+     */
+    void ensureFavoritesExists(Long userId);
 }

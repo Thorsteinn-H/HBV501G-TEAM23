@@ -2,7 +2,7 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,16 +13,38 @@ import lombok.*;
 @Table(name = "favorites")
 public class Favorites {
     @Id
-    @SequenceGenerator(name = "favorites_sequence", sequenceName = "favorites_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "favorites_sequence")
-    private Long id;
-
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "match_id")
-    private Long matchId;
+    @Column(columnDefinition = "TEXT")
+    private String matches; // Comma-separated match IDs
 
-    @Column(name = "player_id")
-    private Long playerId;
+    @Column(columnDefinition = "TEXT")
+    private String players; // Comma-separated player IDs
+    
+    @Column(columnDefinition = "TEXT")
+    private String scores; // Comma-separated score IDs
+    
+    @Column(columnDefinition = "TEXT")
+    private String teams; // Comma-separated team IDs
+    
+    @Column(columnDefinition = "TEXT")
+    private String venues; // Comma-separated venue IDs
+    
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
