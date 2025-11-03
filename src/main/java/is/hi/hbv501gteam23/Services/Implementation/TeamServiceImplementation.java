@@ -6,7 +6,9 @@ import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
+import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
+import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final VenueRepository venueRepository;
+    private final VenueService venueService;
+
 
     /**
      * Retrieves all teams
@@ -102,12 +106,27 @@ public class TeamServiceImplementation implements TeamService {
     /**
      * Creates a new team
      *
-     * @param team the {@link Team} entity to create
+     * @param body the {@link Team} entity to create
      * @return the newly created {@link Team} entity
      */
     @Override
-    public Team create(Team team){
-        return teamRepository.save(team);
+    @Transactional
+    public Team createTeam(TeamDto.CreateTeamRequest body) {
+        Team existing = teamRepository.findByNameContainingIgnoreCase(body.name());
+        if (existing != null) throw new IllegalArgumentException("Team with name already exists");
+
+        Venue venue = venueRepository.findByNameIgnoreCase(body.venueName());
+        if (venue == null) {
+            venue = venueService.createVenue(new VenueDto.VenueRequest(body.venueName(), body.venueAddress()));
+        }
+
+        Team t = new Team();
+        t.setName(body.name());
+        t.setCountry(body.country());
+        t.setActive(true);
+        t.setVenue(venue);
+
+        return teamRepository.save(t);
     }
 
     /**

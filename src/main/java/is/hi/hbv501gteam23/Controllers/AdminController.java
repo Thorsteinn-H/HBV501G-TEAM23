@@ -49,7 +49,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
-    public ResponseEntity<TeamDto.TeamResponse> addTeam(@RequestBody TeamDto.TeamResponse body) {
+    public ResponseEntity<TeamDto.TeamResponse> addTeam(@RequestBody TeamDto.CreateTeamRequest body) {
         Team created = teamService.createTeam(body);
         return ResponseEntity
                 .created(URI.create("/admin/teams/" + created.getId()))

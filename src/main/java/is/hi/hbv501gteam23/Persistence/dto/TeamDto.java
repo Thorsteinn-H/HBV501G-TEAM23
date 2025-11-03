@@ -17,7 +17,8 @@ public final class TeamDto {
     public record CreateTeamRequest(
             String name,
             String country,
-            Long venueName
+            String venueName,
+            String venueAddress
     ) {}
 
     /**

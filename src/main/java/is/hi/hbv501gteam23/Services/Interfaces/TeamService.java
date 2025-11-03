@@ -56,11 +56,10 @@ public interface TeamService {
     /**
      * Creates a new team
      *
-     * @param team the {@link Team} entity to create
+     * @param body the {@link Team} entity to create
      * @return the newly created {@link Team} entity
      */
-    Team create(Team team);
-
+    Team createTeam(TeamDto.CreateTeamRequest body);
     /**
      * Updates existing team
      * @param id the id of the team to update
