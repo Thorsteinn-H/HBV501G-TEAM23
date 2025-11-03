@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "player")
+@Table(name = "players")
 public class Player {
     @Id
     @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1)
