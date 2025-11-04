@@ -12,12 +12,13 @@ public final class TeamDto {
      *
      * @param name name of a team
      * @param country a teams country of origin
-     * @param venueId the ID of the venue the team plays home games
+     * @param venueName the ID of the venue the team plays home games
      */
     public record CreateTeamRequest(
             String name,
             String country,
-            Long venueId
+            String venueName,
+            String venueAddress
     ) {}
 
     /**
@@ -55,7 +56,7 @@ public final class TeamDto {
     public record TeamResponse(
             Long id,
             String name,
-            Boolean isActive,
+            boolean isActive,
             String country,
             Long venueId,
             String venueName

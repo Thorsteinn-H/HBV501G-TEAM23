@@ -6,12 +6,14 @@ import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service for handling logic related to players
@@ -90,28 +92,30 @@ public class PlayerServiceImplementation implements PlayerService {
     }
 
     /**
-     * Creates a new player
      *
-     * @param name     the name of the player
-     * @param dob      the player's date of birth
-     * @param country  the country the player represents
-     * @param position the player's position
-     * @param goals    the number of goals the player has scored
-     * @param teamId   the id of the team to the player should be assigned
-     * @return the newly created {@link Player} entity
+     * @param body
+     * @return
      */
-    @Override public Player createPlayer(String name, LocalDate dob, String country,
-                                         Player.PlayerPosition position, Integer goals, Long teamId) {
-        var team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new EntityNotFoundException("Team "+teamId+" not found"));
-        var p = Player.builder()
-                .name(name)
-                .dateOfBirth(dob)
-                .country(country)
-                .position(position)
-                .goals(goals != null ? goals : 0)
-                .team(team)
-                .build();
+    @Override
+    @Transactional
+    public Player createPlayer(PlayerDto.CreatePlayerRequest body) {
+        Player existing = playerRepository.findByNameContainingIgnoreCase(body.name());
+        if (existing != null) {
+            throw new EntityExistsException("Player "+body.name()+" already exists");
+        }
+
+        Team team = null;
+        if (body.teamId() != null) {
+            team = teamRepository.findById(body.teamId())
+                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.teamId() + " not found"));
+        }
+        Player p = new Player();
+        p.setName(body.name());
+        p.setDateOfBirth(body.dateOfBirth());
+        p.setCountry(body.country());
+        p.setPosition(body.position());
+        p.setGoals(body.goals() != null ? body.goals() : 0);
+        p.setTeam(team);
         return playerRepository.save(p);
     }
 

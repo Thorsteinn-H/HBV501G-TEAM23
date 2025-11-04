@@ -3,12 +3,15 @@ package is.hi.hbv501gteam23.Controllers;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
+import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
+import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,8 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Team}, {@link Match} and {@link Player} resources.
@@ -33,6 +34,7 @@ public class AdminController {
     private final PlayerService playerService;
     private final TeamService teamService;
     private final MatchService matchService;
+    private final VenueService venueService;
 
     // ===================== TEAMS =====================
 
@@ -42,16 +44,16 @@ public class AdminController {
      * <p>
      *     This method saves a new {@link Team} entity to the database.
      * </p>
-     * @param team the {@link Team} object to be created
+     * @param body the {@link is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse} object to be created
      * @return the created {@link Team} entity
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
-    public Team createTeam(Team team) {
-        if (teamService.findByName(team.getName()) != null) {
-            return null;
-        }
-        return teamService.create(team);
+    public ResponseEntity<TeamDto.TeamResponse> addTeam(@RequestBody TeamDto.CreateTeamRequest body) {
+        Team created = teamService.createTeam(body);
+        return ResponseEntity
+                .created(URI.create("/admin/teams/" + created.getId()))
+                .body(toResponse(created));
     }
 
     /**
@@ -114,11 +116,8 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/players")
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body){
-        Player created = playerService.createPlayer(
-                body.name(), body.dateOfBirth(), body.country(),
-                body.position(), body.goals(), body.teamId()
-        );
-        URI location = URI.create("/players/" + created.getId());
+        Player created = playerService.createPlayer(body);
+        URI location = URI.create("/admin/players/" + created.getId());
         return ResponseEntity.created(location).body(toResponse(created));
     }
 
@@ -154,18 +153,16 @@ public class AdminController {
     // ===================== MATCHES =====================
 
     /**
-     * Creates a match
      *
-     * <p>
-     *     This method saves a new {@link Match} entity to the database.
-     * </p>
-     * @param match the {@link Match} object to be created
-     * @return the created {@link Match} entity
+     * @param body
+     * @return
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
-    public Match createMatch (Match match){
-        return matchService.createMatch(match);
+    public ResponseEntity<MatchDto.MatchResponse> createMatch (@RequestBody MatchDto.CreateMatchRequest body) {
+        Match created = matchService.createMatch(body);
+        URI location = URI.create("/admin/matches/" + created.getId());
+        return ResponseEntity.created(location).body(toResponse(created));
     }
 
     /**
@@ -201,6 +198,17 @@ public class AdminController {
     public void deleteMatch(@PathVariable Long id){
         matchService.deleteMatch(id);
     }
+
+    // ===================== VENUE =====================
+
+    @PostMapping("/venues")
+    public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.VenueRequest body) {
+        Venue created = venueService.createVenue(body);
+        return ResponseEntity
+                .created(URI.create("/admin/venues/" + created.getId()))
+                .body(toResponse(created));
+    }
+
 
     // ===================== MAPPERS =====================
 
@@ -256,6 +264,14 @@ public class AdminController {
                 m.getVenue() != null ? m.getVenue().getName() : null,
                 m.getHomeGoals(),
                 m.getAwayGoals()
+        );
+    }
+
+    private VenueDto.VenueResponse toResponse(Venue v) {
+        return new VenueDto.VenueResponse(
+                v.getId(),
+                v.getName(),
+                v.getAddress()
         );
     }
 }
