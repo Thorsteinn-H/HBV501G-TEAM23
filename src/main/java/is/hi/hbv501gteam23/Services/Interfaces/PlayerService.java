@@ -56,18 +56,11 @@ public interface PlayerService {
     List<Player> getActivePlayers(Boolean isActive);
 
     /**
-     * Creates a new player
      *
-     * @param name     the name of the player
-     * @param dob      the player's date of birth
-     * @param country  the country the player represents
-     * @param position the player's position
-     * @param goals    the number of goals the player has scored
-     * @param teamId   the id of the team to the player should be assigned
-     * @return the newly created {@link Player} entity
+     * @param body
+     * @return
      */
-    Player createPlayer(String name, LocalDate dob, String country,
-                        Player.PlayerPosition position, Integer goals, Long teamId);
+    Player createPlayer(PlayerDto.CreatePlayerRequest body);
 
     /**
      * Updates existing player

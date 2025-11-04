@@ -116,11 +116,8 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/players")
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body){
-        Player created = playerService.createPlayer(
-                body.name(), body.dateOfBirth(), body.country(),
-                body.position(), body.goals(), body.teamId()
-        );
-        URI location = URI.create("/players/" + created.getId());
+        Player created = playerService.createPlayer(body);
+        URI location = URI.create("/admin/players/" + created.getId());
         return ResponseEntity.created(location).body(toResponse(created));
     }
 
