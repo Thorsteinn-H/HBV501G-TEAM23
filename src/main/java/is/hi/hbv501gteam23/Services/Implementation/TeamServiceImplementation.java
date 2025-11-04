@@ -115,10 +115,8 @@ public class TeamServiceImplementation implements TeamService {
         Team existing = teamRepository.findByNameContainingIgnoreCase(body.name());
         if (existing != null) throw new IllegalArgumentException("Team with name already exists");
 
-        Venue venue = venueRepository.findByNameIgnoreCase(body.venueName());
-        if (venue == null) {
-            venue = venueService.createVenue(new VenueDto.VenueRequest(body.venueName(), body.venueAddress()));
-        }
+        Venue venue = venueRepository.findById(body.venueId())
+                .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));
 
         Team t = new Team();
         t.setName(body.name());
