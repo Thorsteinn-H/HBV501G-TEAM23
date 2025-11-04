@@ -47,12 +47,11 @@ public interface MatchService {
     Match patchMatch(Long id, MatchDto.PatchMatchRequest body);
 
     /**
-     * Creates a new match
      *
-     * @param match the {@link Match} entity to create
-     * @return the newly created {@link Match} entity
+     * @param body
+     * @return
      */
-    Match createMatch(Match match);
+    Match createMatch(MatchDto.CreateMatchRequest body);
 
 
     /**

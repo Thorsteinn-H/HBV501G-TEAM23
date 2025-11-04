@@ -79,7 +79,7 @@ public class MatchServiceImplementation implements MatchService {
      * @param body partial update payload
      * @return the updated {@link Match}
      *
-     * @throws jakarta.persistence.EntityNotFoundException
+     * @throws EntityNotFoundException
      *  *         if the match does not exist, or if any referenced team/venue id in the
      *  *         payload cannot be found
      */
@@ -111,16 +111,25 @@ public class MatchServiceImplementation implements MatchService {
         return matchRepository.save(m);
     }
 
-    /**
-     * Creates a new match
-     *
-     * @param match the {@link Match} entity to create
-     * @return the newly created {@link Match} entity
-     */
+
     @Override
-    public Match createMatch(Match match) {
-        match.setId(null);
-        return matchRepository.save(match);
+    @Transactional
+    public Match createMatch(MatchDto.CreateMatchRequest body) {
+        Team home = teamRepository.findById(body.homeTeamId())
+                .orElseThrow(() -> new EntityNotFoundException("Home team " + body.homeTeamId() + " not found"));
+        Team away = teamRepository.findById(body.awayTeamId())
+                .orElseThrow(() -> new EntityNotFoundException("Away team " + body.awayTeamId() + " not found"));
+        Venue venue = venueRepository.findById(body.venueId())
+                .orElseThrow(() -> new EntityNotFoundException("Venue " + body.venueId() + " not found"));
+
+        Match m = new Match();
+        m.setHomeTeam(home);
+        m.setAwayTeam(away);
+        m.setHomeGoals(body.homeGoals());
+        m.setAwayGoals(body.awayGoals());
+        m.setVenue(venue);
+        m.setDate(body.date());
+        return matchRepository.save(m);
     }
 
     /**

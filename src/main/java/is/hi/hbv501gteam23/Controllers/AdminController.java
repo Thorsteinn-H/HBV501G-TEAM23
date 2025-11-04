@@ -153,18 +153,16 @@ public class AdminController {
     // ===================== MATCHES =====================
 
     /**
-     * Creates a match
      *
-     * <p>
-     *     This method saves a new {@link Match} entity to the database.
-     * </p>
-     * @param match the {@link Match} object to be created
-     * @return the created {@link Match} entity
+     * @param body
+     * @return
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
-    public Match createMatch (Match match){
-        return matchService.createMatch(match);
+    public ResponseEntity<MatchDto.MatchResponse> createMatch (@RequestBody MatchDto.CreateMatchRequest body) {
+        Match created = matchService.createMatch(body);
+        URI location = URI.create("/admin/matches/" + created.getId());
+        return ResponseEntity.created(location).body(toResponse(created));
     }
 
     /**
