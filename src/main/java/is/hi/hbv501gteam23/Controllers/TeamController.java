@@ -3,9 +3,14 @@ package is.hi.hbv501gteam23.Controllers;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 /**
@@ -58,8 +63,8 @@ public class TeamController {
      * @param name name of the team to be retrieved
      * @return the team mapped to a {@link TeamResponse}
      */
-    @GetMapping("/name={name}")
-    public TeamResponse getTeamByName(@PathVariable("name") String name) {
+    @GetMapping(params = "name")
+    public TeamResponse getTeamByName(@RequestParam String name) {
         return toResponse(teamService.findByName(name));
     }
 
@@ -104,8 +109,8 @@ public class TeamController {
      * @param country the country of the teams to be retrieved.
      * @return list of teams mapped to {@link TeamResponse}
      */
-    @GetMapping("/country={country}")
-    public List<TeamResponse> getByCountry(@PathVariable("country") String country) {
+    @GetMapping(params = "country")
+    public List<TeamResponse> getByCountry(@RequestParam String country) {
         return teamService.findByCountry(country)
                 .stream()
                 .map(this::toResponse)

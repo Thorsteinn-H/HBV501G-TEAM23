@@ -24,7 +24,7 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
      * @param country the country the team is from
      * @return List of all teams from the same country
      */
-    List<Team> getByCountry(String country);
+    List<Team> findAllByCountryIgnoreCase(String country);
 
     /**
      * Retrieves all teams with same venue

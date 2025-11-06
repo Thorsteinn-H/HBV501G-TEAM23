@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.net.URI;
 
 /**
@@ -49,6 +51,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/teams")
+    @ResponseBody
     public ResponseEntity<TeamDto.TeamResponse> addTeam(@RequestBody TeamDto.CreateTeamRequest body) {
         Team created = teamService.createTeam(body);
         return ResponseEntity
@@ -65,6 +68,7 @@ public class AdminController {
      * @param id the id of the team to be deleted.
      *
      */
+    @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/teams/{id}")
     public void deleteTeam(@PathVariable Long id) {
@@ -95,6 +99,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/teams/{id}")
+    @ResponseBody
     public ResponseEntity<TeamDto.TeamResponse> patchTeam(
             @PathVariable Long id,
             @RequestBody TeamDto.PatchTeamRequest body
@@ -115,6 +120,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/players")
+    @ResponseBody
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body){
         Player created = playerService.createPlayer(body);
         URI location = URI.create("/admin/players/" + created.getId());
@@ -132,6 +138,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/players/{id}")
+    @ResponseBody
     public ResponseEntity<PlayerDto.PlayerResponse> patchPlayer(
             @PathVariable Long id,
             @RequestBody PlayerDto.PatchPlayerRequest body
@@ -146,6 +153,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/players/{id}")
+    @ResponseBody
     public void deletePlayer(@PathVariable Long id){
         playerService.deletePlayer(id);
     }
@@ -159,6 +167,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/matches")
+    @ResponseBody
     public ResponseEntity<MatchDto.MatchResponse> createMatch (@RequestBody MatchDto.CreateMatchRequest body) {
         Match created = matchService.createMatch(body);
         URI location = URI.create("/admin/matches/" + created.getId());
@@ -176,6 +185,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/matches/{id}")
+    @ResponseBody
     public ResponseEntity<MatchDto.MatchResponse> patchMatch(
             @PathVariable Long id,
             @RequestBody MatchDto.PatchMatchRequest body
@@ -195,6 +205,7 @@ public class AdminController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/matches/{id}")
+    @ResponseBody
     public void deleteMatch(@PathVariable Long id){
         matchService.deleteMatch(id);
     }
@@ -202,6 +213,7 @@ public class AdminController {
     // ===================== VENUE =====================
 
     @PostMapping("/venues")
+    @ResponseBody
     public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.VenueRequest body) {
         Venue created = venueService.createVenue(body);
         return ResponseEntity

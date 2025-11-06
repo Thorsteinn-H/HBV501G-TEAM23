@@ -5,6 +5,8 @@ import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -23,14 +25,14 @@ public class VenueServiceImplementation implements VenueService {
     @Override
     public Venue findById(Long id) {
         return venueRepository.findById(id)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Venue " + id + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + id + " not found"));
     }
 
     @Override
     public Venue findByName(String name) {
         Venue v = venueRepository.findByNameIgnoreCase(name);
         if (v == null) {
-            throw new jakarta.persistence.EntityNotFoundException("Venue '" + name + "' not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue '" + name + "' not found");
         }
         return v;
     }
@@ -38,14 +40,28 @@ public class VenueServiceImplementation implements VenueService {
     @Override
     @Transactional
     public Venue createVenue(VenueDto.VenueRequest body) {
-        Venue existing = venueRepository.findByNameIgnoreCase(body.name());
+        if (body == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
+        }
+
+        String name = body.name() == null ? null : body.name().trim();
+        String address = body.address() == null ? null : body.address().trim();
+
+        if (name == null || name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue name is required");
+        }
+        if (address == null || address.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue address is required");
+        }
+
+        Venue existing = venueRepository.findByNameIgnoreCase(name);
         if (existing != null) {
-            throw new IllegalArgumentException("Venue with name already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue name already exists"); // 409
         }
 
         Venue v = new Venue();
-        v.setName(body.name());
-        v.setAddress(body.address());
+        v.setName(name);
+        v.setAddress(address);
         return venueRepository.save(v);
     }
 }
