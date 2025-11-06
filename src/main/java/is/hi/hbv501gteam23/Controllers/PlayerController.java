@@ -5,7 +5,11 @@ import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 /**
