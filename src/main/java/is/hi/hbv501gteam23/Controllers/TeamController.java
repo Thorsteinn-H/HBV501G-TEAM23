@@ -125,14 +125,14 @@ public class TeamController {
     }
 
     /**
-     * Updates an existing team.
+     * Updates an existing team. Team can be marked as inactive with isActive = false.
      *
      * @param id the id of the team to update
      * @param patchTeamRequest the fields to update
      * @return the updated team mapped to {@link TeamResponse}
      */
     @PatchMapping("/{id}")
-    public TeamResponse updateTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
+    public TeamResponse patchTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
         Team updatedTeam = teamService.patchTeam(id, patchTeamRequest);
         return toResponse(updatedTeam);
     }
