@@ -25,7 +25,6 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
      * @return List of all teams from the same country
      */
     List<Team> findAllByCountryIgnoreCase(String country);
-    boolean existsByCountryIgnoreCase(String country);
 
     /**
      * Retrieves all teams with same venue

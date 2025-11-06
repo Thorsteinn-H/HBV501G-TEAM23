@@ -20,10 +20,10 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByHomeTeam_IdOrAwayTeam_Id(Long teamId1, Long teamId2);
 
     /**
-     * Retrieves all matches between start date and end start
-     * @param start the start of when a match can happen
-     * @param end the end of when a match can happen
-     * @return List of all matches that happened between star date and end date
+     *
+     * @param from
+     * @param to
+     * @return
      */
-    List<Match> findByDateBetween(LocalDate start, LocalDate end);
+    List<Match> findByDateBetweenOrderByDateAsc(LocalDate from, LocalDate to);
 }

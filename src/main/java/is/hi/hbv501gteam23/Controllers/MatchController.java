@@ -5,7 +5,10 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -59,12 +62,12 @@ public class MatchController {
      * @param year the year to filter matches
      * @return a list of matches mapped to {@link MatchResponse}
      */
-    @GetMapping("/year={year}")
-    public List<MatchResponse> getMatchesByYear(@PathVariable int year) {
-        return matchService.getMatchesByYear(year)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    @GetMapping(params = {"from","to"})
+    public List<MatchResponse> getMatchesBetween(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        return matchService.getMatchesBetween(from, to).stream().map(this::toResponse).toList();
     }
 
     /**
@@ -78,8 +81,8 @@ public class MatchController {
      * @param teamId the id of the team the players should belong to.
      * @return a list of matches mapped to {@link MatchResponse}
      */
-    @GetMapping("/team/{teamId}")
-    public List<MatchResponse> getMatchesByTeam(@PathVariable Long teamId) {
+    @GetMapping(params = "team")
+    public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
         return matchService.getMatchesByTeamId(teamId)
                 .stream()
                 .map(this::toResponse)
