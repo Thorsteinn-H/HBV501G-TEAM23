@@ -87,6 +87,31 @@ public class MatchController {
     }
 
     /**
+     * Creates a new match.
+     *
+     * @param matchRequest the match data to create
+     * @return the created match mapped to {@link MatchResponse}
+     */
+    @PostMapping
+    public MatchResponse createMatch(@RequestBody MatchDto.CreateMatchRequest matchRequest) {
+        Match createdMatch = matchService.createMatch(matchRequest);
+        return toResponse(createdMatch);
+    }
+
+    /**
+     * Updates an existing match.
+     *
+     * @param id the id of the match to update
+     * @param matchRequest the fields to update
+     * @return the updated match mapped to {@link MatchResponse}
+     */
+    @PatchMapping("/{id}")
+    public MatchResponse updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest matchRequest) {
+        Match updatedMatch = matchService.patchMatch(id, matchRequest);
+        return toResponse(updatedMatch);
+    }
+
+    /**
      * Maps a {@link Match} entity to a {@link MatchDto.MatchResponse} DTO.
      * @param m match entity
      * @return mapped {@link MatchDto.MatchResponse}

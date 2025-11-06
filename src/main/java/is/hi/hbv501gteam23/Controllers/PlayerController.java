@@ -5,7 +5,10 @@ import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
@@ -18,7 +21,6 @@ import java.util.List;
 public class PlayerController {
     private final PlayerService playerService;
 
-    //UC7
     /**
      * Retrieves all players.
      * <p>
@@ -32,7 +34,6 @@ public class PlayerController {
                 .stream().map(this::toResponse).toList();
     }
 
-    //UC8
     /**
      * Retrieves a single player by id.
      *
@@ -102,6 +103,34 @@ public class PlayerController {
                 .map(this::toResponse)
                 .toList();
     }
+
+    /**
+     * Creates a new player. Only for admins.
+     * @param body the player data
+     * @return the new player
+     */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public PlayerResponse createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
+        Player created = playerService.createPlayer(body);
+        return toResponse(created);
+    }
+
+    /**
+     * Modifies an existing player. Only for admins.
+     * @param id the player's id
+     * @param body the data that should be modified
+     * @return the updated player
+     */
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PlayerResponse patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
+        Player updated = playerService.patchPlayer(id, body);
+        return toResponse(updated);
+    }
+
+    /**
 
     /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.

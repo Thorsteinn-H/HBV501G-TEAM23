@@ -113,6 +113,31 @@ public class TeamController {
     }
 
     /**
+     * Creates a new team.
+     *
+     * @param createTeamRequest the team data to create
+     * @return the created team mapped to {@link TeamResponse}
+     */
+    @PostMapping
+    public TeamResponse createTeam(@RequestBody TeamDto.CreateTeamRequest createTeamRequest) {
+        Team createdTeam = teamService.createTeam(createTeamRequest);
+        return toResponse(createdTeam);
+    }
+
+    /**
+     * Updates an existing team.
+     *
+     * @param id the id of the team to update
+     * @param patchTeamRequest the fields to update
+     * @return the updated team mapped to {@link TeamResponse}
+     */
+    @PatchMapping("/{id}")
+    public TeamResponse updateTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
+        Team updatedTeam = teamService.patchTeam(id, patchTeamRequest);
+        return toResponse(updatedTeam);
+    }
+
+    /**
      * Maps a {@link Team} entity to a {@link TeamDto.TeamResponse} DTO.
      * @param t team entity
      * @return mapped {@link TeamDto.TeamResponse}
