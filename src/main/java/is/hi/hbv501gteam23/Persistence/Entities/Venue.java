@@ -20,6 +20,6 @@ public class Venue {
     @Column(name = "venue_name", nullable = false, length = 160)
     private String name;
 
-    @Column(name = "address", nullable = true)
+    @Column(name = "address")
     private String address;
 }
