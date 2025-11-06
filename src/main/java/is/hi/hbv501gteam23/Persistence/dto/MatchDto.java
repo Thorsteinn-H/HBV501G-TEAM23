@@ -2,7 +2,7 @@ package is.hi.hbv501gteam23.Persistence.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 
-public class MatchDto {
+public final class MatchDto {
 
     /**
      * Request body for creating a new match
