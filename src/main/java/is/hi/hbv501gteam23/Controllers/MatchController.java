@@ -6,8 +6,11 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -59,7 +62,7 @@ public class MatchController {
      *
      * <p>This endpoint return a list of matches that played during a specific year</p>
      *
-     * @param year the year to filter matches
+     * @param from the year to filter matches
      * @return a list of matches mapped to {@link MatchResponse}
      */
     @GetMapping(params = {"from","to"})
@@ -92,26 +95,28 @@ public class MatchController {
     /**
      * Creates a new match.
      *
-     * @param matchRequest the match data to create
+     * @param body the match data to create
      * @return the created match mapped to {@link MatchResponse}
      */
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
     @PostMapping
-    public MatchResponse createMatch(@RequestBody MatchDto.CreateMatchRequest matchRequest) {
-        Match createdMatch = matchService.createMatch(matchRequest);
-        return toResponse(createdMatch);
+    public ResponseEntity<MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
+        Match createdMatch = matchService.createMatch(body);
+        return ResponseEntity.created(URI.create("/matches" + createdMatch.getId())).body(toResponse(createdMatch));
     }
 
     /**
      * Updates an existing match.
      *
      * @param id the id of the match to update
-     * @param matchRequest the fields to update
+     * @param body the fields to update
      * @return the updated match mapped to {@link MatchResponse}
      */
     @PatchMapping("/{id}")
-    public MatchResponse updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest matchRequest) {
-        Match updatedMatch = matchService.patchMatch(id, matchRequest);
-        return toResponse(updatedMatch);
+    public ResponseEntity<MatchDto.MatchResponse> updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest body) {
+        Match updatedMatch = matchService.patchMatch(id, body);
+        return ResponseEntity.ok(toResponse(updatedMatch));
     }
 
     /**
