@@ -7,9 +7,13 @@ import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -97,31 +101,33 @@ public class TeamController {
 
     /**
      * Creates a new team.
-     * @param createTeamRequest the team data to create
+     * @param body the team data to create
      * @return the created team mapped to {@link TeamResponse}
      */
     @PostMapping
+    @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a team")
     @ApiResponse(responseCode = "200", description = "Team successfully created")
-    public TeamResponse createTeam(@RequestBody TeamDto.CreateTeamRequest createTeamRequest) {
-        Team createdTeam = teamService.createTeam(createTeamRequest);
-        return toResponse(createdTeam);
+    public ResponseEntity<TeamDto.TeamResponse> createTeam(@RequestBody TeamDto.CreateTeamRequest body) {
+        Team created = teamService.createTeam(body);
+        return ResponseEntity.created(URI.create("/teams" + created.getId())).body(toResponse(created));
     }
 
     /**
      * Updates an existing team. Team can be marked as inactive with isActive = false.
      * @param id the id of the team to update
-     * @param patchTeamRequest the fields to update
+     * @param body the fields to update
      * @return the updated team mapped to {@link TeamResponse}
      */
     @PatchMapping("/{id}")
-    @Operation(summary = "Modify a team")
     @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    @Operation(summary = "Modify a team")
     @ApiResponse(responseCode = "200", description = "Team successfully modified")
-    public TeamResponse patchTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
-        Team updatedTeam = teamService.patchTeam(id, patchTeamRequest);
-        return toResponse(updatedTeam);
+    public ResponseEntity<TeamDto.TeamResponse> updateTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest body) {
+        Team updatedTeam = teamService.patchTeam(id, body);
+        return ResponseEntity.ok(toResponse(updatedTeam));
     }
 
     /**
