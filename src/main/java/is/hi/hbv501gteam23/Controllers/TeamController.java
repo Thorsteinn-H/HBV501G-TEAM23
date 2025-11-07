@@ -7,10 +7,8 @@ import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -30,9 +28,9 @@ public class TeamController {
      * Retrieves all {@link Team} entities.
      * @return list of teams mapped to {@link TeamResponse}
      */
+    @GetMapping
     @Operation(summary = "List all teams")
     @ApiResponse(responseCode = "200", description = "Teams successfully fetched")
-    @GetMapping
     public List<TeamResponse> getAllTeams(){
         return teamService.getAllTeams()
                 .stream().map(this::toResponse).toList();
@@ -43,9 +41,9 @@ public class TeamController {
      * @param id the id of the team to be retrieved
      * @return the team mapped to a {@link TeamResponse}
      */
+    @GetMapping("/{id}")
     @Operation(summary = "Get team by id")
     @ApiResponse(responseCode = "200", description = "Team successfully fetched")
-    @GetMapping("/{id}")
     public TeamResponse getTeamById(@PathVariable Long id){
         return toResponse(teamService.getTeamById(id));
     }
@@ -56,6 +54,8 @@ public class TeamController {
      * @return the team mapped to a {@link TeamResponse}
      */
     @GetMapping(params = "name")
+    @Operation(summary = "Get team by name")
+    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public TeamResponse getTeamByName(@RequestParam String name) {
         return toResponse(teamService.findByName(name));
     }
@@ -66,6 +66,8 @@ public class TeamController {
      * @return
      */
     @GetMapping("/isActive={isActive}")
+    @Operation(summary = "Get team by active status")
+    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getActiveTeams(@PathVariable("isActive") Boolean isActive) {
         return teamService.findByActiveStatus(isActive)
                 .stream()
@@ -79,6 +81,8 @@ public class TeamController {
      * @return list of teams mapped to {@link TeamResponse}
      */
     @GetMapping("/venue/{venueId}")
+    @Operation(summary = "Get team by venue ID")
+    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
         return teamService.findByVenueId(venueId)
                 .stream()
@@ -92,6 +96,8 @@ public class TeamController {
      * @return list of teams mapped to {@link TeamResponse}
      */
     @GetMapping(params = "country")
+    @Operation(summary = "Get team by country")
+    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getTeamByCountry(@RequestParam String country) {
         return teamService.findByCountry(country)
                 .stream()
