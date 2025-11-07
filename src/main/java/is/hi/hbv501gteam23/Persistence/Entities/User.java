@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,7 @@ public class User implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
