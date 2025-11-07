@@ -60,8 +60,8 @@ public class PlayerController {
      * @param name the name of the player in database
      * @return the player mapped to a {@link PlayerResponse}
      */
-    @GetMapping("/name={name}")
-    public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
+    @GetMapping(params = "name")
+    public PlayerResponse searchPlayersByName(@RequestParam String name) {
         return toResponse(playerService.searchPlayersByName(name));
     }
 
@@ -73,8 +73,8 @@ public class PlayerController {
      * @param teamName the name of the team in database
      * @return list of players mapped to {@link PlayerResponse}
      */
-    @GetMapping("/team={teamName}")
-    public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
+    @GetMapping(params = "team")
+    public List<PlayerResponse> getAllPlayersByTeamName(@RequestParam String teamName) {
         return playerService.getByTeamName(teamName)
                 .stream()
                 .map(this::toResponse)

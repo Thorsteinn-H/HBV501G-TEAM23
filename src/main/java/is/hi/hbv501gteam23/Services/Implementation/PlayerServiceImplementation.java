@@ -10,9 +10,11 @@ import is.hi.hbv501gteam23.Utils.CountryUtils;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.web.server.ResponseStatusException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -44,7 +46,7 @@ public class PlayerServiceImplementation implements PlayerService {
     @Override
     public Player getPlayerById(Long id) {
         return playerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Player "+id+" not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player "+id+" not found"));
     }
 
     /**
@@ -55,7 +57,11 @@ public class PlayerServiceImplementation implements PlayerService {
      */
     @Override
     public Player searchPlayersByName(String name) {
-        return playerRepository.findByNameContainingIgnoreCase(name);
+        Player p = playerRepository.findByNameContainingIgnoreCase(name);
+        if (p == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player "+name+" not found");
+        }
+        return p;
     }
 
     /**
@@ -66,7 +72,11 @@ public class PlayerServiceImplementation implements PlayerService {
      */
     @Override
     public List<Player> getByTeamName(String teamName) {
-        return playerRepository.findByTeam_NameIgnoreCase(teamName);
+        List<Player> nameOfTeam = playerRepository.findByTeam_NameIgnoreCase(teamName);
+        if (nameOfTeam == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No teams with name "+teamName+" found");
+        }
+        return nameOfTeam;
     }
 
     /**
@@ -77,7 +87,10 @@ public class PlayerServiceImplementation implements PlayerService {
      */
     @Override
     public List<Player> getByTeamId(Long teamId) {
-        return playerRepository.findByTeamId(teamId);
+        if (teamRepository.existsById(teamId)) {
+            return playerRepository.findByTeamId(teamId);
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team "+teamId+" not found");
     }
 
     /**
@@ -109,25 +122,53 @@ public class PlayerServiceImplementation implements PlayerService {
     @Override
     @Transactional
     public Player createPlayer(PlayerDto.CreatePlayerRequest body) {
-        Player existing = playerRepository.findByNameContainingIgnoreCase(body.name());
+        if (body == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
+        }
+
+        String name = body.name() == null ? null : body.name().trim();
+        if (name == null || name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player name is required");
+        }
+        if (body.dateOfBirth() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth is required");
+        }
+        if (body.dateOfBirth().isAfter(java.time.LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth cannot be in the future");
+        }
+        if (body.goals() != null && body.goals() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "goals must be >= 0");
+        }
+        String country = body.country() == null ? null : body.country().trim();
+        if (country == null || country.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
+        }
+        if (body.position() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "position is required");
+        }
+
+        Player existing = playerRepository.findByNameContainingIgnoreCase(name);
         if (existing != null) {
-            throw new EntityExistsException("Player "+body.name()+" already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Player " + name + " already exists");
         }
 
         Team team = null;
         if (body.teamId() != null) {
             team = teamRepository.findById(body.teamId())
-                    .orElseThrow(() -> new EntityNotFoundException("Team " + body.teamId() + " not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + body.teamId() + " not found"));
         }
+
         Player p = new Player();
-        p.setName(body.name());
+        p.setName(name);
         p.setDateOfBirth(body.dateOfBirth());
         p.setCountry(CountryUtils.normalizeCountryCode(body.country()));
         p.setPosition(body.position());
         p.setGoals(body.goals() != null ? body.goals() : 0);
         p.setTeam(team);
+
         return playerRepository.save(p);
     }
+
 
     /**
      * Partially updates a {@link Player} by id.
@@ -170,6 +211,11 @@ public class PlayerServiceImplementation implements PlayerService {
      */
     @Override
     public void deletePlayer(Long id) {
-        playerRepository.deleteById(id);
+        if (playerRepository.existsById(id)) {
+            playerRepository.deleteById(id);
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player " + id + " not found");
+        }
     }
 }
