@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
-import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
 import is.hi.hbv501gteam23.Security.JwtTokenProvider;
@@ -23,11 +22,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
-
 import java.util.List;
 
 @RestController
@@ -150,58 +149,74 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private UserDto.UserResponse toResponse(User u) {
-        return new UserDto.UserResponse(
-                u.getId(),
-                u.getEmail(),
-                u.getName(),
-                u.getGender(),
-                u.getRole(),
-                u.isActive(),
-                u.getCreatedAt()
-        );
-    }
-
     @PostMapping("/users/update_password")
-    public ResponseEntity<?> updatePassword(@RequestBody UserDto.updatePassword request) {
+    @Operation(summary = "Update the current user's password")
+    public ResponseEntity<UserDto.UserResponse> updatePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updatePassword request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        User user = getCurrentLogin();
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
 
-        User newPass = authService.updatePassword(user, request);
-
-        return ResponseEntity.ok(toResponse(newPass));
-
-
-    }
-
-    private User getCurrentLogin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String username = authentication.getName();
-
-        return authService.findByEmail(username);
-
+        User updatedUser = authService.updatePassword(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
     }
 
     @PostMapping("/users/update_username")
-    public ResponseEntity<?> updateUsername(@RequestBody UserDto.updateUsername request) {
-        User user = getCurrentLogin();
+    @Operation(summary = "Update the current user's username")
+    public ResponseEntity<UserDto.UserResponse> updateUsername(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateUsername request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        User newPass = authService.updateUsername(user, request);
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
 
-        return ResponseEntity.ok(toResponse(newPass));
+        User updatedUser = authService.updateUsername(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
     }
 
     @PostMapping("/users/update_gender")
-    public ResponseEntity<?> updateGender(@RequestBody UserDto.updateGender request) {
+    @Operation(summary = "Update the current user's gender")
+    public ResponseEntity<UserDto.UserResponse> updateGender(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateGender request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-        User user = getCurrentLogin();
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
 
-        User newPass = authService.updateGender(user, request);
-
-        return ResponseEntity.ok(toResponse(newPass));
-
+        User updatedUser = authService.updateGender(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
     }
+  
+    private UserDto.UserResponse toResponse(User u) {
+          return new UserDto.UserResponse(
+                  u.getId(),
+                  u.getEmail(),
+                  u.getName(),
+                  u.getGender(),
+                  u.getRole(),
+                  u.isActive(),
+                  u.getCreatedAt()
+          );
+      }
 }
 
 

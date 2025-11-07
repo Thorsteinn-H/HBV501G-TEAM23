@@ -20,8 +20,14 @@ public interface AuthService {
     void ensureFavoritesExists(Long userId);
     void softDeleteUser(Long id);
 
+    /**
+     * Ensures that a favorites entry exists for the given user
+     * @param userId The ID of the user
+     */
+    void ensureFavoritesExists(Long userId);
+
+    //Kjaftæði
     User updatePassword(User user, UserDto.updatePassword request);
     User updateGender(User user,  UserDto.updateGender request);
     User updateUsername(User user, UserDto.updateUsername request);
-
 }

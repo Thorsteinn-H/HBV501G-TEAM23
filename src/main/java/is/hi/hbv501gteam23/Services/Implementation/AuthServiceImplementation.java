@@ -24,9 +24,9 @@ public class AuthServiceImplementation implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImplementation(AuthRepository authRepository, 
+    public AuthServiceImplementation(AuthRepository authRepository,
                                    FavoriteService favoriteService,
-                                   PasswordEncoder passwordEncoder) {
+                                   @Lazy PasswordEncoder passwordEncoder) {
         this.authRepository = authRepository;
         this.favoriteService = favoriteService;
         this.passwordEncoder = passwordEncoder;
@@ -34,14 +34,9 @@ public class AuthServiceImplementation implements AuthService {
 
     @Override
     public User login(String email, String password) {
-        Optional<User> userOpt = authRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (passwordEncoder.matches(password, user.getPasswordHash())) {
-                // Ensure the user has a favorites entry
-                ensureFavoritesExists(user.getId());
-                return user;
-            }
+        User user = findByEmail(email);
+        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
+            return user;
         }
         return null;
     }
@@ -60,7 +55,12 @@ public class AuthServiceImplementation implements AuthService {
         String hashedPassword = passwordEncoder.encode(request.password());
         user.setPasswordHash(hashedPassword);
 
-        return authRepository.save(user);
+        user.setCreatedAt(LocalDateTime.now());
+
+        User savedUser = authRepository.save(user);
+        favoriteService.getOrCreateFavorites(savedUser.getId());
+
+        return savedUser;
     }
     @Override
     public List<User> getAllActiveUsers() {
@@ -99,6 +99,11 @@ public class AuthServiceImplementation implements AuthService {
             user.setGender(null);
             authRepository.save(user);
         }
+    }
+
+    @Override
+    public void ensureFavoritesExists(Long userId) {
+        favoriteService.getOrCreateFavorites(userId);
     }
 
     @Override

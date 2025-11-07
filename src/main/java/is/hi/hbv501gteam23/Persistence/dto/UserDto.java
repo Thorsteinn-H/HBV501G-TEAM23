@@ -59,11 +59,8 @@ public class UserDto {
             String role,
             Boolean isActive,
             java.time.LocalDateTime createdAt
-    
-    
     ) {}
   
-
     public record updatePassword(
             String newPassword,
             String oldPassword
@@ -78,7 +75,4 @@ public class UserDto {
             String newGender,
             String oldGender
     ) {}
-
-
-
 }
