@@ -20,7 +20,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -181,6 +182,58 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
+    @PostMapping("/users/upload_image")
+    @Operation(summary = "Update/Add the users profile picture")
+    public ResponseEntity<UserDto.UserResponse> uploadImage (
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam MultipartFile file) throws IOException {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+        String fileType = file.getContentType();
+
+        if (fileType != null && fileType.startsWith("image")) {
+            User updatedUser = authService.uploadImage(user, file, fileType);
+            return ResponseEntity.ok(toResponse(updatedUser));
+
+        } else {
+            throw new EntityNotFoundException("file type incorrect");
+        }
+
+    }
+
+    @GetMapping("/users/image")
+    @Operation(summary = "Get users profile picture")
+    public ResponseEntity<?> getUserProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+
+        byte[] image = authService.getImage(user);
+        String fileType = authService.getImageType(user);
+
+        return ResponseEntity.ok().header("Content-Type", fileType)
+                .body(image);
+
+    }
+
+
     private UserDto.UserResponse toResponse(User u) {
           return new UserDto.UserResponse(
                   u.getId(),
@@ -189,7 +242,9 @@ public class AuthController {
                   u.getGender(),
                   u.getRole(),
                   u.isActive(),
-                  u.getCreatedAt()
+                  u.getCreatedAt(),
+                  u.getImage(),
+                  u.getImageType()
           );
       }
 }

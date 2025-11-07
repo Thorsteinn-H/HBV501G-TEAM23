@@ -57,7 +57,9 @@ public class UserDto {
             String gender,
             String role,
             Boolean isActive,
-            java.time.LocalDateTime createdAt
+            java.time.LocalDateTime createdAt,
+            byte[] image,
+            String imageType
     ) {}
 
     public record updatePassword(

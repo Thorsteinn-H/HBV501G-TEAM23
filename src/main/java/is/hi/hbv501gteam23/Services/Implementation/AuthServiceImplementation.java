@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -99,6 +102,24 @@ public class AuthServiceImplementation implements AuthService {
             user.setGender(null);
             authRepository.save(user);
         }
+    }
+
+    @Override
+    public User uploadImage(User user, MultipartFile file, String filetype) throws IOException {
+
+        user.setImageType(filetype);
+        user.setImage(file.getBytes());
+        return authRepository.save(user);
+    }
+
+    @Override
+    public byte[] getImage(User user) {
+        return user.getImage();
+    }
+
+    @Override
+    public String getImageType(User user) {
+        return user.getImageType();
     }
 
     @Override
