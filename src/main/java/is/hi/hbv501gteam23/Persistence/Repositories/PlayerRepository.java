@@ -35,6 +35,13 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
     List<Player> findByTeamId(Long teamId);
 
     /**
+     * Retrieves all players with the same active status
+     * @param isActive a player's active status
+     * @return A list of players with the same active status
+     */
+    List<Player> findByIsActive(Boolean isActive);
+
+    /**
      * Retrieves all players with the same position
      * @param position a players position in football
      * @return A list of players with the same football position

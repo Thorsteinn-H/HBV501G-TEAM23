@@ -18,7 +18,7 @@ public class Match {
     @Column(name = "match_id")
     private Long id;
 
-    @Column(name = "match_date")
+    @Column(name = "match_date", nullable = false)
     private LocalDate date;
 
     @Column(name = "home_goals", nullable = false)
@@ -27,15 +27,15 @@ public class Match {
     @Column(name = "away_goals", nullable = false)
     private Integer awayGoals = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "home_team_id")
+    @ManyToOne(fetch = FetchType.LAZY,  optional = false)
+    @JoinColumn(name = "home_team_id", nullable = false)
     private Team homeTeam;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "away_team_id")
+    @ManyToOne(fetch = FetchType.LAZY,   optional = false)
+    @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id")
+    @ManyToOne(fetch = FetchType.LAZY,   optional = false)
+    @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 }

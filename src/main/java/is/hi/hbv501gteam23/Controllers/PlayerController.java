@@ -1,11 +1,18 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -18,7 +25,6 @@ import java.util.List;
 public class PlayerController {
     private final PlayerService playerService;
 
-    //UC7
     /**
      * Retrieves all players.
      * <p>
@@ -32,7 +38,6 @@ public class PlayerController {
                 .stream().map(this::toResponse).toList();
     }
 
-    //UC8
     /**
      * Retrieves a single player by id.
      *
@@ -57,8 +62,8 @@ public class PlayerController {
      * @param name the name of the player in database
      * @return the player mapped to a {@link PlayerResponse}
      */
-    @GetMapping("/name={name}")
-    public PlayerResponse searchPlayersByName(@PathVariable("name") String name) {
+    @GetMapping(params = "name")
+    public PlayerResponse searchPlayersByName(@RequestParam String name) {
         return toResponse(playerService.searchPlayersByName(name));
     }
 
@@ -70,8 +75,8 @@ public class PlayerController {
      * @param teamName the name of the team in database
      * @return list of players mapped to {@link PlayerResponse}
      */
-    @GetMapping("/team={teamName}")
-    public List<PlayerResponse> getAllPlayersByTeamName(@PathVariable("teamName") String teamName) {
+    @GetMapping(params = "team")
+    public List<PlayerResponse> getAllPlayersByTeamName(@RequestParam String teamName) {
         return playerService.getByTeamName(teamName)
                 .stream()
                 .map(this::toResponse)
@@ -96,6 +101,62 @@ public class PlayerController {
     }
 
     /**
+     *
+     * @param isActive
+     * @return
+     */
+    @GetMapping("/isActive={isActive}")
+    public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
+        return playerService.getActivePlayers(isActive)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     *
+     * @param country
+     * @return
+     */
+    @GetMapping("/country={country}")
+    public List<PlayerResponse> getPlayerByCountry(@PathVariable String country) {
+        return playerService.findPlayerByCountry(country.toUpperCase())
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     * Creates a new player. Only for admins.
+     * @param body the player data
+     * @return the new player
+     */
+    @Operation(summary = "Create a player")
+    @ApiResponse(responseCode = "200", description = "Player successfully created")
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
+        Player created = playerService.createPlayer(body);
+        return ResponseEntity.created(URI.create("/players" + created.getId())).body(toResponse(created));
+    }
+
+    /**
+     * Modifies an existing player. Only for admins.
+     * @param id the player's id
+     * @param body the data that should be modified
+     * @return the updated player
+     */
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PlayerResponse> patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
+        Player updated = playerService.patchPlayer(id, body);
+        return ResponseEntity.ok(toResponse(updated));
+    }
+
+    /**
+
+    /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
      * @param p player entity
      * @return mapped {@link PlayerResponse}
@@ -104,6 +165,7 @@ public class PlayerController {
         return new PlayerResponse(
                 p.getId(),
                 p.getName(),
+                p.isActive(),
                 p.getPosition(),
                 p.getGoals(),
                 p.getCountry(),

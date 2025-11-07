@@ -2,6 +2,8 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MatchService {
@@ -30,12 +32,12 @@ public interface MatchService {
     List<Match> getMatchesByTeamId(Long teamId);
 
     /**
-     * Retrieves all matches were played during a specific year.
      *
-     * @param year the year to filter matches
-     * @return a list of {@link Match} entities played during the given year
+     * @param from
+     * @param to
+     * @return
      */
-    List<Match> getMatchesByYear(int year);
+    List<Match> getMatchesBetween(LocalDate from, LocalDate to);
 
 
     /**
@@ -47,12 +49,11 @@ public interface MatchService {
     Match patchMatch(Long id, MatchDto.PatchMatchRequest body);
 
     /**
-     * Creates a new match
      *
-     * @param match the {@link Match} entity to create
-     * @return the newly created {@link Match} entity
+     * @param body
+     * @return
      */
-    Match createMatch(Match match);
+    Match createMatch(MatchDto.CreateMatchRequest body);
 
 
     /**

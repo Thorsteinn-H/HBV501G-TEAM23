@@ -2,15 +2,11 @@ package is.hi.hbv501gteam23.Persistence.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDate;
 
-public class MatchDto {
+public final class MatchDto {
 
     /**
      * Request body for creating a new match
-     *
-     * <p>
-     *      This DTO is used in POST request to create a match with date, homeTeamId, awayTeamId, venueId, homeGoals and
-     *      awayGoals
-     * </p>
+     * All fields are required for POST.
      * @param date when the match took place
      * @param homeTeamId the id of the home team
      * @param awayTeamId the id of the away team
@@ -28,10 +24,8 @@ public class MatchDto {
     ) {}
 
     /**
-     * Updating body for Match
-     * * All fields are optional; only non-null values will be applied.
-     *      Typical uses include renaming a team, changing the country,
-     *      or reassigning the team to a different venue.
+     * Request body for updating a match.
+     * All fields are optional. PATCH only updates non-null fields.
      *
      * @param date when the match took place
      * @param homeTeamId the id of the home team
@@ -52,11 +46,6 @@ public class MatchDto {
 
     /**
      * Request body for retrieving a match
-     *
-     * <p>
-     *     This DTO is used in GET request to get a match with an id, date, homeTeamId, homeTeamName, awayTeamId, awayTeamName,
-     *     venueId, venueName homeGoals and awayGoals
-     * </p>
      *
      * @param id the id of the match
      * @param date when the match took place

@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "team")
+@Table(name = "teams")
 public class Team {
     @Id
     @SequenceGenerator(name = "team_sequence", sequenceName = "team_sequence",  allocationSize = 1)
@@ -19,6 +19,9 @@ public class Team {
 
     @Column(name = "team_name", nullable = false, length = 120)
     private String name;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 
     @Column(name = "team_country", nullable = false, length = 80)
     private String country;

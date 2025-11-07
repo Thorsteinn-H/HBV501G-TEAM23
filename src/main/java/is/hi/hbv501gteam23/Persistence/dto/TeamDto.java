@@ -26,12 +26,14 @@ public final class TeamDto {
      *      Typical uses include renaming a team, changing the country,
      *      or reassigning the team to a different venue.
      * @param name     new team name (optional)
+     * @param isActive new active status (optional)
      * @param country  new team country (optional)
      * @param venueId  id of the target venue (optional; must reference an existing venue)
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchTeamRequest(
             String name,
+            Boolean isActive,
             String country,
             Long venueId
     ) {}
@@ -45,6 +47,7 @@ public final class TeamDto {
      * DTO representing a team returned by the API.
      * @param id ID of a team
      * @param name name of a team
+     * @param isActive active status of a team
      * @param country a teams country of origin
      * @param venueId the ID of the venue the team plays home games
      * @param venueName the name of the venue the team plays home games
@@ -52,6 +55,7 @@ public final class TeamDto {
     public record TeamResponse(
             Long id,
             String name,
+            boolean isActive,
             String country,
             Long venueId,
             String venueName
