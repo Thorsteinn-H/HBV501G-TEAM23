@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 
 /**
  * Nafn : Þorsteinn H. Erlendsson
@@ -13,4 +14,10 @@ public interface AuthService {
     User findByEmail(String email);
     User findById(Long id);
     boolean validatePassword(String rawPassword, String hashedPassword);
+
+    //Kjaftæði
+    User updatePassword(User user, UserDto.updatePassword request);
+    User updateGender(User user,  UserDto.updateGender request);
+    User updateUsername(User user, UserDto.updateUsername request);
+
 }
