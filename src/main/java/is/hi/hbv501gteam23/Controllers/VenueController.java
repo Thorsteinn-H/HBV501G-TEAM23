@@ -46,7 +46,7 @@ public class VenueController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/venues")
+    @PostMapping
     @ResponseBody
     public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.VenueRequest body) {
         Venue created = venueService.createVenue(body);
