@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
@@ -91,48 +92,17 @@ public class AuthController {
         model.addAttribute("user", user);
         return "LoggedInUser";
     }
-
     /**
      *
      * @param request
      * @return
      */
     @PostMapping("/register")
-    public String register(@RequestParam String email, 
-                         @RequestParam("user_name") String name,
-                         @RequestParam String password,
-                         @RequestParam(required = false) String gender,
-                         HttpSession session) {
-        
-        if (email == null || name == null || password == null) {
-            return "redirect:/api/auth/register?error=missing_fields";
-        }
-        
-        // Check if email already exists
-        if (authService.findByEmail(email) != null) {
-            return "redirect:/api/auth/register?error=email_exists";
-        }
-        
-        // Create new user
-        User newUser = User.builder()
-            .email(email)
-            .name(name)
-            .passwordHash(password) // Will be hashed in the service
-            .gender(gender)
-            .role("User")
-            .createdAt(LocalDate.now())
-            .build();
-        
-        // Save user and log them in
-        User savedUser = authService.register(newUser);
-        
-        // Ensure favorites entry exists
-        authService.ensureFavoritesExists(savedUser.getId());
-        
-        session.setAttribute("userId", savedUser.getId());
-        session.setAttribute("userName", savedUser.getName());
-        
-        return "redirect:/api/auth/loggedin";
+    @Operation(summary = "Register new user", description = "Creates a new user account")
+    @ApiResponse(responseCode = "201", description = "User created")
+    public ResponseEntity<UserDto.UserResponse> registerUser(@Valid @RequestBody UserDto.CreateUserRequest request) {
+        User created = authService.registerUser(request);
+        return ResponseEntity.ok(toResponse(created));
     }
 
     /**
@@ -191,20 +161,6 @@ public class AuthController {
                 u.getCreatedAt()
         );
     }
-}
-
-    public User getCurrentLogin(){
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
-
-        return authService.findByEmail(username);
-    }
 
     @PostMapping("/users/update_password")
     public ResponseEntity<?> updatePassword(@RequestBody UserDto.updatePassword request) {
@@ -218,17 +174,13 @@ public class AuthController {
 
     }
 
+    private User getCurrentLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    private UserDto.UserResponse toResponse(User u) {
-        return new UserDto.UserResponse(
-                u.getId(),
-                u.getName(),
-                u.getEmail(),
-                u.getGender(),
-                u.getCreatedAt(),
-                u.getPasswordHash(),
-                u.getRole()
-        );
+        String username = authentication.getName();
+
+        return authService.findByEmail(username);
+
     }
 
     @PostMapping("/users/update_username")
@@ -250,5 +202,7 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(newPass));
 
     }
-
 }
+
+
+
