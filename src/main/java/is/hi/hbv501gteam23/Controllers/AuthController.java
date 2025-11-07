@@ -2,6 +2,8 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
@@ -20,6 +22,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Objects;
 
 import java.util.List;
 
@@ -185,4 +191,64 @@ public class AuthController {
                 u.getCreatedAt()
         );
     }
+}
+
+    public User getCurrentLogin(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username;
+
+        if (principal instanceof UserDetails) {
+            username = ((UserDetails)principal).getUsername();
+        } else {
+            username = principal.toString();
+        }
+
+        return authService.findByEmail(username);
+    }
+
+    @PostMapping("/users/update_password")
+    public ResponseEntity<?> updatePassword(@RequestBody UserDto.updatePassword request) {
+
+        User user = getCurrentLogin();
+
+        User newPass = authService.updatePassword(user, request);
+
+        return ResponseEntity.ok(toResponse(newPass));
+
+
+    }
+
+
+    private UserDto.UserResponse toResponse(User u) {
+        return new UserDto.UserResponse(
+                u.getId(),
+                u.getName(),
+                u.getEmail(),
+                u.getGender(),
+                u.getCreatedAt(),
+                u.getPasswordHash(),
+                u.getRole()
+        );
+    }
+
+    @PostMapping("/users/update_username")
+    public ResponseEntity<?> updateUsername(@RequestBody UserDto.updateUsername request) {
+        User user = getCurrentLogin();
+
+        User newPass = authService.updateUsername(user, request);
+
+        return ResponseEntity.ok(toResponse(newPass));
+    }
+
+    @PostMapping("/users/update_gender")
+    public ResponseEntity<?> updateGender(@RequestBody UserDto.updateGender request) {
+
+        User user = getCurrentLogin();
+
+        User newPass = authService.updateGender(user, request);
+
+        return ResponseEntity.ok(toResponse(newPass));
+
+    }
+
 }

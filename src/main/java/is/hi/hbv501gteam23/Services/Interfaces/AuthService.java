@@ -19,4 +19,10 @@ public interface AuthService {
      */
     void ensureFavoritesExists(Long userId);
     void softDeleteUser(Long id);
+
+    //Kjaftæði
+    User updatePassword(User user, UserDto.updatePassword request);
+    User updateGender(User user,  UserDto.updateGender request);
+    User updateUsername(User user, UserDto.updateUsername request);
+
 }
