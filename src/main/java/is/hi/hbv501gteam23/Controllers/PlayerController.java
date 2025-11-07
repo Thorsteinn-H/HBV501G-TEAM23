@@ -1,5 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
@@ -98,9 +100,27 @@ public class PlayerController {
                 .toList();
     }
 
+    /**
+     *
+     * @param isActive
+     * @return
+     */
     @GetMapping("/isActive={isActive}")
     public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
         return playerService.getActivePlayers(isActive)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     *
+     * @param country
+     * @return
+     */
+    @GetMapping("/country={country}")
+    public List<PlayerResponse> getPlayerByCountry(@PathVariable String country) {
+        return playerService.findPlayerByCountry(country.toUpperCase())
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -111,6 +131,8 @@ public class PlayerController {
      * @param body the player data
      * @return the new player
      */
+    @Operation(summary = "Create a player")
+    @ApiResponse(responseCode = "200", description = "Player successfully created")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)

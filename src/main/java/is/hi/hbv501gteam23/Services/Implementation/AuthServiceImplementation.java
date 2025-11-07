@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @Transactional
@@ -40,17 +40,22 @@ public class AuthServiceImplementation implements AuthService {
         if (findByEmail(user.getEmail()) != null) {
             throw new RuntimeException("Email already in use");
         }
-        
+
         // Set default role if not provided
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("User");
         }
-        
+
         // Hash the password before saving
         String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
         user.setPasswordHash(hashedPassword);
-        
+
         return authRepository.save(user);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return authRepository.findAll();
     }
 
     @Override
@@ -66,5 +71,14 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public boolean validatePassword(String inputPassword, String storedPassword) {
         return passwordEncoder.matches(inputPassword, storedPassword);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        if (authRepository.existsById(id)) {
+            authRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("User not found with id: " + id);
+        }
     }
 }
