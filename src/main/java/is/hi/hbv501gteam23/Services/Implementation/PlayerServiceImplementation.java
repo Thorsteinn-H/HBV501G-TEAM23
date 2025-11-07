@@ -6,14 +6,14 @@ import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
+import is.hi.hbv501gteam23.Utils.CountryUtils;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDate;
+
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service for handling logic related to players
@@ -93,6 +93,16 @@ public class PlayerServiceImplementation implements PlayerService {
 
     /**
      *
+     * @param country the country to filter by
+     * @return
+     */
+    @Override
+    public List<Player> findPlayerByCountry(String country) {
+        return playerRepository.findByCountry(country);
+    }
+
+    /**
+     *
      * @param body
      * @return
      */
@@ -112,7 +122,7 @@ public class PlayerServiceImplementation implements PlayerService {
         Player p = new Player();
         p.setName(body.name());
         p.setDateOfBirth(body.dateOfBirth());
-        p.setCountry(body.country());
+        p.setCountry(CountryUtils.normalizeCountryCode(body.country()));
         p.setPosition(body.position());
         p.setGoals(body.goals() != null ? body.goals() : 0);
         p.setTeam(team);
@@ -141,7 +151,7 @@ public class PlayerServiceImplementation implements PlayerService {
 
         if (body.name() != null)        p.setName(body.name());
         if (body.dateOfBirth() != null) p.setDateOfBirth(body.dateOfBirth());
-        if (body.country() != null)     p.setCountry(body.country());
+        if (body.country() != null)     p.setCountry(CountryUtils.normalizeCountryCode(body.country()));
         if (body.position() != null)    p.setPosition(body.position());
         if (body.goals() != null)       p.setGoals(body.goals());
         if (body.isActive() != null)    p.setActive(body.isActive());

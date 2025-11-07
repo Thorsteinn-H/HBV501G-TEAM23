@@ -96,9 +96,27 @@ public class PlayerController {
                 .toList();
     }
 
+    /**
+     *
+     * @param isActive
+     * @return
+     */
     @GetMapping("/isActive={isActive}")
     public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
         return playerService.getActivePlayers(isActive)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     *
+     * @param country
+     * @return
+     */
+    @GetMapping("/country={country}")
+    public List<PlayerResponse> getPlayerByCountry(@PathVariable String country) {
+        return playerService.findPlayerByCountry(country.toUpperCase())
                 .stream()
                 .map(this::toResponse)
                 .toList();

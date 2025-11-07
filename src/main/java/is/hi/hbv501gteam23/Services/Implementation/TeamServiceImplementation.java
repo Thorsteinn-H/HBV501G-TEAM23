@@ -6,13 +6,14 @@ import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
-import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
+import is.hi.hbv501gteam23.Utils.CountryUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -66,7 +67,7 @@ public class TeamServiceImplementation implements TeamService {
      */
     @Override
     public List<Team> findByCountry(String country){
-        return teamRepository.getByCountry(country);
+        return teamRepository.findByCountry(country);
     }
 
     /**
@@ -120,7 +121,7 @@ public class TeamServiceImplementation implements TeamService {
 
         Team t = new Team();
         t.setName(body.name());
-        t.setCountry(body.country());
+        t.setCountry(CountryUtils.normalizeCountryCode(body.country()));
         t.setActive(true);
         t.setVenue(venue);
 
@@ -147,7 +148,7 @@ public class TeamServiceImplementation implements TeamService {
                 .orElseThrow(() -> new EntityNotFoundException("Team " + id + " not found"));
 
         if (body.name() != null)    t.setName(body.name());
-        if (body.country() != null) t.setCountry(body.country());
+        if (body.country() != null) t.setCountry(CountryUtils.normalizeCountryCode(body.country()));
         if (body.isActive() != null) t.setActive(body.isActive());
         if (body.venueId() != null) {
             Venue v = venueRepository.findById(body.venueId())

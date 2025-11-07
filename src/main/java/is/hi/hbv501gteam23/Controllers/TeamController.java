@@ -105,8 +105,8 @@ public class TeamController {
      * @return list of teams mapped to {@link TeamResponse}
      */
     @GetMapping("/country={country}")
-    public List<TeamResponse> getByCountry(@PathVariable("country") String country) {
-        return teamService.findByCountry(country)
+    public List<TeamResponse> getTeamByCountry(@PathVariable("country") String country) {
+        return teamService.findByCountry(country.toUpperCase())
                 .stream()
                 .map(this::toResponse)
                 .toList();
