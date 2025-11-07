@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Service implementation for handling user authentication and registration
@@ -74,6 +77,11 @@ public class AuthServiceImplementation implements AuthService {
     }
 
     @Override
+    public List<User> getAllActiveUsers() {
+        return authRepository.findAllActiveUsers();
+    }
+
+    @Override
     public User findByEmail(String email) {
         return authRepository.findByEmail(email).orElse(null);
     }
@@ -91,5 +99,18 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public void ensureFavoritesExists(Long userId) {
         favoriteService.getOrCreateFavorites(userId);
+
+    @Override
+    public void softDeleteUser(Long id) {
+        User user = findById(id);
+        if (user != null && user.isActive()) {
+            user.setActive(false);
+            user.setDeletedAt(LocalDateTime.now());
+            user.setEmail("deleted_" + id + "@example.com");
+            user.setName("Deleted User " + id);
+            user.setPasswordHash(null);
+            user.setGender(null);
+            authRepository.save(user);
+        }
     }
 }

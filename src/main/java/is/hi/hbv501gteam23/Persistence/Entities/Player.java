@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "player")
+@Table(name = "players")
 public class Player {
     @Id
     @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1)
@@ -21,19 +21,22 @@ public class Player {
     @Column(name = "player_name", nullable = false, length = 120)
     private String name;
 
-    @Column(name = "date_of_birth")
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
+
+    @Column(name = "date_of_birth",  nullable = false)
     private LocalDate dateOfBirth;
 
     @Column(name = "player_country", length = 80)
     private String country;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "team_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id")
     private Team team;
 
     public enum PlayerPosition { GOALKEEPER, DEFENDER, MIDFIELDER, FORWARD }
     @Enumerated(EnumType.STRING)
-    @Column(name = "player_position", length = 40)
+    @Column(name = "player_position", length = 40, nullable = false)
     private PlayerPosition position;
 
     @Column(name = "goals", nullable = false)

@@ -25,6 +25,7 @@ public final class PlayerDto {
             LocalDate dateOfBirth,
             String country,
             Player.PlayerPosition position,
+            Boolean isActive,
             Integer goals,
             Long teamId
     ) {}
@@ -49,6 +50,7 @@ public final class PlayerDto {
             String country,
             Player.PlayerPosition position,
             Integer goals,
+            Boolean isActive,
             Long teamId
     ) {}
 
@@ -71,6 +73,7 @@ public final class PlayerDto {
     public record PlayerResponse(
             Long id,
             String name,
+            Boolean isActive,
             Player.PlayerPosition position,
             Integer goals,
             String country,

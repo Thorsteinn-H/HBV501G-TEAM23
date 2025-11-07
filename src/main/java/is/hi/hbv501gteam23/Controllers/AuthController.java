@@ -1,28 +1,43 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Security.CustomUserDetails;
+import is.hi.hbv501gteam23.Security.JwtTokenProvider;
+import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession;
-import java.time.LocalDate;
-import java.util.Map;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
     private final AuthService authService;
-    
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          AuthenticationManager authenticationManager,
+                          JwtTokenProvider jwtTokenProvider) {
         this.authService = authService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @PostMapping("/login")
@@ -43,7 +58,7 @@ public class AuthController {
             return "redirect:/api/auth/login?error=" + e.getMessage();
         }
     }
-    
+
     @GetMapping("/loggedin")
     public String loggedIn(HttpSession session, Model model) {
         // Get the authenticated user's username from the security context
@@ -70,7 +85,12 @@ public class AuthController {
         model.addAttribute("user", user);
         return "LoggedInUser";
     }
-    
+
+    /**
+     *
+     * @param request
+     * @return
+     */
     @PostMapping("/register")
     public String register(@RequestParam String email, 
                          @RequestParam("user_name") String name,
@@ -109,44 +129,60 @@ public class AuthController {
         return "redirect:/api/auth/loggedin";
     }
 
-    @GetMapping("/register")
-    public String showRegisterForm(Model model, @RequestParam(required = false) String error) {
-        if (error != null) {
-            switch (error) {
-                case "missing_fields":
-                    model.addAttribute("error", "Email, username, and password are required");
-                    break;
-                case "email_exists":
-                    model.addAttribute("error", "Email already in use");
-                    break;
-                case "registration_failed":
-                    model.addAttribute("error", "Registration failed. Please try again.");
-                    break;
-            }
-        }
-        return "register";
-    }
-    
-    @GetMapping("/login")
-    public String showLoginForm() {
-        return "login";
-    }
-    
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext();
-        return "redirect:/?logout";
+    /**
+     *
+     * @return
+     */
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all users", description = "Returns all non-deleted users")
+    @ApiResponse(responseCode = "200", description = "List of all users")
+    public List<UserDto.UserResponse> getAllUsers() {
+        return authService.getAllActiveUsers().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    @DeleteMapping("/user/{id}")
-    public ResponseEntity<?> removeUser(@PathVariable Long id) {
-        // First, let's check if the user exists
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get user by ID")
+    @ApiResponse(responseCode = "200", description = "User found")
+    public ResponseEntity<UserDto.UserResponse> getUser(@PathVariable Long id) {
         User user = authService.findById(id);
-        if (user != null) {
-            // In a real application, you would call authService.delete(user) here
-            return ResponseEntity.ok("User removed successfully");
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(toResponse(user));
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete user", description = "Marks user as inactive and anonymizes user data")
+    @ApiResponse(responseCode = "200", description = "User successfully deleted")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        authService.softDeleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private UserDto.UserResponse toResponse(User u) {
+        return new UserDto.UserResponse(
+                u.getId(),
+                u.getEmail(),
+                u.getName(),
+                u.getGender(),
+                u.getRole(),
+                u.isActive(),
+                u.getCreatedAt()
+        );
     }
 }

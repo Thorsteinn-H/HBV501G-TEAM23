@@ -1,15 +1,14 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 
-/**
- * Nafn : Þorsteinn H. Erlendsson
- * Tölvupóstur: the85@hi.is
- * Lýsing: Service interface for handling user authentication operations
- */
+import java.util.List;
+
 public interface AuthService {
     User login(String email, String password);
-    User register(User user);
+    User registerUser(UserDto.CreateUserRequest request);
+    List<User> getAllActiveUsers();
     User findByEmail(String email);
     User findById(Long id);
     boolean validatePassword(String rawPassword, String hashedPassword);
@@ -19,4 +18,5 @@ public interface AuthService {
      * @param userId The ID of the user
      */
     void ensureFavoritesExists(Long userId);
+    void softDeleteUser(Long id);
 }

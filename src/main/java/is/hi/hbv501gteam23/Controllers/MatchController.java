@@ -5,7 +5,13 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -52,19 +58,17 @@ public class MatchController {
     }
 
     /**
-     * Retrieves all matches that were played during a specific year
-     *
      * <p>This endpoint return a list of matches that played during a specific year</p>
      *
-     * @param year the year to filter matches
+     * @param from the year to filter matches
      * @return a list of matches mapped to {@link MatchResponse}
      */
-    @GetMapping("/year={year}")
-    public List<MatchResponse> getMatchesByYear(@PathVariable int year) {
-        return matchService.getMatchesByYear(year)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    @GetMapping(params = {"from","to"})
+    public List<MatchResponse> getMatchesBetween(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        return matchService.getMatchesBetween(from, to).stream().map(this::toResponse).toList();
     }
 
     /**
@@ -78,12 +82,39 @@ public class MatchController {
      * @param teamId the id of the team the players should belong to.
      * @return a list of matches mapped to {@link MatchResponse}
      */
-    @GetMapping("/team/{teamId}")
-    public List<MatchResponse> getMatchesByTeam(@PathVariable Long teamId) {
+    @GetMapping(params = "team")
+    public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
         return matchService.getMatchesByTeamId(teamId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+    /**
+     * Creates a new match.
+     *
+     * @param body the match data to create
+     * @return the created match mapped to {@link MatchResponse}
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseBody
+    @PostMapping
+    public ResponseEntity<MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
+        Match createdMatch = matchService.createMatch(body);
+        return ResponseEntity.created(URI.create("/matches" + createdMatch.getId())).body(toResponse(createdMatch));
+    }
+
+    /**
+     * Updates an existing match.
+     *
+     * @param id the id of the match to update
+     * @param body the fields to update
+     * @return the updated match mapped to {@link MatchResponse}
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<MatchDto.MatchResponse> updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest body) {
+        Match updatedMatch = matchService.patchMatch(id, body);
+        return ResponseEntity.ok(toResponse(updatedMatch));
     }
 
     /**
