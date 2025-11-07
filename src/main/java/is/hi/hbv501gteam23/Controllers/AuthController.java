@@ -2,6 +2,8 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
@@ -18,8 +20,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
+import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Objects;
 import java.util.List;
 
 @RestController
@@ -40,32 +47,50 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user", description = "Authenticate and return JWT token")
-    public ResponseEntity<LoginDto.LoginResponse> login(@Valid @RequestBody LoginDto.LoginRequest req) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtTokenProvider.generateToken(authentication.getName());
-
-        User user = authService.findByEmail(authentication.getName());
-        return ResponseEntity.ok(new LoginDto.LoginResponse(token, toResponse(user)));
+    public String login(@RequestParam String email, 
+                       @RequestParam String password, 
+                       HttpSession session,
+                       Model model) {
+        try {
+            User user = authService.login(email, password);
+            if (user != null) {
+                // Store user info in session
+                session.setAttribute("userId", user.getId());
+                session.setAttribute("userName", user.getName());
+                return "redirect:/api/auth/loggedin";
+            }
+            return "redirect:/api/auth/login?error=invalid_credentials";
+        } catch (Exception e) {
+            return "redirect:/api/auth/login?error=" + e.getMessage();
+        }
     }
 
     @GetMapping("/loggedin")
-    @Operation(summary = "Get currently logged in user")
-    public ResponseEntity<UserDto.UserResponse> loggedIn(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public String loggedIn(HttpSession session, Model model) {
+        // Get the authenticated user's username from the security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return "redirect:/api/auth/login?error=not_authenticated";
         }
-        User user = authService.findByEmail(userDetails.getUsername());
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
-        return ResponseEntity.ok(toResponse(user));
+        
+        String username = authentication.getName();
+        
+        // Get the user from the database
+        User user = authService.findByEmail(username);
+        if (user == null) {
+            return "redirect:/api/auth/login?error=user_not_found";
+        }
+        
+        // Ensure favorites entry exists
+        authService.ensureFavoritesExists(user.getId());
+        
+        // Store user info in session
+        session.setAttribute("userId", user.getId());
+        session.setAttribute("userName", user.getName());
+        
+        model.addAttribute("user", user);
+        return "LoggedInUser";
     }
-
     /**
      *
      * @param request
@@ -143,18 +168,6 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
-    private UserDto.UserResponse toResponse(User u) {
-        return new UserDto.UserResponse(
-                u.getId(),
-                u.getEmail(),
-                u.getName(),
-                u.getGender(),
-                u.getRole(),
-                u.isActive(),
-                u.getCreatedAt()
-        );
-    }
-
     @PostMapping("/users/update_username")
     @Operation(summary = "Update the current user's username")
     public ResponseEntity<UserDto.UserResponse> updateUsername(
@@ -192,4 +205,19 @@ public class AuthController {
         User updatedUser = authService.updateGender(user, request);
         return ResponseEntity.ok(toResponse(updatedUser));
     }
+  
+    private UserDto.UserResponse toResponse(User u) {
+          return new UserDto.UserResponse(
+                  u.getId(),
+                  u.getEmail(),
+                  u.getName(),
+                  u.getGender(),
+                  u.getRole(),
+                  u.isActive(),
+                  u.getCreatedAt()
+          );
+      }
 }
+
+
+

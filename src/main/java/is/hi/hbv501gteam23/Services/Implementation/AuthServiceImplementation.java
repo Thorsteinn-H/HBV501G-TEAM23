@@ -6,10 +6,10 @@ import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -62,7 +62,6 @@ public class AuthServiceImplementation implements AuthService {
 
         return savedUser;
     }
-
     @Override
     public List<User> getAllActiveUsers() {
         return authRepository.findAllActiveUsers();
@@ -81,6 +80,11 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public boolean validatePassword(String inputPassword, String storedPassword) {
         return passwordEncoder.matches(inputPassword, storedPassword);
+    }
+    
+    @Override
+    public void ensureFavoritesExists(Long userId) {
+        favoriteService.getOrCreateFavorites(userId);
     }
 
     @Override
