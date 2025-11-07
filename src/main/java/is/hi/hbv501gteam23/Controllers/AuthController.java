@@ -41,30 +41,49 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user", description = "Authenticate and return JWT token")
-    public ResponseEntity<LoginDto.LoginResponse> login(@Valid @RequestBody LoginDto.LoginRequest req) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
-        );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = jwtTokenProvider.generateToken(authentication.getName());
-
-        User user = authService.findByEmail(authentication.getName());
-        return ResponseEntity.ok(new LoginDto.LoginResponse(token, toResponse(user)));
+    public String login(@RequestParam String email, 
+                       @RequestParam String password, 
+                       HttpSession session,
+                       Model model) {
+        try {
+            User user = authService.login(email, password);
+            if (user != null) {
+                // Store user info in session
+                session.setAttribute("userId", user.getId());
+                session.setAttribute("userName", user.getName());
+                return "redirect:/api/auth/loggedin";
+            }
+            return "redirect:/api/auth/login?error=invalid_credentials";
+        } catch (Exception e) {
+            return "redirect:/api/auth/login?error=" + e.getMessage();
+        }
     }
 
     @GetMapping("/loggedin")
-    @Operation(summary = "Get currently logged in user")
-    public ResponseEntity<UserDto.UserResponse> loggedIn(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public String loggedIn(HttpSession session, Model model) {
+        // Get the authenticated user's username from the security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return "redirect:/api/auth/login?error=not_authenticated";
         }
-        User user = authService.findByEmail(userDetails.getUsername());
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
-        return ResponseEntity.ok(toResponse(user));
+        
+        String username = authentication.getName();
+        
+        // Get the user from the database
+        User user = authService.findByEmail(username);
+        if (user == null) {
+            return "redirect:/api/auth/login?error=user_not_found";
+        }
+        
+        // Ensure favorites entry exists
+        authService.ensureFavoritesExists(user.getId());
+        
+        // Store user info in session
+        session.setAttribute("userId", user.getId());
+        session.setAttribute("userName", user.getName());
+        
+        model.addAttribute("user", user);
+        return "LoggedInUser";
     }
 
     /**
@@ -73,11 +92,41 @@ public class AuthController {
      * @return
      */
     @PostMapping("/register")
-    @Operation(summary = "Register new user", description = "Creates a new user account")
-    @ApiResponse(responseCode = "201", description = "User created")
-    public ResponseEntity<UserDto.UserResponse> registerUser(@Valid @RequestBody UserDto.CreateUserRequest request) {
-        User created = authService.registerUser(request);
-        return ResponseEntity.ok(toResponse(created));
+    public String register(@RequestParam String email, 
+                         @RequestParam("user_name") String name,
+                         @RequestParam String password,
+                         @RequestParam(required = false) String gender,
+                         HttpSession session) {
+        
+        if (email == null || name == null || password == null) {
+            return "redirect:/api/auth/register?error=missing_fields";
+        }
+        
+        // Check if email already exists
+        if (authService.findByEmail(email) != null) {
+            return "redirect:/api/auth/register?error=email_exists";
+        }
+        
+        // Create new user
+        User newUser = User.builder()
+            .email(email)
+            .name(name)
+            .passwordHash(password) // Will be hashed in the service
+            .gender(gender)
+            .role("User")
+            .createdAt(LocalDate.now())
+            .build();
+        
+        // Save user and log them in
+        User savedUser = authService.register(newUser);
+        
+        // Ensure favorites entry exists
+        authService.ensureFavoritesExists(savedUser.getId());
+        
+        session.setAttribute("userId", savedUser.getId());
+        session.setAttribute("userName", savedUser.getName());
+        
+        return "redirect:/api/auth/loggedin";
     }
 
     /**

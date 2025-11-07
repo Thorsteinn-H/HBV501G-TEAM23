@@ -12,5 +12,11 @@ public interface AuthService {
     User findByEmail(String email);
     User findById(Long id);
     boolean validatePassword(String rawPassword, String hashedPassword);
+    
+    /**
+     * Ensures that a favorites entry exists for the given user
+     * @param userId The ID of the user
+     */
+    void ensureFavoritesExists(Long userId);
     void softDeleteUser(Long id);
 }

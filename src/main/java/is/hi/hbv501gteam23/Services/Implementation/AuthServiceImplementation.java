@@ -4,53 +4,76 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service implementation for handling user authentication and registration
+ */
 @Service
 @Transactional
 public class AuthServiceImplementation implements AuthService {
     private final AuthRepository authRepository;
+    private final FavoriteService favoriteService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AuthServiceImplementation(AuthRepository authRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public AuthServiceImplementation(AuthRepository authRepository, 
+                                   FavoriteService favoriteService,
+                                   PasswordEncoder passwordEncoder) {
         this.authRepository = authRepository;
+        this.favoriteService = favoriteService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User login(String email, String password) {
-        // This method is kept for backward compatibility
-        // Actual authentication is now handled by Spring Security
-        User user = findByEmail(email);
-        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
-            return user;
+        Optional<User> userOpt = authRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(password, user.getPasswordHash())) {
+                // Ensure the user has a favorites entry
+                ensureFavoritesExists(user.getId());
+                return user;
+            }
         }
         return null;
     }
 
     @Override
-    public User registerUser(UserDto.CreateUserRequest request) {
-        User user = new User();
-        if (findByEmail(user.getEmail()) != null) {
+    public User register(User user) {
+        // Check if user with this email already exists
+        if (authRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already in use");
         }
-
+        
+        // Hash the password before saving
+        String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
+        user.setPasswordHash(hashedPassword);
+        
+        // Set default role if not provided
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("User");
         }
-
-        String hashedPassword = passwordEncoder.encode(request.password());
-        user.setPasswordHash(hashedPassword);
-
-        return authRepository.save(user);
+        
+        // Set creation date
+        user.setCreatedAt(LocalDate.now());
+        
+        // Save the user
+        User savedUser = authRepository.save(user);
+        
+        // Create a favorites entry for the new user
+        favoriteService.getOrCreateFavorites(savedUser.getId());
+        
+        return savedUser;
     }
 
     @Override
@@ -72,6 +95,10 @@ public class AuthServiceImplementation implements AuthService {
     public boolean validatePassword(String inputPassword, String storedPassword) {
         return passwordEncoder.matches(inputPassword, storedPassword);
     }
+    
+    @Override
+    public void ensureFavoritesExists(Long userId) {
+        favoriteService.getOrCreateFavorites(userId);
 
     @Override
     public void softDeleteUser(Long id) {
