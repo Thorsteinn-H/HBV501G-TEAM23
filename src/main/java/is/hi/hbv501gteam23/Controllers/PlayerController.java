@@ -6,9 +6,11 @@ import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -112,9 +114,9 @@ public class PlayerController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public PlayerResponse createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
+    public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
         Player created = playerService.createPlayer(body);
-        return toResponse(created);
+        return ResponseEntity.created(URI.create("/players" + created.getId())).body(toResponse(created));
     }
 
     /**
@@ -125,9 +127,9 @@ public class PlayerController {
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public PlayerResponse patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
+    public ResponseEntity<PlayerResponse> patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
         Player updated = playerService.patchPlayer(id, body);
-        return toResponse(updated);
+        return ResponseEntity.ok(toResponse(updated));
     }
 
     /**
