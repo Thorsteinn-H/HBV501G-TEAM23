@@ -33,6 +33,8 @@ public class PlayerController {
      * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping
+    @Operation(summary = "List all players")
+    @ApiResponse(responseCode = "200", description = "Player list successfully fetched")
     public List<PlayerResponse> getAllPlayers() {
         return playerService.getAllPlayers()
                 .stream().map(this::toResponse).toList();
@@ -49,6 +51,8 @@ public class PlayerController {
      * @throws jakarta.persistence.EntityNotFoundException if the player is not found
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Get player by ID")
+    @ApiResponse(responseCode = "200", description = "Player successfully fetched")
     public PlayerResponse getPlayerById(@PathVariable Long id) {
         return toResponse(playerService.getPlayerById(id));
     }
@@ -63,6 +67,8 @@ public class PlayerController {
      * @return the player mapped to a {@link PlayerResponse}
      */
     @GetMapping(params = "name")
+    @Operation(summary = "Get player by name")
+    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public PlayerResponse searchPlayersByName(@RequestParam String name) {
         return toResponse(playerService.searchPlayersByName(name));
     }
@@ -76,6 +82,8 @@ public class PlayerController {
      * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping(params = "team")
+    @Operation(summary = "List all players in team by team name")
+    @ApiResponse(responseCode = "200", description = "List successfully fetched")
     public List<PlayerResponse> getAllPlayersByTeamName(@RequestParam String teamName) {
         return playerService.getByTeamName(teamName)
                 .stream()
@@ -93,6 +101,8 @@ public class PlayerController {
      * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping("/team/{teamId}")
+    @Operation(summary = "List all players in team by team ID")
+    @ApiResponse(responseCode = "200", description = "List successfully fetched")
     public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
         return playerService.getByTeamId(teamId)
                 .stream()
@@ -106,6 +116,8 @@ public class PlayerController {
      * @return
      */
     @GetMapping("/isActive={isActive}")
+    @Operation(summary = "List all active players")
+    @ApiResponse(responseCode = "200", description = "List successfully fetched")
     public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
         return playerService.getActivePlayers(isActive)
                 .stream()
@@ -119,6 +131,8 @@ public class PlayerController {
      * @return
      */
     @GetMapping("/country={country}")
+    @Operation(summary = "List all players from specific country")
+    @ApiResponse(responseCode = "200", description = "List successfully fetched")
     public List<PlayerResponse> getPlayerByCountry(@PathVariable String country) {
         return playerService.findPlayerByCountry(country.toUpperCase())
                 .stream()
