@@ -6,14 +6,12 @@ import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
@@ -106,11 +104,11 @@ public class TeamController {
      * @param body the team data to create
      * @return the created team mapped to {@link TeamResponse}
      */
-    @Operation(summary = "Create a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully created")
     @PostMapping
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create a team")
+    @ApiResponse(responseCode = "200", description = "Team successfully created")
     public ResponseEntity<TeamDto.TeamResponse> createTeam(@RequestBody TeamDto.CreateTeamRequest body) {
         Team created = teamService.createTeam(body);
         return ResponseEntity.created(URI.create("/teams" + created.getId())).body(toResponse(created));
