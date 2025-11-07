@@ -12,16 +12,16 @@ public interface AuthService {
     User findByEmail(String email);
     User findById(Long id);
     boolean validatePassword(String rawPassword, String hashedPassword);
-    
+    void softDeleteUser(Long id);
+
     /**
      * Ensures that a favorites entry exists for the given user
      * @param userId The ID of the user
      */
     void ensureFavoritesExists(Long userId);
-    void softDeleteUser(Long id);
 
+    //Kjaftæði
     User updatePassword(User user, UserDto.updatePassword request);
     User updateGender(User user,  UserDto.updateGender request);
     User updateUsername(User user, UserDto.updateUsername request);
-
 }

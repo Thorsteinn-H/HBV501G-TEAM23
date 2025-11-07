@@ -1,7 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDate;
 
 public class UserDto {
 
@@ -59,10 +58,7 @@ public class UserDto {
             String role,
             Boolean isActive,
             java.time.LocalDateTime createdAt
-    
-    
     ) {}
-  
 
     public record updatePassword(
             String newPassword,
@@ -78,7 +74,4 @@ public class UserDto {
             String newGender,
             String oldGender
     ) {}
-
-
-
 }
