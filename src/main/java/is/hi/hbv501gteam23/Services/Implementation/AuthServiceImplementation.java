@@ -101,4 +101,35 @@ public class AuthServiceImplementation implements AuthService {
     public void ensureFavoritesExists(Long userId) {
         favoriteService.getOrCreateFavorites(userId);
     }
+
+    @Override
+    public User updatePassword(User user, UserDto.updatePassword request) {
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Old password does not match" );
+
+        } else {
+
+            String hashedNewPassword = passwordEncoder.encode(request.newPassword());
+            user.setPasswordHash(hashedNewPassword);
+            return authRepository.save(user);
+        }
+
+    }
+
+    @Override
+    public User updateGender(User user,  UserDto.updateGender request) {
+
+        user.setGender(request.newGender());
+        return authRepository.save(user);
+
+    }
+
+    @Override
+    public User updateUsername(User user, UserDto.updateUsername request) {
+
+        user.setName(request.newUsername());
+        return authRepository.save(user);
+    }
+
 }

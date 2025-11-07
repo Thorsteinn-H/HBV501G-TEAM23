@@ -3,7 +3,6 @@ package is.hi.hbv501gteam23.Controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
-import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
 import is.hi.hbv501gteam23.Security.JwtTokenProvider;
@@ -20,7 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import java.util.List;
 
 @RestController
@@ -125,6 +124,25 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/users/update_password")
+    @Operation(summary = "Update the current user's password")
+    public ResponseEntity<UserDto.UserResponse> updatePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updatePassword request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updatePassword(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
     private UserDto.UserResponse toResponse(User u) {
         return new UserDto.UserResponse(
                 u.getId(),
@@ -136,5 +154,42 @@ public class AuthController {
                 u.getCreatedAt()
         );
     }
-}
 
+    @PostMapping("/users/update_username")
+    @Operation(summary = "Update the current user's username")
+    public ResponseEntity<UserDto.UserResponse> updateUsername(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateUsername request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updateUsername(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
+    @PostMapping("/users/update_gender")
+    @Operation(summary = "Update the current user's gender")
+    public ResponseEntity<UserDto.UserResponse> updateGender(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateGender request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updateGender(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+}

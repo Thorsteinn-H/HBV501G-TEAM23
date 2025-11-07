@@ -58,5 +58,23 @@ public class UserDto {
             String role,
             Boolean isActive,
             java.time.LocalDateTime createdAt
+    ){}
+
+    public record updatePassword(
+            String newPassword,
+            String oldPassword
     ) {}
+
+    public record updateUsername(
+            String newUsername,
+            String oldUsername
+    ) {}
+
+    public record updateGender(
+            String newGender,
+            String oldGender
+    ) {}
+
+
+
 }
