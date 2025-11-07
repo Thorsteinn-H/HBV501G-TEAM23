@@ -1,5 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
@@ -17,6 +19,8 @@ import java.util.List;
 public class VenueController {
     private final VenueService venueService;
 
+    @Operation(summary = "List all venues")
+    @ApiResponse(responseCode = "200", description = "Venues successfully fetched")
     @GetMapping
     public List<VenueDto.VenueResponse> getAllTeams(){
         return venueService.getAllVenues()

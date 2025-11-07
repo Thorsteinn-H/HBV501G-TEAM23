@@ -1,11 +1,14 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
+import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
+
 import java.util.List;
 
 /**
@@ -18,16 +21,12 @@ import java.util.List;
 public class TeamController {
     private final TeamService teamService;
 
-
     /**
-     * Retrieves all teams.
-     *
-     * <p>
-     *      This method retrieves all {@link Team} entities from the database
-     * </p>
-     *
+     * Retrieves all {@link Team} entities.
      * @return list of teams mapped to {@link TeamResponse}
      */
+    @Operation(summary = "List all teams")
+    @ApiResponse(responseCode = "200", description = "Teams successfully fetched")
     @GetMapping
     public List<TeamResponse> getAllTeams(){
         return teamService.getAllTeams()
@@ -35,26 +34,19 @@ public class TeamController {
     }
 
     /**
-     * Retrieves a single team by id
-     *
-     * <p>
-     *      This method retrieves a {@link Team} entity from the database with a specific identifier.
-     * </p>
-     *
+     * Retrieves a {@link Team} entity by its id
      * @param id the id of the team to be retrieved
      * @return the team mapped to a {@link TeamResponse}
      */
+    @Operation(summary = "Get team by id")
+    @ApiResponse(responseCode = "200", description = "Team successfully fetched")
     @GetMapping("/{id}")
     public TeamResponse getTeamById(@PathVariable Long id){
         return toResponse(teamService.getTeamById(id));
     }
 
     /**
-     * Retrieves team by name
-     *
-     * <p>
-     *       This method retrieves a {@link Team} entity from the database with a specific name.
-     * </p>
+     * Retrieves a {@link Team} entity by name
      * @param name name of the team to be retrieved
      * @return the team mapped to a {@link TeamResponse}
      */
@@ -77,12 +69,7 @@ public class TeamController {
     }
 
     /**
-     * Retrieves a list of teams by their venue.
-     *
-     * <p>
-     *       This method retrieves a list of {@link Team} entities from the database
-     *       with a specific venue.
-     * </p>
+     * Retrieves a list of {@link Team} entities by venue.
      * @param venueId the id of the venue of the teams to be retrieved.
      * @return list of teams mapped to {@link TeamResponse}
      */
@@ -95,12 +82,7 @@ public class TeamController {
     }
 
     /**
-     * Retrieves a list of teams by their country.
-     *
-     * <p>
-     *      This method retrieves a list of {@link Team} entities from the database
-     *      from a specific country.
-     * </p>
+     * Retrieves a list of {@link Team} entities from a specific country.
      * @param country the country of the teams to be retrieved.
      * @return list of teams mapped to {@link TeamResponse}
      */
@@ -114,10 +96,11 @@ public class TeamController {
 
     /**
      * Creates a new team.
-     *
      * @param createTeamRequest the team data to create
      * @return the created team mapped to {@link TeamResponse}
      */
+    @Operation(summary = "Create a team")
+    @ApiResponse(responseCode = "200", description = "Team successfully created")
     @PostMapping
     public TeamResponse createTeam(@RequestBody TeamDto.CreateTeamRequest createTeamRequest) {
         Team createdTeam = teamService.createTeam(createTeamRequest);
@@ -126,11 +109,12 @@ public class TeamController {
 
     /**
      * Updates an existing team. Team can be marked as inactive with isActive = false.
-     *
      * @param id the id of the team to update
      * @param patchTeamRequest the fields to update
      * @return the updated team mapped to {@link TeamResponse}
      */
+    @Operation(summary = "Modify a team")
+    @ApiResponse(responseCode = "200", description = "Team successfully modified")
     @PatchMapping("/{id}")
     public TeamResponse patchTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
         Team updatedTeam = teamService.patchTeam(id, patchTeamRequest);
