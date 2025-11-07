@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,27 +37,25 @@ public class AuthServiceImplementation implements AuthService {
     }
 
     @Override
-    public User register(User user) {
-        // Check if user with this email already exists
+    public User registerUser(UserDto.CreateUserRequest request) {
+        User user = new User();
         if (findByEmail(user.getEmail()) != null) {
             throw new RuntimeException("Email already in use");
         }
 
-        // Set default role if not provided
         if (user.getRole() == null || user.getRole().isEmpty()) {
             user.setRole("User");
         }
 
-        // Hash the password before saving
-        String hashedPassword = passwordEncoder.encode(user.getPasswordHash());
+        String hashedPassword = passwordEncoder.encode(request.password());
         user.setPasswordHash(hashedPassword);
 
         return authRepository.save(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return authRepository.findAll();
+    public List<User> getAllActiveUsers() {
+        return authRepository.findAllActiveUsers();
     }
 
     @Override
@@ -74,11 +74,16 @@ public class AuthServiceImplementation implements AuthService {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        if (authRepository.existsById(id)) {
-            authRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("User not found with id: " + id);
+    public void softDeleteUser(Long id) {
+        User user = findById(id);
+        if (user != null && user.isActive()) {
+            user.setActive(false);
+            user.setDeletedAt(LocalDateTime.now());
+            user.setEmail("deleted_" + id + "@example.com");
+            user.setName("Deleted User " + id);
+            user.setPasswordHash(null);
+            user.setGender(null);
+            authRepository.save(user);
         }
     }
 }

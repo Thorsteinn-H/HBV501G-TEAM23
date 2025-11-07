@@ -6,12 +6,9 @@ import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -103,9 +100,10 @@ public class TeamController {
      * @param createTeamRequest the team data to create
      * @return the created team mapped to {@link TeamResponse}
      */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a team")
     @ApiResponse(responseCode = "200", description = "Team successfully created")
-    @PostMapping
     public TeamResponse createTeam(@RequestBody TeamDto.CreateTeamRequest createTeamRequest) {
         Team createdTeam = teamService.createTeam(createTeamRequest);
         return toResponse(createdTeam);
@@ -117,9 +115,10 @@ public class TeamController {
      * @param patchTeamRequest the fields to update
      * @return the updated team mapped to {@link TeamResponse}
      */
-    @Operation(summary = "Modify a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully modified")
     @PatchMapping("/{id}")
+    @Operation(summary = "Modify a team")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiResponse(responseCode = "200", description = "Team successfully modified")
     public TeamResponse patchTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest patchTeamRequest) {
         Team updatedTeam = teamService.patchTeam(id, patchTeamRequest);
         return toResponse(updatedTeam);

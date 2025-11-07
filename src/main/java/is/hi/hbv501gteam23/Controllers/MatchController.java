@@ -55,12 +55,10 @@ public class MatchController {
     }
 
     /**
-     * Retrieves all matches that were played during a specific year
      *
-     * <p>This endpoint return a list of matches that played during a specific year</p>
-     *
-     * @param year the year to filter matches
-     * @return a list of matches mapped to {@link MatchResponse}
+     * @param from
+     * @param to
+     * @return
      */
     @GetMapping(params = {"from","to"})
     public List<MatchResponse> getMatchesBetween(
