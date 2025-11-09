@@ -14,6 +14,11 @@ public class DatabaseTestController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    /**
+     *
+     * @param model
+     * @return
+     */
     @GetMapping("/test-db")
     public String showAllTables(Model model) {
         try {

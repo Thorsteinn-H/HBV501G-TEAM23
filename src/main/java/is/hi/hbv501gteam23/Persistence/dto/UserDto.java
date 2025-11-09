@@ -62,16 +62,31 @@ public class UserDto {
             String imageType
     ) {}
 
+    /**
+     * Request body for updating a users password
+     * @param newPassword The new password for a user
+     * @param oldPassword The users old password
+     */
     public record updatePassword(
             String newPassword,
             String oldPassword
     ) {}
 
+    /**
+     * Request body for updating a users username
+     * @param newUsername The new username for a user
+     * @param oldUsername The users old username
+     */
     public record updateUsername(
             String newUsername,
             String oldUsername
     ) {}
 
+    /**
+     * Request body for updating gender
+     * @param newGender The new gender for a user
+     * @param oldGender The users old gender
+     */
     public record updateGender(
             String newGender,
             String oldGender

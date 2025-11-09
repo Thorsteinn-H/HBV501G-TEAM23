@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
+
+    /**
+     *
+     *
+     * @param model
+     * @return
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/dashboard")
     public String adminDashboard(Model model) {

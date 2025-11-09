@@ -111,9 +111,9 @@ public class PlayerController {
     }
 
     /**
-     *
-     * @param isActive
-     * @return
+     * Retrieves all players if they are active
+     * @param isActive if the player is active or not
+     * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping("/isActive={isActive}")
     @Operation(summary = "List all active players")
@@ -126,9 +126,9 @@ public class PlayerController {
     }
 
     /**
-     *
-     * @param country
-     * @return
+     * Retrieves all players from a specific country
+     * @param country country to list all players from
+     * @return list of players mapped to {@link PlayerResponse}
      */
     @GetMapping("/country={country}")
     @Operation(summary = "List all players from specific country")

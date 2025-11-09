@@ -125,9 +125,9 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     *
-     * @param body
-     * @return
+     * Creates a match
+     * @param body the {@link Match} entity to create
+     * @return the created match
      */
     @Override
     @Transactional

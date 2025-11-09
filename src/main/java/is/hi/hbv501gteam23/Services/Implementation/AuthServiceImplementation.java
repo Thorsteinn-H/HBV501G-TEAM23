@@ -35,6 +35,14 @@ public class AuthServiceImplementation implements AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Logs inn a user with the given email and password.
+     *
+     * @param email     the email address of the user
+     * @param password  the plain text password provided by the user
+     * @return the {@link User} entity if credentials are valid,
+     *
+     */
     @Override
     public User login(String email, String password) {
         User user = findByEmail(email);
@@ -44,6 +52,12 @@ public class AuthServiceImplementation implements AuthService {
         return null;
     }
 
+    /**
+     * Registers a new user with the provided details.
+     *
+     * @param request  a {@link UserDto.CreateUserRequest} containing the users information
+     * @return the newly created {@link User} entity
+     */
     @Override
     public User registerUser(UserDto.CreateUserRequest request) {
         User user = new User();
@@ -65,31 +79,66 @@ public class AuthServiceImplementation implements AuthService {
 
         return savedUser;
     }
+
+    /**
+     * Retrieves all users who are currently active.
+     *
+     * @return a list of active {@link User} entities
+     */
     @Override
     public List<User> getAllActiveUsers() {
         return authRepository.findAllActiveUsers();
     }
 
+    /**
+     * Finds a user by their email address.
+     *
+     * @param email  the email address of the user to find
+     * @return the matching {@link User} entity
+     */
     @Override
     public User findByEmail(String email) {
         return authRepository.findByEmail(email).orElse(null);
     }
 
+    /**
+     * Finds a user by their id.
+     *
+     * @param id the id of the user to find
+     * @return the matching {@link User} entity
+     */
     @Override
     public User findById(Long id) {
         return authRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Validates a raw password against a hashed password.
+     *
+     * @param inputPassword   the plain text password provided for verification
+     * @param storedPassword  the stored hashed password
+     * @return {@code true} if the raw password matches the hashed password otherwise {@code false}
+     */
     @Override
     public boolean validatePassword(String inputPassword, String storedPassword) {
         return passwordEncoder.matches(inputPassword, storedPassword);
     }
 
+    /**
+     * Ensures a favorite exists for a specific user
+     * @param userId The id of the user
+     */
     @Override
     public void ensureFavoritesExists(Long userId) {
         favoriteService.getOrCreateFavorites(userId);
     }
 
+    /**
+     * Performs a soft delete a user by marking them as inactive
+     * instead of removing them permanently.
+     *
+     * @param id  the id of the user to delete
+     */
     @Override
     public void softDeleteUser(Long id) {
         User user = findById(id);
@@ -104,6 +153,15 @@ public class AuthServiceImplementation implements AuthService {
         }
     }
 
+    /**
+     * Uploads an image file to a specific user.
+     *
+     * @param user      the user uploading the specific image
+     * @param file      the image file to upload
+     * @param filetype  the type of image file
+     * @return the updated {@link User} object with the new image data
+     * @throws IOException if an error occurs while reading or storing the file
+     */
     @Override
     public User uploadImage(User user, MultipartFile file, String filetype) throws IOException {
 
@@ -112,16 +170,36 @@ public class AuthServiceImplementation implements AuthService {
         return authRepository.save(user);
     }
 
+    /**
+     * Retrieves the stored image data for the specified user.
+     *
+     * @param user  the user whose image will be retrieved
+     * @return a byte array containing the image data
+     */
     @Override
     public byte[] getImage(User user) {
         return user.getImage();
     }
 
+    /**
+     * Retrieves the type of image file for a users image
+     *
+     * @param user  the user whose image type will be retrieved
+     * @return a {@link String} representing the image type (e.g., "image/png", "jpg"),
+     *
+     */
     @Override
     public String getImageType(User user) {
         return user.getImageType();
     }
 
+    /**
+     * Updates the password for the specified user.
+     *
+     * @param user     the user whose password will be updated
+     * @param request  a {@link UserDto.updatePassword} containing the old and new passwords
+     * @return the updated {@link User} object after the password change
+     */
     @Override
     public User updatePassword(User user, UserDto.updatePassword request) {
 
@@ -137,6 +215,14 @@ public class AuthServiceImplementation implements AuthService {
 
     }
 
+
+    /**
+     * Updates the gender of the specified user.
+     *
+     * @param user     the user whose gender will be updated
+     * @param request  a {@link UserDto.updateGender} containing the new gender information
+     * @return the updated {@link User} object after the gender change
+     */
     @Override
     public User updateGender(User user,  UserDto.updateGender request) {
 
@@ -145,6 +231,13 @@ public class AuthServiceImplementation implements AuthService {
 
     }
 
+    /**
+     * Updates the username of the specified user.
+     *
+     * @param user     the user whose username will be updated
+     * @param request  a {@link UserDto.updateUsername}  containing the new username
+     * @return the updated {@link User} object after the username change
+     */
     @Override
     public User updateUsername(User user, UserDto.updateUsername request) {
 

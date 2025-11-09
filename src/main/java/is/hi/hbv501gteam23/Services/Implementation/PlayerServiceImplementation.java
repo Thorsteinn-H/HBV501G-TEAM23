@@ -107,17 +107,19 @@ public class PlayerServiceImplementation implements PlayerService {
     /**
      *
      * @param country the country to filter by
-     * @return
+     * @return a list of all {@link Player} entities from the country
      */
     @Override
     public List<Player> findPlayerByCountry(String country) {
         return playerRepository.findByCountry(country);
     }
 
+
     /**
+     * Creates a new player
      *
-     * @param body
-     * @return
+     * @param body the {@link Player} entity to create
+     * @return the newly created {@link Player} entity
      */
     @Override
     @Transactional
