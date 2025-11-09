@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "venues")
+@Table(name = "venue")
 public class Venue {
     @Id
     @SequenceGenerator(name = "venue_sequence", sequenceName = "venue_sequence", allocationSize = 1)
@@ -20,6 +20,12 @@ public class Venue {
     @Column(name = "venue_name", nullable = false, length = 160)
     private String name;
 
-    @Column(name = "address")
+    @Column(name = "address", nullable = true, length = 255)
     private String address;
+
+    @Column(name = "latitude")
+    private String latitude;
+
+    @Column(name = "longitude")
+    private String longitude;
 }
