@@ -10,14 +10,12 @@ public class UserDto {
      * @param userName user's chosen username
      * @param password user's password
      * @param gender user's gender
-     * @param role user's role (User, ADMIN)
      */
     public record CreateUserRequest(
             String email,
             String userName,
             String password,
-            String gender, // optional
-            String role
+            String gender // optional
     ) {}
 
     /**

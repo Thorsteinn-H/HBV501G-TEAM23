@@ -142,13 +142,18 @@ public class TeamController {
      * @return mapped {@link TeamDto.TeamResponse}
      */
     private TeamDto.TeamResponse toResponse(Team t) {
+        var v = t.getVenue();
+        Long venueId   = (v != null) ? v.getId() : null;
+        String venueName = (v != null && v.getName() != null && !v.getName().isBlank())
+                ? v.getName()
+                : "Enginn heimavöllur";
         return new TeamDto.TeamResponse(
                 t.getId(),
                 t.getName(),
                 t.isActive(),
                 t.getCountry(),
-                t.getVenue().getId(),
-                t.getVenue().getName()
+                venueId,
+                venueName
         );
     }
 }
