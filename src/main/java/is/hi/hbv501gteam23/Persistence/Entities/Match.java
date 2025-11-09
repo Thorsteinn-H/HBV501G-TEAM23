@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "matches")
+@Table(name = "match")
 public class Match {
     @Id
     @SequenceGenerator(name = "match_sequence", sequenceName = "match_sequence", allocationSize = 1)

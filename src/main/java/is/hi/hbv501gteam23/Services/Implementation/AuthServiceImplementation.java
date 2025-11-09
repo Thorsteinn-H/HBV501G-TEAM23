@@ -5,6 +5,7 @@ import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,19 +22,11 @@ import java.util.List;
  */
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AuthServiceImplementation implements AuthService {
     private final AuthRepository authRepository;
     private final FavoriteService favoriteService;
     private final PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public AuthServiceImplementation(AuthRepository authRepository,
-                                   FavoriteService favoriteService,
-                                   @Lazy PasswordEncoder passwordEncoder) {
-        this.authRepository = authRepository;
-        this.favoriteService = favoriteService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     /**
      * Logs inn a user with the given email and password.
@@ -60,24 +53,21 @@ public class AuthServiceImplementation implements AuthService {
      */
     @Override
     public User registerUser(UserDto.CreateUserRequest request) {
-        User user = new User();
-        if (findByEmail(user.getEmail()) != null) {
+        if (findByEmail(request.email()) != null) {
             throw new RuntimeException("Email already in use");
         }
-
-        if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("User");
-        }
-
-        String hashedPassword = passwordEncoder.encode(request.password());
-        user.setPasswordHash(hashedPassword);
-
+        User user = new User();
+        user.setEmail(request.email());
+        user.setName(request.userName());
+        user.setRole("USER");
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setCreatedAt(LocalDateTime.now());
+        user.setActive(true);
+        user.setGender(request.gender());
 
-        User savedUser = authRepository.save(user);
-        favoriteService.getOrCreateFavorites(savedUser.getId());
-
-        return savedUser;
+        User saved = authRepository.save(user);
+        favoriteService.getOrCreateFavorites(saved.getId());
+        return saved;
     }
 
     /**
