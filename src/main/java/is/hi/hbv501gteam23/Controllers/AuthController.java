@@ -246,7 +246,7 @@ public class AuthController {
     @Operation(summary = "Update/Add the users profile picture")
     public ResponseEntity<UserDto.UserResponse> uploadImage (
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -277,7 +277,7 @@ public class AuthController {
      * the image type
      *
      */
-    @GetMapping("/users/image")
+    @GetMapping("/users/get_image")
     @Operation(summary = "Get users profile picture")
     public ResponseEntity<?> getUserProfilePicture(
             @AuthenticationPrincipal CustomUserDetails userDetails){
@@ -298,6 +298,33 @@ public class AuthController {
         return ResponseEntity.ok().header("Content-Type", fileType)
                 .body(image);
 
+    }
+
+
+    /**
+     * Deletes the logged in users image
+     *
+     * @param userDetails the logged inn user's details
+     * @return a {@link ResponseEntity} containing the user's details
+     *
+     */
+    @DeleteMapping("/delete_image")
+    @Operation(summary = "Delete users profile picture")
+    public ResponseEntity<?> deleteUserProfilePicture(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        user.setImageType(null);
+        user.setImage(null);
+
+        return ResponseEntity.ok(toResponse(user));
     }
 
 
