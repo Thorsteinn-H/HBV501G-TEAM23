@@ -55,10 +55,10 @@ public class FavouriteController {
     }
 
     /**
-     *
-     * @param type
-     * @param itemId
-     * @return
+     * Remove an item from user's favorites
+     * @param type The type of the favorite (match, player, score, team, venue)
+     * @param itemId The ID of the item to remove
+     * @return response entity if deleteing the favorite was a success
      */
     @DeleteMapping("/{type}/{itemId}")
     public ResponseEntity<?> removeFavorite(
@@ -74,9 +74,9 @@ public class FavouriteController {
     }
 
     /**
-     *
-     * @param type e
-     * @return
+     * Get all favorites of a specific type for a user
+     * @param type The type of favorites to get (match, player, score, team, venue)
+     * @return response entity containing all users favorites
      */
     @GetMapping("/{type}")
     public ResponseEntity<?> getFavorites(@PathVariable String type) {
@@ -90,10 +90,10 @@ public class FavouriteController {
     }
 
     /**
-     *
-     * @param type
-     * @param itemId
-     * @return
+     * Check if an item is in user's favorites
+     * @param type The type of the favorite (match, player, score, team, venue)
+     * @param itemId The ID of the item to check
+     * @return a response entity with true if it is favorite and false if not
      */
     @GetMapping("/{type}/{itemId}")
     public ResponseEntity<Boolean> isFavorite(
