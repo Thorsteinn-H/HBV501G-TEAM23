@@ -2,9 +2,13 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
 import is.hi.hbv501gteam23.Security.JwtTokenProvider;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
@@ -20,9 +24,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import java.util.List;
 
+/**
+ * REST controller that exposes read/write operations for users
+ */
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
@@ -40,6 +48,11 @@ public class AuthController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    /**
+     * Logs inn a user with the given email and password.
+     * @param req a {@link LoginDto.LoginResponse} containing the users log in information
+     * @return
+     */
     @PostMapping("/login")
     @Operation(summary = "Login user", description = "Authenticate and return JWT token")
     public ResponseEntity<LoginDto.LoginResponse> login(@Valid @RequestBody LoginDto.LoginRequest req) {
@@ -53,6 +66,11 @@ public class AuthController {
         return ResponseEntity.ok(new LoginDto.LoginResponse(token, toResponse(user)));
     }
 
+    /**
+     * Get current logged inn users details
+     * @param userDetails the logged inn user's details
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @GetMapping("/loggedin")
     @Operation(summary = "Get currently logged in user")
     public ResponseEntity<UserDto.UserResponse> loggedIn(
@@ -67,9 +85,10 @@ public class AuthController {
     }
 
     /**
+     * Registers a new user with the provided details.
      *
-     * @param request
-     * @return
+     * @param request  a {@link UserDto.CreateUserRequest} containing the users information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
      */
     @PostMapping("/register")
     @Operation(summary = "Register new user", description = "Creates a new user account")
@@ -80,8 +99,9 @@ public class AuthController {
     }
 
     /**
+     * Retrieves all users who are currently active.
      *
-     * @return
+     * @return a list of {@link UserDto.UserResponse} containing the mapped data to all active users
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -94,9 +114,10 @@ public class AuthController {
     }
 
     /**
+     * Finds a user by their id.
      *
-     * @param id
-     * @return
+     * @param id the id of the user to find
+     * @return a {@link UserDto.UserResponse} containing the mapped data
      */
     @GetMapping("/user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -111,9 +132,11 @@ public class AuthController {
     }
 
     /**
+     * Performs a soft delete a user by marking them as inactive
+     * instead of removing them permanently.
      *
-     * @param id
-     * @return
+     * @param id  the id of the user to delete
+     * @return a {@link UserDto.UserResponse} containing the mapped data
      */
     @DeleteMapping("/user/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -124,6 +147,12 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Update the users password
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} containing the new gender information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @PostMapping("/users/update_password")
     @Operation(summary = "Update the current user's password")
     public ResponseEntity<UserDto.UserResponse> updatePassword(
@@ -143,6 +172,12 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
+    /**
+     * Update the users username
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} object containing the new username information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @PostMapping("/users/update_username")
     @Operation(summary = "Update the current user's username")
     public ResponseEntity<UserDto.UserResponse> updateUsername(
@@ -162,6 +197,12 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
+    /**
+     * Update the users gender
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} object containing the new gender information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @PostMapping("/users/update_gender")
     @Operation(summary = "Update the current user's gender")
     public ResponseEntity<UserDto.UserResponse> updateGender(
@@ -181,6 +222,78 @@ public class AuthController {
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
+    /**
+     * Sets the logged inn users image
+     * @param userDetails the logged inn user's details
+     * @param file the image file
+     * @return a {@link ResponseEntity} containing the user's image as a byte array and
+     * the image type
+     * @throws IOException if an error occurs while reading or storing the file
+     */
+    @PostMapping("/users/upload_image")
+    @Operation(summary = "Update/Add the users profile picture")
+    public ResponseEntity<UserDto.UserResponse> uploadImage (
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam MultipartFile file) throws IOException {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+        String fileType = file.getContentType();
+
+        if (fileType != null && fileType.startsWith("image")) {
+            User updatedUser = authService.uploadImage(user, file, fileType);
+            return ResponseEntity.ok(toResponse(updatedUser));
+
+        } else {
+            throw new EntityNotFoundException("file type incorrect");
+        }
+
+    }
+
+    /**
+     * Retrieves the logged inn user's image.
+     *
+     * @param userDetails the logged inn user's details
+     * @return a {@link ResponseEntity} containing the user's image as a byte array and
+     * the image type
+     *
+     */
+    @GetMapping("/users/image")
+    @Operation(summary = "Get users profile picture")
+    public ResponseEntity<?> getUserProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        byte[] image = authService.getImage(user);
+        String fileType = authService.getImageType(user);
+
+        return ResponseEntity.ok().header("Content-Type", fileType)
+                .body(image);
+
+    }
+
+
+    /**
+     * Maps a {@link User} entity to a {@link UserDto.UserResponse} DTO.
+     * @param u user entity
+     * @return mapped {@link UserDto.UserResponse}
+     */
     private UserDto.UserResponse toResponse(User u) {
           return new UserDto.UserResponse(
                   u.getId(),
@@ -189,7 +302,9 @@ public class AuthController {
                   u.getGender(),
                   u.getRole(),
                   u.isActive(),
-                  u.getCreatedAt()
+                  u.getCreatedAt(),
+                  u.getImage(),
+                  u.getImageType()
           );
       }
 }

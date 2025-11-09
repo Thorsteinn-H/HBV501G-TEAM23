@@ -56,9 +56,9 @@ public interface PlayerService {
     List<Player> findPlayerByCountry(String country);
 
     /**
-     *
-     * @param body
-     * @return
+     * Creates a player
+     * @param body the {@link Player} entity to create
+     * @return the created player
      */
     Player createPlayer(PlayerDto.CreatePlayerRequest body);
 

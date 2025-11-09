@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
@@ -17,6 +18,11 @@ import java.util.List;
 public class VenueServiceImplementation implements VenueService {
     private final VenueRepository venueRepository;
 
+    /**
+     * Retrieves all venue
+     *
+     * @return a list of all {@link Venue} entities
+     */
     @Override
     public List<Venue> getAllVenues() {
         return venueRepository.findAll();
@@ -28,6 +34,12 @@ public class VenueServiceImplementation implements VenueService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + id + " not found"));
     }
 
+    /**
+     * Retrieves a single venue by its name.
+     *
+     * @param name the name of the venue
+     * @return the {@link Venue} with the specified name
+     */
     @Override
     public Venue findByName(String name) {
         Venue v = venueRepository.findByNameIgnoreCase(name);
@@ -37,6 +49,12 @@ public class VenueServiceImplementation implements VenueService {
         return v;
     }
 
+    /**
+     * Creates a new venue
+     *
+     * @param body the {@link Venue} entity to create
+     * @return the newly created {@link Venue} entity
+     */
     @Override
     @Transactional
     public Venue createVenue(VenueDto.VenueRequest body) {

@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
+import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Repositories.FavoriteRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,11 @@ public class FavoriteServiceImplementation implements FavoriteService {
         this.favoriteRepository = favoriteRepository;
     }
 
+    /**
+     * Get or create favorites for a user
+     * @param userId The ID of the user
+     * @return The user's favorites
+     */
     @Override
     public Favorites getOrCreateFavorites(Long userId) {
         return favoriteRepository.findById(userId)
@@ -31,6 +37,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
                 });
     }
 
+    /**
+     * Add an item to user's favorites
+     * @param userId The ID of the user
+     * @param type The type of the favorite (match, player, score, team, venue)
+     * @param itemId The ID of the item to add
+     */
     @Override
     @Transactional
     public void addFavorite(Long userId, String type, Long itemId) {
@@ -46,6 +58,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
         favoriteRepository.save(favorites);
     }
 
+    /**
+     * Remove an item from user's favorites
+     * @param userId The ID of the user
+     * @param type The type of the favorite (match, player, score, team, venue)
+     * @param itemId The ID of the item to remove
+     */
     @Override
     @Transactional
     public void removeFavorite(Long userId, String type, Long itemId) {
@@ -61,6 +79,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
         });
     }
 
+    /**
+     * Get all favorites of a specific type for a user
+     * @param userId The ID of the user
+     * @param type The type of favorites to get (match, player, score, team, venue)
+     * @return List of favorite item IDs
+     */
     @Override
     public List<Long> getFavorites(Long userId, String type) {
         return favoriteRepository.findById(userId)
@@ -76,6 +100,13 @@ public class FavoriteServiceImplementation implements FavoriteService {
                 .orElse(Collections.emptyList());
     }
 
+    /**
+     * Check if an item is in user's favorites
+     * @param userId The ID of the user
+     * @param type The type of the favorite (match, player, score, team, venue)
+     * @param itemId The ID of the item to check
+     * @return true if the item is in favorites, false otherwise
+     */
     @Override
     public boolean isFavorite(Long userId, String type, Long itemId) {
         return favoriteRepository.findById(userId)
@@ -86,6 +117,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
                 .orElse(false);
     }
 
+    /**
+     * Get the type of favorite (match, player, score, team, venue)
+     * @param favorites The {@link Favorites} entity to get the type
+     * @param type The type of favorite (match, player, score, team, venue)
+     * @return The string of the favorite
+     */
     private String getFieldByType(Favorites favorites, String type) {
         return switch (type.toLowerCase()) {
             case "match" -> favorites.getMatches();
@@ -97,6 +134,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
         };
     }
 
+    /**
+     * Set the type of favorite (match, player, score, team, venue)
+     * @param favorites The {@link Favorites} entity whose type will be set
+     * @param type The type of favorite (match, player, score, team, venue)
+     * @param value The value of the favorite to set
+     */
     private void setFieldByType(Favorites favorites, String type, String value) {
         switch (type.toLowerCase()) {
             case "match" -> favorites.setMatches(value);
