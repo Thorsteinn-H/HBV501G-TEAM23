@@ -103,7 +103,7 @@ public class PlayerController {
     @GetMapping("/team/{teamId}")
     @Operation(summary = "List all players in team by team ID")
     @ApiResponse(responseCode = "200", description = "List successfully fetched")
-    public List<PlayerDto.PlayerResponse> getByVenueId(@PathVariable("teamId") Long teamId) {
+    public List<PlayerDto.PlayerResponse> getByTeamId(@PathVariable("teamId") Long teamId) {
         return playerService.getByTeamId(teamId)
                 .stream()
                 .map(this::toResponse)

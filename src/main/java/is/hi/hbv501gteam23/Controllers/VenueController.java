@@ -24,7 +24,7 @@ public class VenueController {
     @ApiResponse(responseCode = "200", description = "Venues successfully fetched")
     @GetMapping
     @ResponseBody
-    public List<VenueDto.VenueResponse> getAllTeams(){
+    public List<VenueDto.VenueResponse> getAllVenues(){
         return venueService.getAllVenues()
                 .stream().map(this::toResponse).toList();
     }
