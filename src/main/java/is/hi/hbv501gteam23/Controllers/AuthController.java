@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -209,6 +210,17 @@ public class AuthController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody UserDto.updateGender request
     ) {
+
+        List<String> genders = new ArrayList<>();
+        genders.add("Male");
+        genders.add("Female");
+        genders.add("Other");
+        genders.add("Prefer not to say");
+
+        if (!genders.contains(request.newGender())) {
+            throw new EntityNotFoundException("Not a valid gender");
+        }
+
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
