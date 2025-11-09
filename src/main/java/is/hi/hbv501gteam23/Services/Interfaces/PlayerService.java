@@ -3,29 +3,25 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
-import java.time.LocalDate;
+
 import java.util.List;
 
 public interface PlayerService {
     /**
      * Retrieves all players
-     *
      * @return a list of all {@link Player} entities
      */
     List<Player> getAllPlayers();
 
     /**
      * Retrieves a single player by its unique identifier.
-     *
      * @param id the ID of the match
      * @return the {@link Player} with the specified id
      */
     Player getPlayerById(Long id);
 
-
     /**
      * Retrieves a single player by its name
-     *
      * @param name the name of the player
      * @return the {@link Player} with the specified name
      */
@@ -33,7 +29,6 @@ public interface PlayerService {
 
     /**
      * Retrieves a list of players by its team name
-     *
      * @param team the ID of the match
      * @return a list of all {@link Player} entities with the specified team name
      */
@@ -41,25 +36,31 @@ public interface PlayerService {
 
     /**
      * Retrieves a list of players by its team unique identifier.
-     *
      * @param teamId the ID of the match
      * @return a list of all {@link Player} entities with the specified team id
      */
     List<Player> getByTeamId(Long teamId);
 
     /**
-     * Creates a new player
-     *
-     * @param name     the name of the player
-     * @param dob      the player's date of birth
-     * @param country  the country the player represents
-     * @param position the player's position
-     * @param goals    the number of goals the player has scored
-     * @param teamId   the id of the team to the player should be assigned
-     * @return the newly created {@link Player} entity
+     * Retrieves a list of active players
+     * @param isActive the active status of the player
+     * @return a list of all {@link Player} entities with active status
      */
-    Player createPlayer(String name, LocalDate dob, String country,
-                        Player.PlayerPosition position, Integer goals, Long teamId);
+    List<Player> getActivePlayers(Boolean isActive);
+
+    /**
+     * Retrieves a list of players from a specific country
+     * @param country the country to filter by
+     * @return a list of all {@link Player} entities from the specified country
+     */
+    List<Player> findPlayerByCountry(String country);
+
+    /**
+     * Creates a player
+     * @param body the {@link Player} entity to create
+     * @return the created player
+     */
+    Player createPlayer(PlayerDto.CreatePlayerRequest body);
 
     /**
      * Updates existing player

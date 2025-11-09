@@ -20,9 +20,12 @@ public class Venue {
     @Column(name = "venue_name", nullable = false, length = 160)
     private String name;
 
-    @Column(name = "longitude", nullable = true)
-    private Double longitude;
+    @Column(name = "address", nullable = true, length = 255)
+    private String address;
 
-    @Column(name = "latitude", nullable = true)
-    private Double latitude;
+    @Column(name = "latitude")
+    private String latitude;
+
+    @Column(name = "longitude")
+    private String longitude;
 }

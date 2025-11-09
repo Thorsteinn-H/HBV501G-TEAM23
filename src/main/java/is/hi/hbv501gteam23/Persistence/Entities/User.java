@@ -1,10 +1,11 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -31,11 +32,27 @@ public class User implements Serializable {
     private String gender;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
+    @JsonIgnore
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = false;
+
+    @JsonIgnore
+    @Column(name = "deleted_at", nullable = false)
+    private LocalDateTime deletedAt;
+
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    @Lob
+    @Column(name="image")
+    private byte[] image;
+
+    @Column(name="imageType")
+    private String imageType;
 }

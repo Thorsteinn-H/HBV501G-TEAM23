@@ -1,141 +1,313 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.Entities.Venue;
+import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
+import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
+import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
+import is.hi.hbv501gteam23.Security.CustomUserDetails;
+import is.hi.hbv501gteam23.Security.JwtTokenProvider;
+import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession;
-import java.time.LocalDate;
-import java.util.Map;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.util.List;
 
-@Controller
+/**
+ * REST controller that exposes read/write operations for users
+ */
+@RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
     private final AuthService authService;
-    
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Autowired
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService,
+                          AuthenticationManager authenticationManager,
+                          JwtTokenProvider jwtTokenProvider) {
         this.authService = authService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    /**
+     * Logs inn a user with the given email and password.
+     * @param req a {@link LoginDto.LoginResponse} containing the users log in information
+     * @return
+     */
     @PostMapping("/login")
-    public String login(@RequestParam String email, 
-                       @RequestParam String password, 
-                       HttpSession session,
-                       Model model) {
-        try {
-            // This method is now just a fallback, as Spring Security will handle the actual authentication
-            return "redirect:/api/auth/loggedin";
-        } catch (Exception e) {
-            return "redirect:/api/auth/login?error";
-        }
+    @Operation(summary = "Login user", description = "Authenticate and return JWT token")
+    public ResponseEntity<LoginDto.LoginResponse> login(@Valid @RequestBody LoginDto.LoginRequest req) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.email(), req.password())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtTokenProvider.generateToken(authentication.getName());
+
+        User user = authService.findByEmail(authentication.getName());
+        return ResponseEntity.ok(new LoginDto.LoginResponse(token, toResponse(user)));
     }
-    
+
+    /**
+     * Get current logged inn users details
+     * @param userDetails the logged inn user's details
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @GetMapping("/loggedin")
-    public String loggedIn(HttpSession session, Model model) {
-        // Get the authenticated user's username from the security context
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails)principal).getUsername();
-        } else {
-            username = principal.toString();
+    @Operation(summary = "Get currently logged in user")
+    public ResponseEntity<UserDto.UserResponse> loggedIn(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
-        // Get the user from the database
-        User user = authService.findByEmail(username);
-        if (user == null) {
-            return "redirect:/api/auth/login?error=user_not_found";
-        }
-        
-        // Store user info in session
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userName", user.getName());
-        
-        model.addAttribute("user", user);
-        return "LoggedInUser";
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
+        return ResponseEntity.ok(toResponse(user));
     }
-    
+
+    /**
+     * Registers a new user with the provided details.
+     *
+     * @param request  a {@link UserDto.CreateUserRequest} containing the users information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
     @PostMapping("/register")
-    public String register(@RequestParam String email, 
-                         @RequestParam("user_name") String name,
-                         @RequestParam String password,
-                         @RequestParam(required = false) String gender,
-                         HttpSession session) {
-        
-        if (email == null || name == null || password == null) {
-            return "redirect:/api/auth/register?error=missing_fields";
-        }
-        
-        // Check if email already exists
-        if (authService.findByEmail(email) != null) {
-            return "redirect:/api/auth/register?error=email_exists";
-        }
-        
-        // Create new user
-        User newUser = User.builder()
-            .email(email)
-            .name(name)
-            .passwordHash(password) // Will be hashed in the service
-            .gender(gender)
-            .role("User")
-            .createdAt(LocalDate.now())
-            .build();
-        
-        // Save user and log them in
-        User savedUser = authService.register(newUser);
-        session.setAttribute("userId", savedUser.getId());
-        session.setAttribute("userName", savedUser.getName());
-        
-        return "redirect:/api/auth/loggedin";
+    @Operation(summary = "Register new user", description = "Creates a new user account")
+    @ApiResponse(responseCode = "201", description = "User created")
+    public ResponseEntity<UserDto.UserResponse> registerUser(@Valid @RequestBody UserDto.CreateUserRequest request) {
+        User created = authService.registerUser(request);
+        return ResponseEntity.ok(toResponse(created));
     }
 
-    @GetMapping("/register")
-    public String showRegisterForm(Model model, @RequestParam(required = false) String error) {
-        if (error != null) {
-            switch (error) {
-                case "missing_fields":
-                    model.addAttribute("error", "Email, username, and password are required");
-                    break;
-                case "email_exists":
-                    model.addAttribute("error", "Email already in use");
-                    break;
-                case "registration_failed":
-                    model.addAttribute("error", "Registration failed. Please try again.");
-                    break;
-            }
-        }
-        return "register";
-    }
-    
-    @GetMapping("/login")
-    public String showLoginForm() {
-        return "login";
-    }
-    
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        SecurityContextHolder.clearContext();
-        return "redirect:/?logout";
+    /**
+     * Retrieves all users who are currently active.
+     *
+     * @return a list of {@link UserDto.UserResponse} containing the mapped data to all active users
+     */
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get all users", description = "Returns all non-deleted users")
+    @ApiResponse(responseCode = "200", description = "List of all users")
+    public List<UserDto.UserResponse> getAllUsers() {
+        return authService.getAllActiveUsers().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    @DeleteMapping("/user/{id}")
-    public ResponseEntity<?> removeUser(@PathVariable Long id) {
-        // First, let's check if the user exists
+    /**
+     * Finds a user by their id.
+     *
+     * @param id the id of the user to find
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
+    @GetMapping("/user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get user by ID")
+    @ApiResponse(responseCode = "200", description = "User found")
+    public ResponseEntity<UserDto.UserResponse> getUser(@PathVariable Long id) {
         User user = authService.findById(id);
-        if (user != null) {
-            // In a real application, you would call authService.delete(user) here
-            return ResponseEntity.ok("User removed successfully");
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(toResponse(user));
     }
+
+    /**
+     * Performs a soft delete a user by marking them as inactive
+     * instead of removing them permanently.
+     *
+     * @param id  the id of the user to delete
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
+    @DeleteMapping("/user/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete user", description = "Marks user as inactive and anonymizes user data")
+    @ApiResponse(responseCode = "200", description = "User successfully deleted")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        authService.softDeleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Update the users password
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} containing the new gender information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
+    @PostMapping("/users/update_password")
+    @Operation(summary = "Update the current user's password")
+    public ResponseEntity<UserDto.UserResponse> updatePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updatePassword request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updatePassword(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
+    /**
+     * Update the users username
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} object containing the new username information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
+    @PostMapping("/users/update_username")
+    @Operation(summary = "Update the current user's username")
+    public ResponseEntity<UserDto.UserResponse> updateUsername(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateUsername request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updateUsername(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
+    /**
+     * Update the users gender
+     * @param userDetails the logged inn user's details
+     * @param request a {@link UserDto.updateGender} object containing the new gender information
+     * @return a {@link UserDto.UserResponse} containing the mapped data
+     */
+    @PostMapping("/users/update_gender")
+    @Operation(summary = "Update the current user's gender")
+    public ResponseEntity<UserDto.UserResponse> updateGender(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserDto.updateGender request
+    ) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        User updatedUser = authService.updateGender(user, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
+    /**
+     * Sets the logged inn users image
+     * @param userDetails the logged inn user's details
+     * @param file the image file
+     * @return a {@link ResponseEntity} containing the user's image as a byte array and
+     * the image type
+     * @throws IOException if an error occurs while reading or storing the file
+     */
+    @PostMapping("/users/upload_image")
+    @Operation(summary = "Update/Add the users profile picture")
+    public ResponseEntity<UserDto.UserResponse> uploadImage (
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam MultipartFile file) throws IOException {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+        String fileType = file.getContentType();
+
+        if (fileType != null && fileType.startsWith("image")) {
+            User updatedUser = authService.uploadImage(user, file, fileType);
+            return ResponseEntity.ok(toResponse(updatedUser));
+
+        } else {
+            throw new EntityNotFoundException("file type incorrect");
+        }
+
+    }
+
+    /**
+     * Retrieves the logged inn user's image.
+     *
+     * @param userDetails the logged inn user's details
+     * @return a {@link ResponseEntity} containing the user's image as a byte array and
+     * the image type
+     *
+     */
+    @GetMapping("/users/image")
+    @Operation(summary = "Get users profile picture")
+    public ResponseEntity<?> getUserProfilePicture(
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = authService.findByEmail(userDetails.getUsername());
+
+        if (user == null || !user.isActive()) {
+            throw new EntityNotFoundException("User not found");
+        }
+
+        byte[] image = authService.getImage(user);
+        String fileType = authService.getImageType(user);
+
+        return ResponseEntity.ok().header("Content-Type", fileType)
+                .body(image);
+
+    }
+
+
+    /**
+     * Maps a {@link User} entity to a {@link UserDto.UserResponse} DTO.
+     * @param u user entity
+     * @return mapped {@link UserDto.UserResponse}
+     */
+    private UserDto.UserResponse toResponse(User u) {
+          return new UserDto.UserResponse(
+                  u.getId(),
+                  u.getEmail(),
+                  u.getName(),
+                  u.getGender(),
+                  u.getRole(),
+                  u.isActive(),
+                  u.getCreatedAt(),
+                  u.getImage(),
+                  u.getImageType()
+          );
+      }
 }
+
+
+

@@ -10,8 +10,11 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class MatchServiceImplementation implements MatchService {
     @Override
     public Match getMatchById(Long id) {
         return matchRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Match " + id + " not found"));
     }
 
     /**
@@ -52,20 +55,30 @@ public class MatchServiceImplementation implements MatchService {
      */
     @Override
     public List<Match> getMatchesByTeamId(Long teamId) {
+        if (teamId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "teamId is required");
+        }
+        if (!teamRepository.existsById(teamId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + teamId + " not found");
+        }
         return matchRepository.findByHomeTeam_IdOrAwayTeam_Id(teamId, teamId);
     }
 
     /**
-     * Retrieves all matches were played during a specific year.
      *
-     * @param year the year to filter matches
-     * @return a list of {@link Match} entities played during the given year
+     * @param from
+     * @param to
+     * @return
      */
     @Override
-    public List<Match> getMatchesByYear(int year) {
-        LocalDate start = LocalDate.of(year, 1, 1);
-        LocalDate end   = LocalDate.of(year, 12, 31);
-        return matchRepository.findByDateBetween(start, end);
+    public List<Match> getMatchesBetween(LocalDate from, LocalDate to) {
+        if (from == null || to == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "from and to are required");
+        }
+        if (to.isBefore(from)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'to' must be on/after 'from'");
+        }
+        return matchRepository.findByDateBetweenOrderByDateAsc(from, to); // inclusive
     }
 
     /**
@@ -79,7 +92,7 @@ public class MatchServiceImplementation implements MatchService {
      * @param body partial update payload
      * @return the updated {@link Match}
      *
-     * @throws jakarta.persistence.EntityNotFoundException
+     * @throws EntityNotFoundException
      *  *         if the match does not exist, or if any referenced team/venue id in the
      *  *         payload cannot be found
      */
@@ -112,15 +125,57 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Creates a new match
-     *
-     * @param match the {@link Match} entity to create
-     * @return the newly created {@link Match} entity
+     * Creates a match
+     * @param body the {@link Match} entity to create
+     * @return the created match
      */
     @Override
-    public Match createMatch(Match match) {
-        match.setId(null);
-        return matchRepository.save(match);
+    @Transactional
+    public Match createMatch(MatchDto.CreateMatchRequest body) {
+        if (body == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
+        }
+        if (body.homeTeamId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "homeTeamId is required");
+        }
+        if (body.awayTeamId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "awayTeamId is required");
+        }
+        if (body.venueId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "venueId is required");
+        }
+        if (body.date() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date is required");
+        }
+
+        if (body.homeTeamId().equals(body.awayTeamId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "homeTeamId and awayTeamId must be different");
+        }
+
+        if (body.homeGoals() != null && body.homeGoals() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "homeGoals must be >= 0");
+        }
+        if (body.awayGoals() != null && body.awayGoals() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "awayGoals must be >= 0");
+        }
+
+        Team home = teamRepository.findById(body.homeTeamId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Home team " + body.homeTeamId() + " not found"));
+
+        Team away = teamRepository.findById(body.awayTeamId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Away team " + body.awayTeamId() + " not found"));
+
+        Venue venue = venueRepository.findById(body.venueId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
+
+        Match m = new Match();
+        m.setHomeTeam(home);
+        m.setAwayTeam(away);
+        m.setVenue(venue);
+        m.setDate(body.date());
+        m.setHomeGoals(body.homeGoals() != null ? body.homeGoals() : 0);
+        m.setAwayGoals(body.awayGoals() != null ? body.awayGoals() : 0);
+        return matchRepository.save(m);
     }
 
     /**
