@@ -15,6 +15,7 @@ public final class MatchDto {
      * @param awayGoals away teams goals
      */
     public record CreateMatchRequest(
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
             LocalDate date,
             Long homeTeamId,
             Long awayTeamId,

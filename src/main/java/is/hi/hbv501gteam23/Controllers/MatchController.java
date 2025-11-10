@@ -1,5 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
@@ -97,9 +99,11 @@ public class MatchController {
      * @return the created match mapped to {@link MatchResponse}
      */
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create a match")
+    @ApiResponse(responseCode = "200", description = "Match successfully created")
     @ResponseBody
     @PostMapping
-    public ResponseEntity<MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
+    public ResponseEntity<MatchDto.MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
         Match createdMatch = matchService.createMatch(body);
         return ResponseEntity.created(URI.create("/matches" + createdMatch.getId())).body(toResponse(createdMatch));
     }

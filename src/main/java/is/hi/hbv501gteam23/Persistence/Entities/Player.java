@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "players")
+@Table(name = "player")
 public class Player {
     @Id
     @SequenceGenerator(name = "player_sequence", sequenceName = "player_sequence", allocationSize = 1)
@@ -24,7 +24,7 @@ public class Player {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Column(name = "date_of_birth",  nullable = false)
+    @Column(name = "date_of_birth",  nullable = true)
     private LocalDate dateOfBirth;
 
     @Column(name = "player_country", length = 80)

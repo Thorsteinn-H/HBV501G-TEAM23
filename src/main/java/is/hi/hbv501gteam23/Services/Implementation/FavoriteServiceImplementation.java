@@ -4,6 +4,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Repositories.FavoriteRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,13 +15,9 @@ import java.util.*;
  * Service implementation for handling favorite items
  */
 @Service
+@RequiredArgsConstructor
 public class FavoriteServiceImplementation implements FavoriteService {
     private final FavoriteRepository favoriteRepository;
-
-    @Autowired
-    public FavoriteServiceImplementation(FavoriteRepository favoriteRepository) {
-        this.favoriteRepository = favoriteRepository;
-    }
 
     /**
      * Get or create favorites for a user

@@ -2,7 +2,9 @@ package is.hi.hbv501gteam23.Controllers;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,22 +18,24 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/favorites")
+@RequiredArgsConstructor
 public class FavouriteController {
     private final FavoriteService favoriteService;
-
-    public FavouriteController(FavoriteService favoriteService) {
-        this.favoriteService = favoriteService;
-    }
+    private final AuthRepository authRepository;
 
     /**
      * Get the current logged in users id
      * @return the id of the logged in user
      */
     private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Assuming the user ID is stored in the authentication principal
-        // You might need to adjust this based on your authentication setup
-        return Long.parseLong(authentication.getName());
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            throw new IllegalStateException("Not authenticated");
+        }
+        String email = auth.getName();
+        return authRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found: " + email))
+                .getId();
     }
 
     /**
