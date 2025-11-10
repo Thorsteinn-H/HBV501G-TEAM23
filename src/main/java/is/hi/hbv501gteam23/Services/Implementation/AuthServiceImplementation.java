@@ -6,8 +6,6 @@ import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,10 +62,7 @@ public class AuthServiceImplementation implements AuthService {
         user.setCreatedAt(LocalDateTime.now());
         user.setActive(true);
         user.setGender(request.gender());
-
-        User saved = authRepository.save(user);
-        favoriteService.getOrCreateFavorites(saved.getId());
-        return saved;
+        return authRepository.save(user);
     }
 
     /**
@@ -112,15 +107,6 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public boolean validatePassword(String inputPassword, String storedPassword) {
         return passwordEncoder.matches(inputPassword, storedPassword);
-    }
-
-    /**
-     * Ensures a favorite exists for a specific user
-     * @param userId The id of the user
-     */
-    @Override
-    public void ensureFavoritesExists(Long userId) {
-        favoriteService.getOrCreateFavorites(userId);
     }
 
     /**
