@@ -58,8 +58,8 @@ public class JwtTokenProvider {
     }
 
     /**
-     *
-     * @param token
+     * Validates the JWT token
+     * @param token the token to validate
      * @return false if invalid, otherwise true
      */
     public boolean validateToken(String token) {

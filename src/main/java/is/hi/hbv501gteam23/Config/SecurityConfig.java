@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Config;
 
 import is.hi.hbv501gteam23.Security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,28 +34,35 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
-                                "/metadata/**"
-                        ).permitAll()
-                        .requestMatchers(
-                                "/api/auth/users/**",
-                                "/api/auth/user/**"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(logout -> logout
-                        .logoutUrl("/api/auth/logout")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .permitAll()
-                );
-
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                        "/api/auth/register",
+                        "/api/auth/login",
+                        "/metadata/**"
+                ).permitAll()
+                .requestMatchers(
+                        "/api/auth/users/**",
+                        "/api/auth/user/**"
+                ).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> {
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
+                })
+                .accessDeniedHandler((req, res, e) -> {
+                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: You do not have permission");
+                })
+            )
+            .logout(logout -> logout
+                .logoutUrl("/api/auth/logout")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .permitAll()
+        );
         return http.build();
     }
 }
