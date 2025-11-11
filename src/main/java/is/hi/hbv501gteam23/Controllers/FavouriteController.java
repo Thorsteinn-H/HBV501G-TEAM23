@@ -1,12 +1,11 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
-import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +15,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Favorites} resources.
  * Base path is /favoerites
  */
+@Tag(name = "Favorite", description = "Favorite management")
 @RestController
 @RequestMapping("/api/favorites")
 @RequiredArgsConstructor

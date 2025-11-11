@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
@@ -29,6 +30,7 @@ import java.util.List;
 /**
  * REST controller that exposes read/write operations for users
  */
+@Tag(name = "Auth", description = "Authentication and user management")
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")

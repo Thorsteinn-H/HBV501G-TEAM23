@@ -7,6 +7,32 @@ import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import java.util.List;
 
 public interface PlayerService {
+
+    /**
+     *
+     * @param name
+     * @param teamId
+     * @param teamName
+     * @param country
+     * @param isActive
+     * @param sortBy
+     * @param sortDir
+     * @param page
+     * @param size
+     * @return
+     */
+    List<Player> findPlayers(
+        String name,
+        Long teamId,
+        String teamName,
+        String country,
+        Boolean isActive,
+        String sortBy,
+        String sortDir,
+        int page,
+        int size
+    );
+
     /**
      * Retrieves all players
      * @return a list of all {@link Player} entities

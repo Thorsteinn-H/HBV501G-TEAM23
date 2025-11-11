@@ -1,15 +1,17 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.VenueSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -26,6 +28,31 @@ public class VenueServiceImplementation implements VenueService {
     @Override
     public List<Venue> getAllVenues() {
         return venueRepository.findAll();
+    }
+
+    /**
+     *
+     * @param id
+     * @param name
+     * @param address
+     * @return
+     */
+    @Override
+    public List<Venue> findByFilters(Long id, String name, String address) {
+        Specification<Venue> spec = null;
+
+        if (id != null) {
+            spec = VenueSpecifications.hasId(id);
+        }
+
+        if (name != null && !name.isBlank()) {
+            spec = (spec == null) ? VenueSpecifications.hasName(name) : spec.and(VenueSpecifications.hasName(name));
+        }
+
+        if (address != null && !address.isBlank()) {
+            spec = (spec == null) ? VenueSpecifications.hasAddress(address) : spec.and(VenueSpecifications.hasAddress(address));
+        }
+        return venueRepository.findAll(spec);
     }
 
     @Override
