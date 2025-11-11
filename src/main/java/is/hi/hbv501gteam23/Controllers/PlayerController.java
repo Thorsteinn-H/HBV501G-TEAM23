@@ -1,10 +1,14 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
+import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,31 +17,75 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Player} resources.
  * Base path is /players
  */
+@Tag(name = "Player", description = "Player management")
 @RestController
 @RequestMapping("/players")
 @RequiredArgsConstructor
 public class PlayerController {
     private final PlayerService playerService;
+    private final MetadataService metadataService;
 
     /**
-     * Retrieves all players.
-     * <p>
-     *      This method retrieves all {@link Player} entities from the database
-     * </p>
-     * @return list of players mapped to {@link PlayerResponse}
+     *
+     * @param name
+     * @param teamId
+     * @param teamName
+     * @param country
+     * @param isActive
+     * @param sortBy
+     * @param sortDir
+     * @param page
+     * @param size
+     * @return
      */
     @GetMapping
-    @Operation(summary = "List all players")
-    @ApiResponse(responseCode = "200", description = "Player list successfully fetched")
-    public List<PlayerResponse> getAllPlayers() {
-        return playerService.getAllPlayers()
-                .stream().map(this::toResponse).toList();
+    @Operation(
+            summary = "Get all players with optional filters",
+            description = "Retrieve all players or filter by name, teamId, teamName, country, or active status. Supports sorting and pagination."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Players successfully fetched"),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameters")
+    })
+    public ResponseEntity<List<PlayerDto.PlayerResponse>> listPlayers(
+            @Parameter(description = "Filter by player name") @RequestParam(required = false) String name,
+            @Parameter(description = "Filter by team ID") @RequestParam(required = false) Long teamId,
+            @Parameter(description = "Filter by team name") @RequestParam(required = false) String teamName,
+            @Parameter(description = "Filter by country code. See valid country codes via the /metadata/countries endpoint")
+                @RequestParam(required = false) String country,
+            @Parameter(description = "Filter by active status") @RequestParam(required = false) Boolean isActive,
+            @Parameter(description = "Field to sort by (default = 'name')") @RequestParam(defaultValue = "name") String sortBy,
+            @Parameter(description = "Sort direction: ASC or DESC (default = ASC)") @RequestParam(defaultValue = "ASC") String sortDir,
+            @Parameter(description = "Page number, 0-indexed") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
+    ) {
+        if (country != null) {
+            boolean validCountry = metadataService.getAllCountries().stream()
+                    .anyMatch(c -> c.code().equalsIgnoreCase(country));
+            if (!validCountry) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(Collections.emptyList());
+            }
+        }
+
+        List<Player> players = playerService.findPlayers(
+                name, teamId, teamName, country, isActive, sortBy, sortDir, page, size
+        );
+
+        List<PlayerDto.PlayerResponse> response = players.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -51,93 +99,17 @@ public class PlayerController {
      * @throws jakarta.persistence.EntityNotFoundException if the player is not found
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Get player by ID")
-    @ApiResponse(responseCode = "200", description = "Player successfully fetched")
-    public PlayerResponse getPlayerById(@PathVariable Long id) {
+    @Operation(
+            summary = "Get player by ID",
+            description = "Retrieve a single player by their unique identifier."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Player successfully fetched"),
+            @ApiResponse(responseCode = "404", description = "Player not found")
+    })
+    public PlayerResponse getPlayerById(
+            @Parameter(description = "ID of the player to retrieve") @PathVariable Long id) {
         return toResponse(playerService.getPlayerById(id));
-    }
-
-    /**
-     * Retrieves a player by name
-     *
-     * <p>
-     *     This method retrieves a {@link Player} entity from the database with a specific name.
-     * </p>
-     * @param name the name of the player in database
-     * @return the player mapped to a {@link PlayerResponse}
-     */
-    @GetMapping(params = "name")
-    @Operation(summary = "Get player by name")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
-    public PlayerResponse searchPlayersByName(@RequestParam String name) {
-        return toResponse(playerService.searchPlayersByName(name));
-    }
-
-    /**
-     * Retrieves all players by team name
-     * <p>
-     *      This method retrieves all {@link Player} entities from the database with a specific name.
-     * </p>
-     * @param teamName the name of the team in database
-     * @return list of players mapped to {@link PlayerResponse}
-     */
-    @GetMapping(params = "team")
-    @Operation(summary = "List all players in team by team name")
-    @ApiResponse(responseCode = "200", description = "List successfully fetched")
-    public List<PlayerResponse> getAllPlayersByTeamName(@RequestParam String teamName) {
-        return playerService.getByTeamName(teamName)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    /**
-     * Retrieves all players by team identifier
-     *
-     * <p>
-     *     This method retrieves all {@link Player} entities with a specific team.
-     * </p>
-     * @param teamId the identifier of the team in database
-     * @return list of players mapped to {@link PlayerResponse}
-     */
-    @GetMapping("/team/{teamId}")
-    @Operation(summary = "List all players in team by team ID")
-    @ApiResponse(responseCode = "200", description = "List successfully fetched")
-    public List<PlayerDto.PlayerResponse> getByTeamId(@PathVariable("teamId") Long teamId) {
-        return playerService.getByTeamId(teamId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    /**
-     * Retrieves all players if they are active
-     * @param isActive if the player is active or not
-     * @return list of players mapped to {@link PlayerResponse}
-     */
-    @GetMapping("/isActive={isActive}")
-    @Operation(summary = "List all active players")
-    @ApiResponse(responseCode = "200", description = "List successfully fetched")
-    public List<PlayerDto.PlayerResponse> getActivePlayers(@PathVariable("isActive") Boolean isActive) {
-        return playerService.getActivePlayers(isActive)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    /**
-     * Retrieves all players from a specific country
-     * @param country country to list all players from
-     * @return list of players mapped to {@link PlayerResponse}
-     */
-    @GetMapping("/country={country}")
-    @Operation(summary = "List all players from specific country")
-    @ApiResponse(responseCode = "200", description = "List successfully fetched")
-    public List<PlayerResponse> getPlayerByCountry(@PathVariable String country) {
-        return playerService.findPlayerByCountry(country.toUpperCase())
-                .stream()
-                .map(this::toResponse)
-                .toList();
     }
 
     /**
@@ -145,10 +117,10 @@ public class PlayerController {
      * @param body the player data
      * @return the new player
      */
-    @Operation(summary = "Create a player")
-    @ApiResponse(responseCode = "200", description = "Player successfully created")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create a player")
+    @ApiResponse(responseCode = "200", description = "Player successfully created")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
         Player created = playerService.createPlayer(body);
@@ -163,6 +135,8 @@ public class PlayerController {
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Modify a player")
+    @ApiResponse(responseCode = "200", description = "Player successfully modified")
     public ResponseEntity<PlayerResponse> patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
         Player updated = playerService.patchPlayer(id, body);
         return ResponseEntity.ok(toResponse(updated));

@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
@@ -19,6 +20,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Favorite} resources.
  * Base path is /favoerites
  */
+@Tag(name = "Favorite", description = "Favorite management")
 @RestController
 @RequestMapping("/favorites")
 @RequiredArgsConstructor

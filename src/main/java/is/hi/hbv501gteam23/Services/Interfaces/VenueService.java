@@ -1,8 +1,6 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
-import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 
 import java.util.List;
@@ -15,6 +13,15 @@ public interface VenueService {
      * @return a list of all {@link Venue} entities
      */
     List<Venue> getAllVenues();
+
+    /**
+     *
+     * @param id
+     * @param name
+     * @param address
+     * @return
+     */
+    List<Venue> findByFilters(Long id, String name, String address);
 
     /**
      * Retrieves a single venue by its unique identifier.

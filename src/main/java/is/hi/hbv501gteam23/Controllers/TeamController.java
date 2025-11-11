@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
@@ -18,6 +19,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Team} resources.
  * Base path is /players
  */
+@Tag(name = "Team", description = "Team management")
 @RestController
 @RequestMapping("/teams")
 @RequiredArgsConstructor

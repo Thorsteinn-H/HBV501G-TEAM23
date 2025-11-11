@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.dto.LoginDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
@@ -21,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.List;
 /**
  * REST controller that exposes read/write operations for users
  */
+@Tag(name = "Auth", description = "Authentication and user management")
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
@@ -81,10 +84,10 @@ public class AuthController {
      */
     @PostMapping("/register")
     @Operation(summary = "Register new user", description = "Creates a new user account")
-    @ApiResponse(responseCode = "201", description = "User created")
+    @ApiResponse(responseCode = "201", description = "Created")
     public ResponseEntity<UserDto.UserResponse> registerUser(@Valid @RequestBody UserDto.CreateUserRequest request) {
-        User created = authService.registerUser(request);
-        return ResponseEntity.ok(toResponse(created));
+        User newUser = authService.registerUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(newUser));
     }
 
     /**

@@ -7,14 +7,18 @@ import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import is.hi.hbv501gteam23.Utils.CountryUtils;
-import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import java.time.LocalDate;
+
 import java.util.List;
 
 /**
@@ -26,6 +30,70 @@ import java.util.List;
 public class PlayerServiceImplementation implements PlayerService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
+
+    /**
+     *
+     * @param name
+     * @param teamId
+     * @param teamName
+     * @param country
+     * @param isActive
+     * @param sortBy
+     * @param sortDir
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public List<Player> findPlayers(
+            String name,
+            Long teamId,
+            String teamName,
+            String country,
+            Boolean isActive,
+            String sortBy,
+            String sortDir,
+            int page,
+            int size
+    ) {
+        Specification<Player> spec = (root, query, criteriaBuilder) -> {
+            Predicate p = criteriaBuilder.conjunction();
+
+            if (name != null && !name.isBlank()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+
+            if (teamId != null) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("team").get("id"), teamId));
+            }
+
+            if (teamName != null && !teamName.isBlank()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%"));
+            }
+
+            if (country != null && !country.isBlank()) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(
+                        root.get("country"), country.toUpperCase()));
+            }
+
+            if (isActive != null) {
+                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("active"), isActive));
+            }
+
+            return p;
+        };
+
+        Sort.Direction direction = Sort.Direction.ASC;
+        if ("DESC".equalsIgnoreCase(sortDir)) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return playerRepository.findAll(spec, pageable).getContent();
+    }
 
     /**
      * Retrieves all players

@@ -13,7 +13,7 @@ public interface AuthRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     // Find active users only (not deleted)
-    @Query("SELECT u FROM User u WHERE u.isActive = false")
+    @Query("SELECT u FROM User u WHERE u.isActive = true")
     List<User> findAllActiveUsers();
 
     // Login method - returns user if credentials are valid, null otherwise
