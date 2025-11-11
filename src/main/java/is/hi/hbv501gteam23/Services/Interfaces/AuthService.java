@@ -69,12 +69,6 @@ public interface AuthService {
     void softDeleteUser(Long id);
 
     /**
-     * Ensures that a favorites entry exists for the given user
-     * @param userId The ID of the user
-     */
-    void ensureFavoritesExists(Long userId);
-
-    /**
      * Uploads an image file to a specific user.
      *
      * @param user      the user uploading the specific image
