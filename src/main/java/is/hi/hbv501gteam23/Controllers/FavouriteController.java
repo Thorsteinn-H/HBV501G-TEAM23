@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * REST controller that exposes read/write operations for {@link Favorite} resources.
- * Base path is /favoerites
+ * Base path is /favorites
  */
 @Tag(name = "Favorite", description = "Favorite management")
 @RestController
