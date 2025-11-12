@@ -6,7 +6,7 @@ import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
-import is.hi.hbv501gteam23.Utils.CountryUtils;
+import is.hi.hbv501gteam23.Utils.MetadataUtils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -231,7 +231,7 @@ public class PlayerServiceImplementation implements PlayerService {
         Player p = new Player();
         p.setName(name);
         p.setDateOfBirth(body.dateOfBirth());
-        p.setCountry(CountryUtils.normalizeCountryCode(body.country()));
+        p.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
         p.setPosition(body.position());
         p.setGoals(body.goals() != null ? body.goals() : 0);
         p.setTeam(team);
@@ -262,7 +262,7 @@ public class PlayerServiceImplementation implements PlayerService {
 
         if (body.name() != null)        p.setName(body.name());
         if (body.dateOfBirth() != null) p.setDateOfBirth(body.dateOfBirth());
-        if (body.country() != null)     p.setCountry(CountryUtils.normalizeCountryCode(body.country()));
+        if (body.country() != null)     p.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
         if (body.position() != null)    p.setPosition(body.position());
         if (body.goals() != null)       p.setGoals(body.goals());
         if (body.isActive() != null)    p.setActive(body.isActive());

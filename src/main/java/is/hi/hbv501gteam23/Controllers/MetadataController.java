@@ -1,21 +1,20 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import is.hi.hbv501gteam23.Persistence.dto.CountryDto;
+import is.hi.hbv501gteam23.Persistence.dto.MetadataDto;
+import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
+import is.hi.hbv501gteam23.Utils.MetadataUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
-@Tag(name = "Metadata", description = "Endpoints providing reference data")
+@Tag(name = "Metadata")
 @RestController
 @RequestMapping("/metadata")
 @RequiredArgsConstructor
@@ -27,21 +26,33 @@ public class MetadataController {
      *
      * @return ResponseEntity containing the list of countries and HTTP status code 200.
      */
-    @Operation(
-        summary = "Retrieve all countries",
-        description = "Fetches a list of all countries that can be assigned to a team or player. " +
-            "Each country includes its ISO 3166-1 alpha-2 code and English display name."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Country list successfully fetched"),
-        @ApiResponse(responseCode = "500", description = "Internal server error while fetching countries")
-    })
     @GetMapping("/countries")
-    public ResponseEntity<List<CountryDto>> getAllCountries() {
-        try {
-            return ResponseEntity.ok(metadataService.getAllCountries());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @Operation(
+        summary = "List countries",
+        description = "Fetches a list of all countries that can be assigned to a team or player."
+    )
+    public Map<String, List<Map<String, String>>> getAllCountries() {
+        List<Map<String, String>> countries = metadataService.getAllCountries()
+            .stream()
+            .map(c -> new MetadataDto(c.label(), c.value()))
+            .map(dto -> Map.of(
+                "name", dto.label(),
+                "code", dto.value()
+            ))
+            .toList();
+        return Map.of("countries", countries);
+    }
+
+    @GetMapping("/genders")
+    @Operation(summary = "List genders", description = "Returns all possible Gender enum values.")
+    public Map<String, List<Map<String, String>>> getGenders() {
+        List<Map<String, String>> genders = MetadataUtils.toMetadata(Gender.class, Gender::getLabel)
+                .stream()
+                .map(dto -> Map.of(
+                        "label", dto.label(),
+                        "value", dto.value()
+                ))
+                .toList();
+        return Map.of("genders", genders);
     }
 }

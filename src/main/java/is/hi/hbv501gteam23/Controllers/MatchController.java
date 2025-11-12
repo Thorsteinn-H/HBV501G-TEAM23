@@ -1,8 +1,6 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
@@ -22,7 +20,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Match} resources.
  * Base path is /matches
  */
-@Tag(name = "Match", description = "Match management")
+@Tag(name = "Match")
 @RestController
 @RequestMapping("/matches")
 @RequiredArgsConstructor
@@ -35,20 +33,12 @@ public class MatchController {
      * @return list of matches mapped to {@link MatchResponse}
      */
     @GetMapping
-    @Operation(
-        summary = "List all matches",
-        description = "Retrieves all matches stored in the database, with optional filters by date or team."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Match list successfully retrieved"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - missing or invalid token"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
+    @Operation(summary = "List all matches", description = "Lists all matches with optional filters by date or team.")
     public List<MatchResponse> getAllMatches() {
         return matchService.getAllMatches()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+            .stream()
+            .map(this::toResponse)
+            .toList();
     }
 
     /**
@@ -59,7 +49,6 @@ public class MatchController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "Get match by ID")
-    @ApiResponse(responseCode = "200", description = "Match retrieved")
     public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
         return toResponse(matchService.getMatchById(id));
     }
@@ -71,6 +60,7 @@ public class MatchController {
      * @return a list of matches mapped to {@link MatchResponse}
      */
     @GetMapping(params = {"from","to"})
+    @Operation(summary = "Get matches between time period")
     public List<MatchResponse> getMatchesBetween(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
@@ -86,7 +76,6 @@ public class MatchController {
      */
     @GetMapping(params = "team")
     @Operation(summary = "List all matches played by a team")
-    @ApiResponse(responseCode = "200", description = "Match list retrieved")
     public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
         return matchService.getMatchesByTeamId(teamId)
                 .stream()
@@ -100,11 +89,10 @@ public class MatchController {
      * @param body the match data to create
      * @return the created match mapped to {@link MatchResponse}
      */
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a match")
-    @ApiResponse(responseCode = "200", description = "Match successfully created")
     @ResponseBody
-    @PostMapping
     public ResponseEntity<MatchDto.MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
         Match createdMatch = matchService.createMatch(body);
         return ResponseEntity.created(URI.create("/matches" + createdMatch.getId())).body(toResponse(createdMatch));
@@ -119,7 +107,6 @@ public class MatchController {
      */
     @PatchMapping("/{id}")
     @Operation(summary = "Modify a match")
-    @ApiResponse(responseCode = "200", description = "Match successfully modified")
     public ResponseEntity<MatchDto.MatchResponse> updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest body) {
         Match updatedMatch = matchService.patchMatch(id, body);
         return ResponseEntity.ok(toResponse(updatedMatch));

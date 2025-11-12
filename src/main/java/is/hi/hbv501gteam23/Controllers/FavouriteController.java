@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
@@ -20,7 +21,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Favorite} resources.
  * Base path is /favorites
  */
-@Tag(name = "Favorite", description = "Favorite management")
+@Tag(name = "Favorite")
 @RestController
 @RequestMapping("/favorites")
 @RequiredArgsConstructor
@@ -29,8 +30,8 @@ public class FavouriteController {
     private final AuthRepository authRepository;
 
     /**
-     * Get the current logged in users id
-     * @return the id of the logged in user
+     * Get the currently logged-in users id
+     * @return the id of the logged-in user
      */
     private Long getCurrentUserId() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -52,6 +53,7 @@ public class FavouriteController {
     }
 
     @GetMapping
+    @Operation(summary = "List favorites")
     public ResponseEntity<List<FavoriteDto.favoriteResponse>> getAllFavorites() {
         Long userId = getCurrentUserId();
         var list = favoriteService.listAllForUser(userId);
@@ -59,6 +61,7 @@ public class FavouriteController {
     }
 
     @GetMapping(value = "/{type}")
+    @Operation(summary = "Get favorites by type")
     public ResponseEntity<List<FavoriteDto.favoriteResponse>> getFavoritesByType(@PathVariable String type) {
         Long userId = getCurrentUserId();
         var entityType = parseType(type);
@@ -78,6 +81,7 @@ public class FavouriteController {
 
 
     @PostMapping("/{type}/{itemId}")
+    @Operation(summary = "Add to favorites")
     public ResponseEntity<?> addFavorite(
             @PathVariable String type,
             @PathVariable Long itemId) {
@@ -93,6 +97,7 @@ public class FavouriteController {
     }
 
     @DeleteMapping("/{type}/{itemId}")
+    @Operation(summary = "Remove favorite")
     public ResponseEntity<Void> removeFavorite(
             @PathVariable String type,
             @PathVariable Long itemId) {

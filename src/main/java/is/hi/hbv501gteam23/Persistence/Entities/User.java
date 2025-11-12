@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,15 +29,18 @@ public class User implements Serializable {
     @Column(name = "email", nullable = false, unique = true, length = 320)
     private String email;
 
-    @Column(name = "gender")
-    private String gender;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = true)
+    private Gender gender;
 
     @JsonIgnore
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = false;
+    private boolean isActive = true;
+
+    @Builder.Default
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt  = LocalDateTime.now();
 
     @JsonIgnore
     @Column(name = "deleted_at")

@@ -36,16 +36,39 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/api/auth/register",
-                        "/api/auth/login",
-                        "/metadata/**"
+                    .requestMatchers(
+                        "/auth/login",
+                        "/auth/register"
+                    ).permitAll()
+                    .requestMatchers(HttpMethod.GET,
+                        "/players/**",
+                        "/venues/**",
+                        "/matches/**",
+                        "/teams/**",
+                        "/favorites/**",
+                        "/metadata/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**"
                 ).permitAll()
-                .requestMatchers(
-                        "/api/auth/users/**",
-                        "/api/auth/user/**"
+                .requestMatchers("/users/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST,
+                        "/players/**",
+                        "/venues/**",
+                        "/matches/**",
+                        "/teams/**"
                 ).hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                .requestMatchers(HttpMethod.PATCH,
+                        "/players/**",
+                        "/venues/**",
+                        "/matches/**",
+                        "/teams/**"
+                ).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE,
+                        "/players/**",
+                        "/venues/**",
+                        "/matches/**",
+                        "/teams/**"
+                ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -56,12 +79,6 @@ public class SecurityConfig {
                 .accessDeniedHandler((req, res, e) -> {
                     res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: You do not have permission");
                 })
-            )
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .permitAll()
         );
         return http.build();
     }

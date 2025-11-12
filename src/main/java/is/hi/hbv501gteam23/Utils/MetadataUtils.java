@@ -1,9 +1,27 @@
 package is.hi.hbv501gteam23.Utils;
 
-import java.util.Arrays;
-import java.util.Locale;
+import is.hi.hbv501gteam23.Persistence.dto.MetadataDto;
 
-public class CountryUtils {
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Function;
+
+public class MetadataUtils {
+
+    /**
+     * Convert any enum to a list of MetadataDto
+     *
+     * @param enumClass the enum class
+     * @param labelMapper function to get the label (usually enum.getLabel())
+     * @param <E> enum type
+     * @return List of MetadataDto
+     */
+    public static <E extends Enum<E>> List<MetadataDto> toMetadata(Class<E> enumClass, Function<E, String> labelMapper) {
+        return Arrays.stream(enumClass.getEnumConstants())
+                .map(e -> new MetadataDto(labelMapper.apply(e), e.name()))
+                .toList();
+    }
 
     /**
      * Normalizes and validates a 2-letter ISO country code.
