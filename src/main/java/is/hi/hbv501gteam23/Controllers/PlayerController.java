@@ -2,8 +2,6 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
@@ -25,7 +23,7 @@ import java.util.stream.Collectors;
  * REST controller that exposes read/write operations for {@link Player} resources.
  * Base path is /players
  */
-@Tag(name = "Player", description = "Player management")
+@Tag(name = "Player")
 @RestController
 @RequestMapping("/players")
 @RequiredArgsConstructor
@@ -48,67 +46,49 @@ public class PlayerController {
      */
     @GetMapping
     @Operation(
-            summary = "Get all players with optional filters",
-            description = "Retrieve all players or filter by name, teamId, teamName, country, or active status. Supports sorting and pagination."
+        summary = "List players",
+        description = "List all players or use optional filters. Supports sorting and pagination."
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Players successfully fetched"),
-            @ApiResponse(responseCode = "400", description = "Invalid query parameters")
-    })
     public ResponseEntity<List<PlayerDto.PlayerResponse>> listPlayers(
-            @Parameter(description = "Filter by player name") @RequestParam(required = false) String name,
-            @Parameter(description = "Filter by team ID") @RequestParam(required = false) Long teamId,
-            @Parameter(description = "Filter by team name") @RequestParam(required = false) String teamName,
-            @Parameter(description = "Filter by country code. See valid country codes via the /metadata/countries endpoint")
-                @RequestParam(required = false) String country,
-            @Parameter(description = "Filter by active status") @RequestParam(required = false) Boolean isActive,
-            @Parameter(description = "Field to sort by (default = 'name')") @RequestParam(defaultValue = "name") String sortBy,
-            @Parameter(description = "Sort direction: ASC or DESC (default = ASC)") @RequestParam(defaultValue = "ASC") String sortDir,
-            @Parameter(description = "Page number, 0-indexed") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size
+        @Parameter @RequestParam(required = false) String name,
+        @Parameter @RequestParam(required = false) Long teamId,
+        @Parameter @RequestParam(required = false) String teamName,
+        @Parameter @RequestParam(required = false) String country,
+        @Parameter @RequestParam(required = false) Boolean isActive,
+        @Parameter @RequestParam(defaultValue = "name") String sortBy,
+        @Parameter @RequestParam(defaultValue = "ASC") String sortDir,
+        @Parameter @RequestParam(defaultValue = "0") int page,
+        @Parameter @RequestParam(defaultValue = "20") int size
     ) {
         if (country != null) {
             boolean validCountry = metadataService.getAllCountries().stream()
-                    .anyMatch(c -> c.code().equalsIgnoreCase(country));
+                .anyMatch(c -> c.value().equalsIgnoreCase(country));
             if (!validCountry) {
                 return ResponseEntity
-                        .badRequest()
-                        .body(Collections.emptyList());
+                    .badRequest()
+                    .body(Collections.emptyList());
             }
         }
 
         List<Player> players = playerService.findPlayers(
-                name, teamId, teamName, country, isActive, sortBy, sortDir, page, size
+            name, teamId, teamName, country, isActive, sortBy, sortDir, page, size
         );
 
         List<PlayerDto.PlayerResponse> response = players.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+            .map(this::toResponse)
+            .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Retrieves a single player by id.
-     *
-     * <p>
-     *      This method retrieves a {@link Player} entity from the database with a specific identifier.
-     * </p>
-     * @param id the id of the player to be retrieved.
-     * @return the player mapped to a {@link PlayerResponse}
-     * @throws jakarta.persistence.EntityNotFoundException if the player is not found
+     * Retrieves a single player by ID.
+     * @param id the ID of the player to find
+     * @return the player
      */
     @GetMapping("/{id}")
-    @Operation(
-            summary = "Get player by ID",
-            description = "Retrieve a single player by their unique identifier."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Player successfully fetched"),
-            @ApiResponse(responseCode = "404", description = "Player not found")
-    })
-    public PlayerResponse getPlayerById(
-            @Parameter(description = "ID of the player to retrieve") @PathVariable Long id) {
+    @Operation(summary = "Get player by ID", description = "Get a player by their ID.")
+    public PlayerResponse getPlayerById(@Parameter @PathVariable Long id) {
         return toResponse(playerService.getPlayerById(id));
     }
 
@@ -120,7 +100,6 @@ public class PlayerController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a player")
-    @ApiResponse(responseCode = "200", description = "Player successfully created")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
         Player created = playerService.createPlayer(body);
@@ -136,7 +115,6 @@ public class PlayerController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Modify a player")
-    @ApiResponse(responseCode = "200", description = "Player successfully modified")
     public ResponseEntity<PlayerResponse> patchPlayer(@PathVariable Long id, @RequestBody PlayerDto.PatchPlayerRequest body) {
         Player updated = playerService.patchPlayer(id, body);
         return ResponseEntity.ok(toResponse(updated));

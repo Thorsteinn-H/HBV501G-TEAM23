@@ -16,12 +16,11 @@ public interface VenueService {
 
     /**
      *
-     * @param id
      * @param name
      * @param address
      * @return
      */
-    List<Venue> findByFilters(Long id, String name, String address);
+    List<Venue> findByFilters(String name, String address);
 
     /**
      * Retrieves a single venue by its unique identifier.
