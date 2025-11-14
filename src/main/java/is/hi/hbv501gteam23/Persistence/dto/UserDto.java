@@ -18,7 +18,7 @@ public class UserDto {
      * @param isActive
      */
     public record CreateUserRequest(
-            @Schema(example = "user@example.com")
+            @Schema(example = "admin@team23.com")
             @Email(message = "Invalid email")
             @NotBlank(message = "Email is required")
             String email,
@@ -53,7 +53,7 @@ public class UserDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchUserRequest(
-            @Schema(example = "user@example.com")
+            @Schema(example = "admin@team23.com")
             @Email(message = "Invalid email")
             String email,
 
@@ -93,9 +93,9 @@ public class UserDto {
      * @param oldPassword The old password for the user
      */
     public record UpdatePassword(
-            @Schema(example = "new")
+            @Schema(example = "newPassword456")
             String newPassword,
-            @Schema(example = "old")
+            @Schema(example = "oldPassword123")
             String oldPassword
     ) {}
 
@@ -112,7 +112,7 @@ public class UserDto {
     public record UserResponse(
             Long id,
 
-            @Schema(example = "user@example.com")
+            @Schema(example = "admin@team23.com")
             String email,
 
             @Schema(example = "username")

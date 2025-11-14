@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -19,10 +20,10 @@ public interface UserService {
     /**
      * Finds a user by their email address.
      *
-     * @param email  the email address of the user to find
+     * @param email the email address of the user to find
      * @return the matching {@link User} entity
      */
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     /**
      * Finds a user by their id.

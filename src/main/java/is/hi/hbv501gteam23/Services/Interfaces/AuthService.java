@@ -9,18 +9,17 @@ public interface AuthService {
     /**
      * Logs in a user with the given email and password.
      *
-     * @param email     the email address of the user
-     * @param password  the plain text password provided by the user
-     * @return the {@link User} entity if credentials are valid,
-     *
+     * @param email    the email address of the user
+     * @param password the plain text password provided by the user
+     * @return the {@link AuthDto.AuthResponse} entity if credentials are valid
      */
-    User login(String email, String password);
+    AuthDto.AuthResponse login(String email, String password);
 
     /**
      * Registers a new user with the provided details.
      *
-     * @param request  a {@link UserDto.CreateUserRequest} containing the users information
+     * @param request a {@link UserDto.CreateUserRequest} containing the users information
      * @return the newly created {@link User} entity
      */
-    User register(AuthDto.@Valid RegisterUserRequest request);
+    AuthDto.AuthResponse register(@Valid AuthDto.RegisterUserRequest request);
 }
