@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -47,12 +48,12 @@ public class UserServiceImplementation implements UserService {
     /**
      * Finds a user by their email address.
      *
-     * @param email  the email address of the user to find
+     * @param email the email address of the user to find
      * @return the matching {@link User} entity
      */
     @Override
-    public User findByEmail(String email) {
-        return authRepository.findByEmail(email).orElse(null);
+    public Optional<User> findByEmail(String email) {
+        return authRepository.findByEmail(email);
     }
 
     /**

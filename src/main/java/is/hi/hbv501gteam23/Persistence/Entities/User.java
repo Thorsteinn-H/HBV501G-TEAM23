@@ -5,6 +5,7 @@ import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -16,7 +17,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     @Id
     @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")

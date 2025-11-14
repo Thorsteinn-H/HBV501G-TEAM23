@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@Tag(name = "User")
+@Tag(name = "User", description = "Restricted to admin only")
 @CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
