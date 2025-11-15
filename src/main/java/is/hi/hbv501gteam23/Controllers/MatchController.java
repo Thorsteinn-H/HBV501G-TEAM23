@@ -1,7 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
@@ -20,6 +20,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Match} resources.
  * Base path is /matches
  */
+@Tag(name = "Match")
 @RestController
 @RequestMapping("/matches")
 @RequiredArgsConstructor
@@ -27,45 +28,39 @@ public class MatchController {
     private final MatchService matchService;
 
     /**
-     * Retrieves all matches
+     * Lists all {@link Match} entities
      *
-     * <p>
-     *      This method retrieves all {@link Match} entities from the database
-     * </p>
-     *
-     * @return list of matches mapped to {@link MatchResponse
+     * @return list of matches mapped to {@link MatchResponse}
      */
     @GetMapping
+    @Operation(summary = "List all matches", description = "Lists all matches with optional filters by date or team.")
     public List<MatchResponse> getAllMatches() {
         return matchService.getAllMatches()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+            .stream()
+            .map(this::toResponse)
+            .toList();
     }
 
     /**
-     * Retrieves a match based on it's id
-     *
-     * <p>
-     *       This method retrieves a {@link Match} entity from the database
-     *       with a specific identifier.
-     * </p>
+     * Gets a {@link Match} entity by its ID
      *
      * @param id the id of the match
      * @return a {@link MatchDto.MatchResponse} containing the mapped data
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Get match by ID")
     public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
         return toResponse(matchService.getMatchById(id));
     }
 
     /**
-     * <p>This endpoint return a list of matches that played during a specific year</p>
+     * Returns a list of matches that played during a specific year
      *
      * @param from the year to filter matches
      * @return a list of matches mapped to {@link MatchResponse}
      */
     @GetMapping(params = {"from","to"})
+    @Operation(summary = "Get matches between time period")
     public List<MatchResponse> getMatchesBetween(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
@@ -76,15 +71,11 @@ public class MatchController {
     /**
      * Retrieves all matches that a given team played.
      *
-     * <p>
-     *     This endpoint return a list of matches where a team identified with a team id has
-     *      participated inn
-     * </p>
-     *
      * @param teamId the id of the team the players should belong to.
      * @return a list of matches mapped to {@link MatchResponse}
      */
     @GetMapping(params = "team")
+    @Operation(summary = "List all matches played by a team")
     public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
         return matchService.getMatchesByTeamId(teamId)
                 .stream()
@@ -98,11 +89,10 @@ public class MatchController {
      * @param body the match data to create
      * @return the created match mapped to {@link MatchResponse}
      */
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a match")
-    @ApiResponse(responseCode = "200", description = "Match successfully created")
     @ResponseBody
-    @PostMapping
     public ResponseEntity<MatchDto.MatchResponse> createMatch(@RequestBody MatchDto.CreateMatchRequest body) {
         Match createdMatch = matchService.createMatch(body);
         return ResponseEntity.created(URI.create("/matches" + createdMatch.getId())).body(toResponse(createdMatch));
@@ -116,6 +106,7 @@ public class MatchController {
      * @return the updated match mapped to {@link MatchResponse}
      */
     @PatchMapping("/{id}")
+    @Operation(summary = "Modify a match")
     public ResponseEntity<MatchDto.MatchResponse> updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest body) {
         Match updatedMatch = matchService.patchMatch(id, body);
         return ResponseEntity.ok(toResponse(updatedMatch));

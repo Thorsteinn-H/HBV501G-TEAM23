@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
+import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -26,6 +27,10 @@ public class Player {
 
     @Column(name = "date_of_birth",  nullable = true)
     private LocalDate dateOfBirth;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = true)
+    private Gender gender;
 
     @Column(name = "player_country", length = 80)
     private String country;

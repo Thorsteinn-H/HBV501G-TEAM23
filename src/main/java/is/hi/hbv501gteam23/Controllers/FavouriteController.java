@@ -1,31 +1,37 @@
 package is.hi.hbv501gteam23.Controllers;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
-import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
+import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.util.List;
 
 /**
- * REST controller that exposes read/write operations for {@link Favorites} resources.
- * Base path is /favoerites
+ * REST controller that exposes read/write operations for {@link Favorite} resources.
+ * Base path is /favorites
  */
+@Tag(name = "Favorite")
 @RestController
-@RequestMapping("/api/favorites")
+@RequestMapping("/favorites")
 @RequiredArgsConstructor
 public class FavouriteController {
     private final FavoriteService favoriteService;
     private final AuthRepository authRepository;
 
     /**
-     * Get the current logged in users id
-     * @return the id of the logged in user
+     * Get the currently logged-in users id
+     * @return the id of the logged-in user
      */
     private Long getCurrentUserId() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
@@ -38,73 +44,66 @@ public class FavouriteController {
                 .getId();
     }
 
-    /**
-     * Add an item to user's favorites
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to add
-     * @return
-     */
-
-    @PostMapping("/{type}/{itemId}")
-    public ResponseEntity<?> addFavorite(
-            @PathVariable String type,
-            @PathVariable Long itemId) {
+    private Favorite.EntityType parseType(String type) {
         try {
-            Long userId = getCurrentUserId();
-            favoriteService.addFavorite(userId, type, itemId);
-            return ResponseEntity.ok().build();
+            return Favorite.EntityType.valueOf(type.trim().toUpperCase());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error adding to favorites: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type. Use one of: PLAYER, TEAM, MATCH.");
         }
     }
 
-    /**
-     * Remove an item from user's favorites
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to remove
-     * @return response entity if deleteing the favorite was a success
-     */
-    @DeleteMapping("/{type}/{itemId}")
-    public ResponseEntity<?> removeFavorite(
-            @PathVariable String type,
-            @PathVariable Long itemId) {
-        try {
-            Long userId = getCurrentUserId();
-            favoriteService.removeFavorite(userId, type, itemId);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error removing from favorites: " + e.getMessage());
-        }
+    @GetMapping
+    @Operation(summary = "List favorites")
+    public ResponseEntity<List<FavoriteDto.favoriteResponse>> getAllFavorites() {
+        Long userId = getCurrentUserId();
+        var list = favoriteService.listAllForUser(userId);
+        return ResponseEntity.ok(list);
     }
 
-    /**
-     * Get all favorites of a specific type for a user
-     * @param type The type of favorites to get (match, player, score, team, venue)
-     * @return response entity containing all users favorites
-     */
-    @GetMapping("/{type}")
-    public ResponseEntity<?> getFavorites(@PathVariable String type) {
-        try {
-            Long userId = getCurrentUserId();
-            List<Long> favorites = favoriteService.getFavorites(userId, type);
-            return ResponseEntity.ok(favorites);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error getting favorites: " + e.getMessage());
-        }
+    @GetMapping(value = "/{type}")
+    @Operation(summary = "Get favorites by type")
+    public ResponseEntity<List<FavoriteDto.favoriteResponse>> getFavoritesByType(@PathVariable String type) {
+        Long userId = getCurrentUserId();
+        var entityType = parseType(type);
+        var list = favoriteService.listForUserAndType(userId, entityType);
+        return ResponseEntity.ok(list);
     }
 
-    /**
-     * Check if an item is in user's favorites
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to check
-     * @return a response entity with true if it is favorite and false if not
-     */
     @GetMapping("/{type}/{itemId}")
     public ResponseEntity<Boolean> isFavorite(
             @PathVariable String type,
             @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        boolean isFav = favoriteService.isFavorite(userId, type, itemId);
+        var entityType = parseType(type);
+        boolean isFav = favoriteService.isFavorite(userId, entityType, itemId);
         return ResponseEntity.ok(isFav);
+    }
+
+
+    @PostMapping("/{type}/{itemId}")
+    @Operation(summary = "Add to favorites")
+    public ResponseEntity<?> addFavorite(
+            @PathVariable String type,
+            @PathVariable Long itemId) {
+        Long userId = getCurrentUserId();
+        var entityType = parseType(type);
+
+        var created = favoriteService.addFavorite(userId, entityType, itemId);
+        var location = URI.create(String.format("/favorites/%s/%d", entityType, itemId));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .header(HttpHeaders.LOCATION, location.toString())
+                .body(created);
+    }
+
+    @DeleteMapping("/{type}/{itemId}")
+    @Operation(summary = "Remove favorite")
+    public ResponseEntity<Void> removeFavorite(
+            @PathVariable String type,
+            @PathVariable Long itemId) {
+        Long userId = getCurrentUserId();
+        var entityType = parseType(type);
+        favoriteService.removeFavorite(userId, entityType, itemId);
+        return ResponseEntity.noContent().build();
     }
 }

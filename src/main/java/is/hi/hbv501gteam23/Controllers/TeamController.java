@@ -1,7 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
@@ -18,6 +18,7 @@ import java.util.List;
  * REST controller that exposes read/write operations for {@link Team} resources.
  * Base path is /players
  */
+@Tag(name = "Team")
 @RestController
 @RequestMapping("/teams")
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class TeamController {
      */
     @GetMapping
     @Operation(summary = "List all teams")
-    @ApiResponse(responseCode = "200", description = "Teams successfully fetched")
     public List<TeamResponse> getAllTeams(){
         return teamService.getAllTeams()
                 .stream().map(this::toResponse).toList();
@@ -42,8 +42,7 @@ public class TeamController {
      * @return the team mapped to a {@link TeamResponse}
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Get team by id")
-    @ApiResponse(responseCode = "200", description = "Team successfully fetched")
+    @Operation(summary = "Get team by ID")
     public TeamResponse getTeamById(@PathVariable Long id){
         return toResponse(teamService.getTeamById(id));
     }
@@ -55,7 +54,6 @@ public class TeamController {
      */
     @GetMapping(params = "name")
     @Operation(summary = "Get team by name")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public TeamResponse getTeamByName(@RequestParam String name) {
         return toResponse(teamService.findByName(name));
     }
@@ -67,7 +65,6 @@ public class TeamController {
      */
     @GetMapping("/isActive={isActive}")
     @Operation(summary = "Get team by active status")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getActiveTeams(@PathVariable("isActive") Boolean isActive) {
         return teamService.findByActiveStatus(isActive)
                 .stream()
@@ -82,7 +79,6 @@ public class TeamController {
      */
     @GetMapping("/venue/{venueId}")
     @Operation(summary = "Get team by venue ID")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
         return teamService.findByVenueId(venueId)
                 .stream()
@@ -97,7 +93,6 @@ public class TeamController {
      */
     @GetMapping(params = "country")
     @Operation(summary = "Get team by country")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getTeamByCountry(@RequestParam String country) {
         return teamService.findByCountry(country)
                 .stream()
@@ -114,7 +109,6 @@ public class TeamController {
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully created")
     public ResponseEntity<TeamDto.TeamResponse> createTeam(@RequestBody TeamDto.CreateTeamRequest body) {
         Team created = teamService.createTeam(body);
         return ResponseEntity.created(URI.create("/teams" + created.getId())).body(toResponse(created));
@@ -130,7 +124,6 @@ public class TeamController {
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
     @Operation(summary = "Modify a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully modified")
     public ResponseEntity<TeamDto.TeamResponse> updateTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest body) {
         Team updatedTeam = teamService.patchTeam(id, body);
         return ResponseEntity.ok(toResponse(updatedTeam));

@@ -1,9 +1,13 @@
-Þorsteinn hilmir var hér\
-Þóra var hér\
-Eygló var hér\
-Helga var hér
+# Soccer API
+Bakendi fyrir fótbolta gagnagrunn.
 
-Til að keyra seed.sql skrá til að skoða hvort endapunktar virka:\
-`psql -d hbv501g_team23_db -f ./src/main/resources/sql/seed.sql`
+## Um verkefnið
+Við unnum þetta verkefni sem hluti af Hugbúnaðarverkefni 1 (HBV501G) haustönnina 2025.
+Verkefnið er unnið í Java Spring.
 
-**Þessi skrá er aðeins til að testa locally**
+### Teymið
+- @helgsie
+- @Klingsterina
+- @ThoraDis
+- @Thorsteinn-H
+
