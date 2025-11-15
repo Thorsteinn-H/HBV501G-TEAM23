@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Match} resources.
@@ -27,19 +29,35 @@ import java.util.List;
 public class MatchController {
     private final MatchService matchService;
 
-    /**
-     * Lists all {@link Match} entities
-     *
-     * @return list of matches mapped to {@link MatchResponse}
-     */
     @GetMapping
-    @Operation(summary = "List all matches", description = "Lists all matches with optional filters by date or team.")
-    public List<MatchResponse> getAllMatches() {
-        return matchService.getAllMatches()
-            .stream()
-            .map(this::toResponse)
-            .toList();
+    @Operation(summary = "Filter teams")
+    public ResponseEntity<List<MatchDto.MatchResponse>> filterMatch(
+            @RequestParam(required = false) Long matchId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) Integer homeGoals,
+            @RequestParam(required = false) Integer awayGoals,
+            @RequestParam(required = false) Long homeTeamId,
+            @RequestParam(required = false) String homeTeamName,
+            @RequestParam(required = false) Long awayTeamId,
+            @RequestParam(required = false) String awayTeamName,
+            @RequestParam(required = false) Long venueId,
+            @RequestParam(required = false) String venueName,
+            @Parameter @RequestParam(required = false,defaultValue = "name") String sortBy,
+            @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
+    )
+    {
+
+        List<Match> matches=matchService.findMatchFilter(matchId,startDate,endDate,homeGoals,awayGoals,homeTeamId,homeTeamName,awayTeamId,awayTeamName,
+                venueId,venueName,sortBy,sortDir);
+
+        List<MatchDto.MatchResponse> response = matches.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
+
 
     /**
      * Gets a {@link Match} entity by its ID

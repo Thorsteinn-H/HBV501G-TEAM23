@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Persistence.Repositories;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  * Repository for accessing and managing {@link Match} entities.
  */
 @Repository
-public interface MatchRepository extends JpaRepository<Match, Long> {
+public interface MatchRepository extends JpaRepository<Match, Long> , JpaSpecificationExecutor<Match> {
     /**
      * Retrieves all matches by home team or away team
      * @param teamId1 id of the first team

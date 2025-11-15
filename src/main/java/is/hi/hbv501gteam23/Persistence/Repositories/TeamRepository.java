@@ -3,6 +3,7 @@ package is.hi.hbv501gteam23.Persistence.Repositories;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
  * Repository for accessing and managing {@link Team} entities.
  */
 @Repository
-public interface TeamRepository extends JpaRepository<Team, Long> {
+public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
     /**
      * Retrieves a team by name and ignores case
      * @param name the name of the team

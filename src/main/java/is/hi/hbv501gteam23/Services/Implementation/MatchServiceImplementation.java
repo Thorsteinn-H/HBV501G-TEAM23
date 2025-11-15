@@ -6,10 +6,13 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.MatchSpecification;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +28,32 @@ public class MatchServiceImplementation implements MatchService {
     private final TeamRepository teamRepository;
     private final VenueRepository venueRepository;
 
-    /**
-     * Retrieves all matches
-     *
-     * @return a list of all {@link Match} entities
-     */
     @Override
-    public List<Match> getAllMatches() {
-        return matchRepository.findAll();
+    public List<Match> findMatchFilter(Long matchId,LocalDate startDate,
+                                       LocalDate endDate,Integer homeGoals,
+                                       Integer awayGoals,Long homeTeamId,
+                                       String homeTeamName,Long awayTeamId,
+                                       String awayTeamName, Long venueId,
+                                       String venueName, String sortBy, String sortDir) {
+
+        Specification<Match> spec= Specification.allOf(
+                MatchSpecification.matchId(matchId),
+                MatchSpecification.matchDate(startDate,endDate),
+                MatchSpecification.matchHomeGoals(homeGoals),
+                MatchSpecification.matchAwayGoals(awayGoals),
+                MatchSpecification.matchHomeTeamId(homeTeamId),
+                MatchSpecification.matchHomeTeamName(homeTeamName),
+                MatchSpecification.matchAwayTeamId(awayTeamId),
+                MatchSpecification.matchAwayTeamName(awayTeamName),
+                MatchSpecification.matchVenueId(venueId),
+                MatchSpecification.matchVenueName(venueName)
+
+        );
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        return matchRepository.findAll(spec,sort);
     }
 
     /**

@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface TeamService {
 
-    /**
-     * Retrieves all teams
-     *
-     * @return a list of all {@link Team} entities
-     */
-    List<Team> getAllTeams();
+
+    List<Team> findTeamFilter(
+            Long teamId, String name, Boolean isActive,
+            String country, Long venueId, String venueName,
+            String sortBy, String sortDir
+    );
 
     /**
      * Retrieves a single team by its unique identifier.
