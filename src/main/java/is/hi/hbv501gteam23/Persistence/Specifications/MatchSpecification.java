@@ -48,7 +48,7 @@ public class MatchSpecification {
     public static Specification<Match> matchHomeTeamName(String homeTeamName){
         return (root, query, criteriaBuilder) ->
                 (homeTeamName == null || homeTeamName.isBlank()) ? null:
-                criteriaBuilder.like(root.get("homeTeam").get("name"), homeTeamName);
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("homeTeam").get("name")), "%" + homeTeamName.toLowerCase() + "%");
 
     }
 
@@ -62,7 +62,7 @@ public class MatchSpecification {
     public static Specification<Match> matchAwayTeamName(String awayTeamName){
         return (root, query, criteriaBuilder) ->
                 (awayTeamName == null || awayTeamName.isBlank()) ? null:
-                criteriaBuilder.like(root.get("awayTeam").get("name"), awayTeamName);
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("awayTeam").get("name")), "%" + awayTeamName.toLowerCase() + "%");
 
     }
 
@@ -76,7 +76,7 @@ public class MatchSpecification {
     public static Specification<Match> matchVenueName(String name){
         return (root, query, criteriaBuilder) ->
                 (name == null || name.isBlank()) ? null:
-                criteriaBuilder.like(root.get("venue").get("name"), name);
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + name.toLowerCase() + "%");
 
     }
 

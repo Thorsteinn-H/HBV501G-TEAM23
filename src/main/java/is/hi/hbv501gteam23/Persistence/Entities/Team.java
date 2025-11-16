@@ -26,7 +26,7 @@ public class Team {
     @Column(name = "team_country", nullable = false, length = 80)
     private String country;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "venue_id")
     private Venue venue;
 }

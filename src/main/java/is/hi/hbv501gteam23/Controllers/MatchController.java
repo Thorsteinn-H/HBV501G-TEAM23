@@ -8,7 +8,6 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +42,7 @@ public class MatchController {
             @RequestParam(required = false) String awayTeamName,
             @RequestParam(required = false) Long venueId,
             @RequestParam(required = false) String venueName,
-            @Parameter @RequestParam(required = false,defaultValue = "name") String sortBy,
+            @Parameter @RequestParam(required = false,defaultValue = "id") String sortBy,
             @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
     )
     {
@@ -58,48 +57,6 @@ public class MatchController {
         return ResponseEntity.ok(response);
     }
 
-
-    /**
-     * Gets a {@link Match} entity by its ID
-     *
-     * @param id the id of the match
-     * @return a {@link MatchDto.MatchResponse} containing the mapped data
-     */
-    @GetMapping("/{id}")
-    @Operation(summary = "Get match by ID")
-    public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
-        return toResponse(matchService.getMatchById(id));
-    }
-
-    /**
-     * Returns a list of matches that played during a specific year
-     *
-     * @param from the year to filter matches
-     * @return a list of matches mapped to {@link MatchResponse}
-     */
-    @GetMapping(params = {"from","to"})
-    @Operation(summary = "Get matches between time period")
-    public List<MatchResponse> getMatchesBetween(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-    ) {
-        return matchService.getMatchesBetween(from, to).stream().map(this::toResponse).toList();
-    }
-
-    /**
-     * Retrieves all matches that a given team played.
-     *
-     * @param teamId the id of the team the players should belong to.
-     * @return a list of matches mapped to {@link MatchResponse}
-     */
-    @GetMapping(params = "team")
-    @Operation(summary = "List all matches played by a team")
-    public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
-        return matchService.getMatchesByTeamId(teamId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
 
     /**
      * Creates a new match.

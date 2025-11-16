@@ -16,7 +16,7 @@ public class TeamSpecifications {
     public static Specification<Team> teamName(String name) {
         return (root, query, criteriaBuilder) ->
                 (name == null || name.isBlank()) ? null:
-                        criteriaBuilder.like(root.get("name"), name);
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
     public static Specification<Team> teamStatus(Boolean isActive) {
@@ -28,7 +28,7 @@ public class TeamSpecifications {
     public static Specification<Team> teamCountry(String country) {
         return (root, query, criteriaBuilder) ->
                 (country == null || country.isBlank()) ? null:
-                        criteriaBuilder.like(root.get("country"), country);
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + country.toLowerCase() + "%");
     }
 
     public static Specification<Team> teamVenue(Long id){
@@ -41,7 +41,7 @@ public class TeamSpecifications {
     public static Specification<Team> teamVenueName(String venueName){
         return (root, query, criteriaBuilder) ->
                 (venueName == null || venueName.isBlank()) ? null:
-                        criteriaBuilder.like(root.get("venue").get("name"), venueName);
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + venueName.toLowerCase() + "%");
 
     }
 
