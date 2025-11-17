@@ -122,8 +122,7 @@ public class UserController {
                   u.getRole(),
                   u.isActive(),
                   u.getCreatedAt(),
-                  u.getImage(),
-                  u.getImageType()
+                  u.getProfileImage()
           );
       }
 }

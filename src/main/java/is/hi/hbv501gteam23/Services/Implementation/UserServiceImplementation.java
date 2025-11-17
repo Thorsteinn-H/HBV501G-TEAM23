@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
@@ -165,8 +166,12 @@ public class UserServiceImplementation implements UserService {
         if (file.getSize() > MAX_FILE_SIZE)
             throw new IllegalArgumentException("File size exceeds 5MB");
 
-        user.setImage(file.getBytes());
-        user.setImageType(file.getContentType());
+        Image image = user.getProfileImage();
+
+        image.setImageData(file.getBytes());
+        image.setImageType(file.getContentType());
+
+        user.setProfileImage(image);
         return authRepository.save(user);
     }
 
@@ -180,8 +185,7 @@ public class UserServiceImplementation implements UserService {
     public User deleteImage(User user) {
         if (user == null) throw new IllegalArgumentException("User cannot be null");
 
-        user.setImage(null);
-        user.setImageType(null);
+        user.setProfileImage(null);
         return authRepository.save(user);
     }
 
@@ -193,7 +197,7 @@ public class UserServiceImplementation implements UserService {
      */
     @Override
     public byte[] getImage(User user) {
-        return user.getImage();
+        return user.getProfileImage().getImageData();
     }
 
     /**
@@ -205,7 +209,7 @@ public class UserServiceImplementation implements UserService {
      */
     @Override
     public String getImageType(User user) {
-        return user.getImageType();
+        return user.getProfileImage().getImageType();
     }
 
     /**

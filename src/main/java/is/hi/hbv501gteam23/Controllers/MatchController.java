@@ -1,13 +1,13 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Match} resources.
@@ -27,18 +28,29 @@ import java.util.List;
 public class MatchController {
     private final MatchService matchService;
 
-    /**
-     * Lists all {@link Match} entities
-     *
-     * @return list of matches mapped to {@link MatchResponse}
-     */
     @GetMapping
-    @Operation(summary = "List all matches", description = "Lists all matches with optional filters by date or team.")
-    public List<MatchResponse> getAllMatches() {
-        return matchService.getAllMatches()
-            .stream()
-            .map(this::toResponse)
-            .toList();
+    @Operation(summary = "Filter teams")
+    public ResponseEntity<List<MatchDto.MatchResponse>> filterMatch(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) Integer homeGoals,
+            @RequestParam(required = false) Integer awayGoals,
+            @RequestParam(required = false) String homeTeamName,
+            @RequestParam(required = false) String awayTeamName,
+            @RequestParam(required = false) String venueName,
+            @Parameter @RequestParam(required = false,defaultValue = "id") String sortBy,
+            @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
+    )
+    {
+
+        List<Match> matches=matchService.findMatchFilter(startDate,endDate,homeGoals,awayGoals,homeTeamName,awayTeamName
+                ,venueName,sortBy,sortDir);
+
+        List<MatchDto.MatchResponse> response = matches.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -53,35 +65,6 @@ public class MatchController {
         return toResponse(matchService.getMatchById(id));
     }
 
-    /**
-     * Returns a list of matches that played during a specific year
-     *
-     * @param from the year to filter matches
-     * @return a list of matches mapped to {@link MatchResponse}
-     */
-    @GetMapping(params = {"from","to"})
-    @Operation(summary = "Get matches between time period")
-    public List<MatchResponse> getMatchesBetween(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-    ) {
-        return matchService.getMatchesBetween(from, to).stream().map(this::toResponse).toList();
-    }
-
-    /**
-     * Retrieves all matches that a given team played.
-     *
-     * @param teamId the id of the team the players should belong to.
-     * @return a list of matches mapped to {@link MatchResponse}
-     */
-    @GetMapping(params = "team")
-    @Operation(summary = "List all matches played by a team")
-    public List<MatchResponse> getMatchesByTeam(@RequestParam Long teamId) {
-        return matchService.getMatchesByTeamId(teamId)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
 
     /**
      * Creates a new match.

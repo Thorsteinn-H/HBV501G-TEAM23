@@ -1,20 +1,17 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
-import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface MatchService {
-    /**
-     * Retrieves all matches
-     *
-     * @return a list of all {@link Match} entities
-     */
-    List<Match> getAllMatches();
 
+    List<Match> findMatchFilter(
+            LocalDate startDate,LocalDate endDate,Integer homeGoals,Integer
+                    awayGoals,String homeTeamName,String
+                    awayTeamName, String venueName, String sortBy, String sortDir);
     /**
      * Retrieves a single match by its unique identifier.
      *

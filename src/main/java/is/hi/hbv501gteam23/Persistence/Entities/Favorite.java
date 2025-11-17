@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "favorite", uniqueConstraints = @UniqueConstraint(name="uk_user_entity", columnNames={"userId","entityType","entityId"})
+@Table(name = "favorites", uniqueConstraints = @UniqueConstraint(name="uk_user_entity", columnNames={"userId","entityType","entityId"})
 )
 public class Favorite {
     @Id

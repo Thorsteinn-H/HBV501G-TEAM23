@@ -5,11 +5,13 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.TeamSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
-import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import is.hi.hbv501gteam23.Utils.MetadataUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +26,23 @@ public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final VenueRepository venueRepository;
-    private final VenueService venueService;
 
-
-    /**
-     * Retrieves all teams
-     *
-     * @return a list of all {@link Team} entities
-     */
     @Override
-    public List<Team> getAllTeams(){
-        return teamRepository.findAll();
+    public List<Team> findTeamFilter(String name, Boolean isActive,
+                                     String country, String venueName,
+                                     String sortBy, String sortDir) {
+
+        Specification<Team> spec= Specification.allOf(
+                TeamSpecifications.teamName(name),
+                TeamSpecifications.teamStatus(isActive),
+                TeamSpecifications.teamCountry(country),
+                TeamSpecifications.teamVenueName(venueName)
+                );
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        return teamRepository.findAll(spec,sort);
     }
 
     /**

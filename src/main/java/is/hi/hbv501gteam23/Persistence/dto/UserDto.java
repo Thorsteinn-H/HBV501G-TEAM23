@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
+import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -128,7 +129,7 @@ public class UserDto {
             Boolean isActive,
 
             java.time.LocalDateTime createdAt,
-            byte[] image,
-            String imageType
+
+            Image profileImage
     ) {}
 }
