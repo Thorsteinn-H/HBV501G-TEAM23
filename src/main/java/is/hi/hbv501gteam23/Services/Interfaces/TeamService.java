@@ -8,8 +8,8 @@ public interface TeamService {
 
 
     List<Team> findTeamFilter(
-            Long teamId, String name, Boolean isActive,
-            String country, Long venueId, String venueName,
+             String name, Boolean isActive,
+            String country, String venueName,
             String sortBy, String sortDir
     );
 

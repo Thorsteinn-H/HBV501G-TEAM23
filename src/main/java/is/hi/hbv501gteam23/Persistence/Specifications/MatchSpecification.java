@@ -7,12 +7,6 @@ import java.time.LocalDate;
 
 public class MatchSpecification {
 
-    public static Specification<Match> matchId(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                        criteriaBuilder.equal(root.get("id"), id);
-
-    }
 
     public static Specification<Match> matchDate(LocalDate startDate, LocalDate endDate){
         return (root, query, criteriaBuilder) -> {
@@ -38,12 +32,6 @@ public class MatchSpecification {
 
     }
 
-    public static Specification<Match> matchHomeTeamId(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                criteriaBuilder.equal(root.get("homeTeam"), id);
-
-    }
 
     public static Specification<Match> matchHomeTeamName(String homeTeamName){
         return (root, query, criteriaBuilder) ->
@@ -52,24 +40,10 @@ public class MatchSpecification {
 
     }
 
-    public static Specification<Match> matchAwayTeamId(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                criteriaBuilder.equal(root.get("awayTeam"), id);
-
-    }
-
     public static Specification<Match> matchAwayTeamName(String awayTeamName){
         return (root, query, criteriaBuilder) ->
                 (awayTeamName == null || awayTeamName.isBlank()) ? null:
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("awayTeam").get("name")), "%" + awayTeamName.toLowerCase() + "%");
-
-    }
-
-    public static Specification<Match> matchVenueId(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                        criteriaBuilder.equal(root.get("venue"), id);
 
     }
 

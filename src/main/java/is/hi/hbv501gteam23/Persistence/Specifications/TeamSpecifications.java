@@ -6,12 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class TeamSpecifications {
 
-    public static Specification<Team> teamId(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                        criteriaBuilder.equal(root.get("id"), id);
-
-    }
 
     public static Specification<Team> teamName(String name) {
         return (root, query, criteriaBuilder) ->
@@ -31,12 +25,6 @@ public class TeamSpecifications {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + country.toLowerCase() + "%");
     }
 
-    public static Specification<Team> teamVenue(Long id){
-        return (root, query, criteriaBuilder) ->
-                (id == null) ? null:
-                        criteriaBuilder.equal(root.get("venue"), id);
-
-    }
 
     public static Specification<Team> teamVenueName(String venueName){
         return (root, query, criteriaBuilder) ->

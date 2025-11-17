@@ -9,9 +9,9 @@ import java.util.List;
 public interface MatchService {
 
     List<Match> findMatchFilter(
-            Long matchId,LocalDate startDate,LocalDate endDate,Integer homeGoals,Integer
-                    awayGoals,Long homeTeamId,String homeTeamName,Long awayTeamId,String
-                    awayTeamName, Long venueId, String venueName, String sortBy, String sortDir);
+            LocalDate startDate,LocalDate endDate,Integer homeGoals,Integer
+                    awayGoals,String homeTeamName,String
+                    awayTeamName, String venueName, String sortBy, String sortDir);
     /**
      * Retrieves a single match by its unique identifier.
      *

@@ -34,11 +34,9 @@ public class TeamController {
     @GetMapping
     @Operation(summary = "Filter teams")
     public ResponseEntity<List<TeamDto.TeamResponse>> filterTeams(
-            @RequestParam(required = false) Long teamId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) String country,
-            @RequestParam(required = false) Long venueId,
             @RequestParam(required = false) String venueName,
             @Parameter @RequestParam(required = false,defaultValue = "name") String sortBy,
             @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
@@ -54,13 +52,39 @@ public class TeamController {
             }
         }
 
-        List<Team> teams=teamService.findTeamFilter(teamId,name,isActive,country,venueId,venueName,sortBy,sortDir);
+        List<Team> teams=teamService.findTeamFilter(name,isActive,country,venueName,sortBy,sortDir);
 
         List<TeamDto.TeamResponse> response = teams.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves a {@link Team} entity by its id
+     * @param id the id of the team to be retrieved
+     * @return the team mapped to a {@link TeamResponse}
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get team by ID")
+    public TeamResponse getTeamById(@PathVariable Long id){
+        return toResponse(teamService.getTeamById(id));
+    }
+
+
+    /**
+     * Retrieves a list of {@link Team} entities by venue.
+     * @param venueId the id of the venue of the teams to be retrieved.
+     * @return list of teams mapped to {@link TeamResponse}
+     */
+    @GetMapping("/venue/{venueId}")
+    @Operation(summary = "Get team by venue ID")
+    public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
+        return teamService.findByVenueId(venueId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     /**

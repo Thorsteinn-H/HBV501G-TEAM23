@@ -28,16 +28,14 @@ public class TeamServiceImplementation implements TeamService {
     private final VenueRepository venueRepository;
 
     @Override
-    public List<Team> findTeamFilter(Long teamId, String name, Boolean isActive,
-                                     String country, Long venueId, String venueName,
+    public List<Team> findTeamFilter(String name, Boolean isActive,
+                                     String country, String venueName,
                                      String sortBy, String sortDir) {
 
         Specification<Team> spec= Specification.allOf(
-                TeamSpecifications.teamId(teamId),
                 TeamSpecifications.teamName(name),
                 TeamSpecifications.teamStatus(isActive),
                 TeamSpecifications.teamCountry(country),
-                TeamSpecifications.teamVenue(venueId),
                 TeamSpecifications.teamVenueName(venueName)
                 );
 

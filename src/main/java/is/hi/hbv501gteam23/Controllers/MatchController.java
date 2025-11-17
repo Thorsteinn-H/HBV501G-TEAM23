@@ -31,30 +31,38 @@ public class MatchController {
     @GetMapping
     @Operation(summary = "Filter teams")
     public ResponseEntity<List<MatchDto.MatchResponse>> filterMatch(
-            @RequestParam(required = false) Long matchId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) Integer homeGoals,
             @RequestParam(required = false) Integer awayGoals,
-            @RequestParam(required = false) Long homeTeamId,
             @RequestParam(required = false) String homeTeamName,
-            @RequestParam(required = false) Long awayTeamId,
             @RequestParam(required = false) String awayTeamName,
-            @RequestParam(required = false) Long venueId,
             @RequestParam(required = false) String venueName,
             @Parameter @RequestParam(required = false,defaultValue = "id") String sortBy,
             @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
     )
     {
 
-        List<Match> matches=matchService.findMatchFilter(matchId,startDate,endDate,homeGoals,awayGoals,homeTeamId,homeTeamName,awayTeamId,awayTeamName,
-                venueId,venueName,sortBy,sortDir);
+        List<Match> matches=matchService.findMatchFilter(startDate,endDate,homeGoals,awayGoals,homeTeamName,awayTeamName
+                ,venueName,sortBy,sortDir);
 
         List<MatchDto.MatchResponse> response = matches.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Gets a {@link Match} entity by its ID
+     *
+     * @param id the id of the match
+     * @return a {@link MatchDto.MatchResponse} containing the mapped data
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get match by ID")
+    public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
+        return toResponse(matchService.getMatchById(id));
     }
 
 

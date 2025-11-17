@@ -29,23 +29,19 @@ public class MatchServiceImplementation implements MatchService {
     private final VenueRepository venueRepository;
 
     @Override
-    public List<Match> findMatchFilter(Long matchId,LocalDate startDate,
+    public List<Match> findMatchFilter(LocalDate startDate,
                                        LocalDate endDate,Integer homeGoals,
-                                       Integer awayGoals,Long homeTeamId,
-                                       String homeTeamName,Long awayTeamId,
-                                       String awayTeamName, Long venueId,
+                                       Integer awayGoals,
+                                       String homeTeamName,
+                                       String awayTeamName,
                                        String venueName, String sortBy, String sortDir) {
 
         Specification<Match> spec= Specification.allOf(
-                MatchSpecification.matchId(matchId),
                 MatchSpecification.matchDate(startDate,endDate),
                 MatchSpecification.matchHomeGoals(homeGoals),
                 MatchSpecification.matchAwayGoals(awayGoals),
-                MatchSpecification.matchHomeTeamId(homeTeamId),
                 MatchSpecification.matchHomeTeamName(homeTeamName),
-                MatchSpecification.matchAwayTeamId(awayTeamId),
                 MatchSpecification.matchAwayTeamName(awayTeamName),
-                MatchSpecification.matchVenueId(venueId),
                 MatchSpecification.matchVenueName(venueName)
 
         );
