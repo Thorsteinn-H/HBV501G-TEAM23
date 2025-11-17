@@ -89,8 +89,7 @@ public class AuthServiceImplementation implements AuthService {
             user.getRole(),
             user.isActive(),
             user.getCreatedAt(),
-            user.getImage(),
-            user.getImageType()
+            user.getProfileImage()
         );
     }
 }
