@@ -143,12 +143,12 @@ public class ProfileController {
         User user = userService.findByEmail(userDetails.getUsername())
             .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        if (user == null || user.getImage() == null) {
+        if (user == null || user.getProfileImage() == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok()
-                .header("Content-Type", user.getImageType())
-                .body(user.getImage());
+                .header("Content-Type", user.getProfileImage().getImageType())
+                .body(user.getProfileImage().getImageData());
     }
 
     /**
@@ -211,8 +211,7 @@ public class ProfileController {
                 user.getRole(),
                 user.isActive(),
                 user.getCreatedAt(),
-                user.getImage(),
-                user.getImageType()
+                user.getProfileImage()
         );
     }
 }

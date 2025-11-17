@@ -56,10 +56,7 @@ public class User implements Serializable {
     @Column(name = "role", nullable = false)
     private String role;
 
-    @Lob
-    @Column(name="image")
-    private byte[] image;
+    @OneToOne
+    private Image profileImage;
 
-    @Column(name="imageType")
-    private String imageType;
 }
