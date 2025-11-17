@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "team")
+@Table(name = "teams")
 public class Team {
     @Id
     @SequenceGenerator(name = "team_sequence", sequenceName = "team_sequence",  allocationSize = 1)
