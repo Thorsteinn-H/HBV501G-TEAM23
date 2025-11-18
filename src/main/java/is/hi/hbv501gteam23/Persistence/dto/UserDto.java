@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
+import java.time.LocalDateTime;
 
 public class UserDto {
 
@@ -36,7 +39,7 @@ public class UserDto {
             Gender gender,
 
             @Schema(example = "USER")
-            String role,
+            SystemRole role,
 
             @Schema(example = "true")
             Boolean isActive
@@ -68,7 +71,7 @@ public class UserDto {
             Gender gender,
 
             @Schema(example = "USER")
-            String role,
+            SystemRole role,
 
             @Schema(example = "true")
             Boolean isActive
@@ -123,12 +126,12 @@ public class UserDto {
             Gender gender,
 
             @Schema(example = "USER")
-            String role,
+            SystemRole role,
 
             @Schema(example = "true")
             Boolean isActive,
 
-            java.time.LocalDateTime createdAt,
+            LocalDateTime createdAt,
 
             Image profileImage
     ) {}

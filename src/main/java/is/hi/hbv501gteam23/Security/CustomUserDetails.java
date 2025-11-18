@@ -1,10 +1,12 @@
 package is.hi.hbv501gteam23.Security;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -14,7 +16,7 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final String passwordHash;
     private final boolean active;
-    private final String role;
+    private final SystemRole role;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {

@@ -95,13 +95,13 @@ public class MatchServiceImplementation implements MatchService {
         if (to.isBefore(from)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'to' must be on/after 'from'");
         }
-        return matchRepository.findByDateBetweenOrderByDateAsc(from, to); // inclusive
+        return matchRepository.findByMatchDateBetweenOrderByMatchDateAsc(from, to); // inclusive
     }
 
     /**
      * Partially updates a {@link Match} identified by {@code id}.
      * Applies only the non-null fields from {@code body}. Supported fields:
-     * {@code date}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
+     * {@code matchDate}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
      * {@code homeGoals}, {@code awayGoals}. Team and venue identifiers (if present)
      * are looked up and validated before being set.
      *
@@ -119,7 +119,7 @@ public class MatchServiceImplementation implements MatchService {
         Match m = matchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
 
-        if (body.date() != null)      m.setDate(body.date());
+        if (body.matchDate() != null)      m.setMatchDate(body.matchDate());
         if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
         if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
         if (body.homeTeamId() != null) {
@@ -161,8 +161,8 @@ public class MatchServiceImplementation implements MatchService {
         if (body.venueId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "venueId is required");
         }
-        if (body.date() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date is required");
+        if (body.matchDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "matchDate is required");
         }
 
         if (body.homeTeamId().equals(body.awayTeamId())) {
@@ -189,7 +189,7 @@ public class MatchServiceImplementation implements MatchService {
         m.setHomeTeam(home);
         m.setAwayTeam(away);
         m.setVenue(venue);
-        m.setDate(body.date());
+        m.setMatchDate(body.matchDate());
         m.setHomeGoals(body.homeGoals() != null ? body.homeGoals() : 0);
         m.setAwayGoals(body.awayGoals() != null ? body.awayGoals() : 0);
         return matchRepository.save(m);

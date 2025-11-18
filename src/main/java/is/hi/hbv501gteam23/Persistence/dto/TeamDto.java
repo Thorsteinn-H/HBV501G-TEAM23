@@ -55,7 +55,7 @@ public final class TeamDto {
     public record TeamResponse(
             Long id,
             String name,
-            boolean isActive,
+            Boolean isActive,
             String country,
             Long venueId,
             String venueName
