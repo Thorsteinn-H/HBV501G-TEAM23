@@ -103,7 +103,7 @@ public class MatchController {
     private MatchDto.MatchResponse toResponse(Match m) {
         return new MatchDto.MatchResponse(
                 m.getId(),
-                m.getDate(),
+                m.getMatchDate(),
                 m.getHomeTeam() != null ? m.getHomeTeam().getId()   : null,
                 m.getHomeTeam() != null ? m.getHomeTeam().getName() : null,
                 m.getAwayTeam() != null ? m.getAwayTeam().getId()   : null,

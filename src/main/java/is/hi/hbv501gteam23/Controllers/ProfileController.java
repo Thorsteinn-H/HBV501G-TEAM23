@@ -123,10 +123,7 @@ public class ProfileController {
     ) {
         if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
+        User user = getAuthenticatedUser(userDetails);
 
         User updatedUser = userService.updatePassword(user, request);
         return ResponseEntity.ok(toResponse(updatedUser));
@@ -140,8 +137,7 @@ public class ProfileController {
     @GetMapping("/avatar")
     @Operation(summary = "Get profile picture")
     public ResponseEntity<byte[]> getAvatar(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = getAuthenticatedUser(userDetails);
 
         if (user == null || user.getProfileImage() == null) {
             return ResponseEntity.notFound().build();
@@ -167,10 +163,7 @@ public class ProfileController {
 
         if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
+        User user = getAuthenticatedUser(userDetails);
 
         User updatedUser = userService.uploadImage(user, file);
         return ResponseEntity.ok(toResponse(updatedUser));
@@ -188,13 +181,16 @@ public class ProfileController {
     public ResponseEntity<Void> deleteAvatar(@AuthenticationPrincipal CustomUserDetails userDetails){
         if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
+        User user = getAuthenticatedUser(userDetails);
 
         userService.deleteImage(user);
         return ResponseEntity.noContent().build();
+    }
+
+    private User getAuthenticatedUser(CustomUserDetails userDetails) {
+        return userService.findByEmail(userDetails.getUsername())
+            .filter(User::isActive)
+            .orElseThrow(() -> new EntityNotFoundException("User not found or inactive"));
     }
 
     /**

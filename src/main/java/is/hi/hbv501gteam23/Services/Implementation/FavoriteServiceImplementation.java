@@ -28,7 +28,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional
-    public FavoriteDto.favoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId) {
+    public FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId) {
         boolean targetExists = switch (type) {
             case MATCH  -> matchRepository.existsById(entityId);
             case PLAYER -> playerRepository.existsById(entityId);
@@ -71,7 +71,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FavoriteDto.favoriteResponse> listAllForUser(Long userId) {
+    public List<FavoriteDto.FavoriteResponse> listAllForUser(Long userId) {
         return favoriteRepository.findByUserId(userId).stream()
                 .map(this::toResponse)
                 .toList();
@@ -79,14 +79,14 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FavoriteDto.favoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type) {
+    public List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type) {
         return favoriteRepository.findByUserIdAndEntityType(userId, type).stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    private FavoriteDto.favoriteResponse toResponse(Favorite f) {
-        return new FavoriteDto.favoriteResponse(
+    private FavoriteDto.FavoriteResponse toResponse(Favorite f) {
+        return new FavoriteDto.FavoriteResponse(
                 f.getId(),
                 f.getUserId(),
                 f.getEntityType(),

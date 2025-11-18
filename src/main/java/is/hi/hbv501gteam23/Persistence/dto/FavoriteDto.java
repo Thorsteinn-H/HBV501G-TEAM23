@@ -4,12 +4,12 @@ import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
 
 public final class FavoriteDto {
 
-    public record createFavoriteRequest(
+    public record CreateFavoriteRequest(
             Favorite.EntityType entityType,
             Long entityId
     ) {}
 
-    public record favoriteResponse(
+    public record FavoriteResponse(
             Long id,
             Long userId,
             Favorite.EntityType entityType,

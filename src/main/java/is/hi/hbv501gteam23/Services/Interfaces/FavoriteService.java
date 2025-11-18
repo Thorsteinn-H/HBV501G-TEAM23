@@ -9,10 +9,10 @@ import java.util.List;
  * Service interface for handling user favorites
  */
 public interface FavoriteService {
-    FavoriteDto.favoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId);
+    FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId);
     void removeFavorite(Long userId, Favorite.EntityType type, Long entityId);
     boolean isFavorite(Long userId, Favorite.EntityType type, Long entityId);
 
-    List<FavoriteDto.favoriteResponse> listAllForUser(Long userId);
-    List<FavoriteDto.favoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type);
+    List<FavoriteDto.FavoriteResponse> listAllForUser(Long userId);
+    List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type);
 }

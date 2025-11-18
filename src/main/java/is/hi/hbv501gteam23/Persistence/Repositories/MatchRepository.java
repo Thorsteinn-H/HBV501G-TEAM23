@@ -26,5 +26,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> , JpaSpecifi
      * @param to
      * @return
      */
-    List<Match> findByDateBetweenOrderByDateAsc(LocalDate from, LocalDate to);
+    List<Match> findByMatchDateBetweenOrderByMatchDateAsc(LocalDate from, LocalDate to);
 }
