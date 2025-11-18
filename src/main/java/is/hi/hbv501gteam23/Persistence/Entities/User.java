@@ -57,6 +57,7 @@ public class User implements Serializable {
     private String role;
 
     @OneToOne
+    @JoinColumn(name = "profile_image_id")
     private Image profileImage;
 
 }

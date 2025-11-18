@@ -20,7 +20,7 @@ public class Image {
     private String imageType;
 
     @Lob
-    @Column(name = "image_data", length = 10000000) // Adjust length as needed
+    @Column(name = "image_data", columnDefinition = "bytea")
     private byte[] imageData;
 
 
