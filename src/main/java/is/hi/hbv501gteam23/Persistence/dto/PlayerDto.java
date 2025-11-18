@@ -17,7 +17,7 @@ public final class PlayerDto {
      *      goals and teamID
      *
      * @param name the name of the player
-     * @param dateOfBirth the matchDate of players birth
+     * @param dateOfBirth the date of players birth
      * @param country players country of origin
      * @param position the position a players plays for the team
      * @param isActive    whether the player is currently active
@@ -53,7 +53,7 @@ public final class PlayerDto {
      *      or reassigning the team to a different venue.
      *
      * @param name the name of the player
-     * @param dateOfBirth the matchDate of players birth
+     * @param dateOfBirth the date of players birth
      * @param country players country of origin
      * @param position the position a players plays for the team
      * @param goals how many goals a player has scored
@@ -83,7 +83,7 @@ public final class PlayerDto {
      * @param position the position a players plays for the team
      * @param goals how many goals a player has scored
      * @param country players country of origin
-     * @param dateOfBirth the matchDate of players birth
+     * @param dateOfBirth the date of players birth
      * @param teamId the ID of a team the player belongs too
      * @param teamName the name of a team the player belongs too
      */
