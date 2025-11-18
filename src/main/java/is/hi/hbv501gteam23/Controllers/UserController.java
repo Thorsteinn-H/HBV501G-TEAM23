@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,11 +38,24 @@ public class UserController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "List users", description = "Lists all users. Admin only.")
-    public List<UserDto.UserResponse> getAllUsers() {
-        return userService.getAllUsers().stream()
+    @Operation(summary = "List users", description = "Lists all users with optional filtering and sorting. Admin only.")
+    public List<UserDto.UserResponse> getAllUsers(
+        @RequestParam(required = false) String email,
+        @RequestParam(required = false) String username,
+        @RequestParam(required = false) String role,
+        @RequestParam(required = false) Boolean active,
+        @RequestParam(required = false) String sortBy,
+        @RequestParam(required = false, defaultValue = "asc") String order
+    ) {
+        try {
+            return userService.findUsers(email, username, role, active, sortBy, order)
+                .stream()
                 .map(this::toResponse)
                 .toList();
+        }
+        catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving users", e);
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
-import is.hi.hbv501gteam23.Persistence.Specifications.MatchSpecification;
+import is.hi.hbv501gteam23.Persistence.Specifications.MatchSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,12 +37,12 @@ public class MatchServiceImplementation implements MatchService {
                                        String venueName, String sortBy, String sortDir) {
 
         Specification<Match> spec= Specification.allOf(
-                MatchSpecification.matchDate(startDate,endDate),
-                MatchSpecification.matchHomeGoals(homeGoals),
-                MatchSpecification.matchAwayGoals(awayGoals),
-                MatchSpecification.matchHomeTeamName(homeTeamName),
-                MatchSpecification.matchAwayTeamName(awayTeamName),
-                MatchSpecification.matchVenueName(venueName)
+                MatchSpecifications.matchDate(startDate,endDate),
+                MatchSpecifications.matchHomeGoals(homeGoals),
+                MatchSpecifications.matchAwayGoals(awayGoals),
+                MatchSpecifications.matchHomeTeamName(homeTeamName),
+                MatchSpecifications.matchAwayTeamName(awayTeamName),
+                MatchSpecifications.matchVenueName(venueName)
 
         );
 

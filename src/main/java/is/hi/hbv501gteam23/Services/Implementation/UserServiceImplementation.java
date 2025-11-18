@@ -3,9 +3,12 @@ package is.hi.hbv501gteam23.Services.Implementation;
 import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.UserSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,14 +37,22 @@ public class UserServiceImplementation implements UserService {
         "image/gif"
     );
 
-    /**
-     * Retrieves all users.
-     *
-     * @return a list of {@link User} entities
-     */
-    @Override
-    public List<User> getAllUsers() {
-        return authRepository.findAllUsers();
+    public List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order) {
+        Specification<User> spec = UserSpecifications.emailContains(email)
+            .and(UserSpecifications.nameContains(name))
+            .and(UserSpecifications.roleEquals(role))
+            .and(UserSpecifications.isActive(active));
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        if (sortBy != null) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            sort = switch (sortBy.toLowerCase()) {
+                case "email" -> Sort.by(direction, "email");
+                case "name" -> Sort.by(direction, "name");
+                case "createdat" -> Sort.by(direction, "createdAt");
+                default -> Sort.by(direction, "id");
+            };
+        }
+        return authRepository.findAll(spec, sort);
     }
 
     /**
@@ -64,18 +75,6 @@ public class UserServiceImplementation implements UserService {
     @Override
     public User findById(Long id) {
         return authRepository.findById(id).orElse(null);
-    }
-
-    /**
-     * Validates a raw password against a hashed password.
-     *
-     * @param rawPassword   the plain text password provided for verification
-     * @param storedPassword  the stored hashed password
-     * @return {@code true} if the raw password matches the hashed password otherwise {@code false}
-     */
-    @Override
-    public boolean validatePassword(String rawPassword, String storedPassword) {
-        return passwordEncoder.matches(rawPassword, storedPassword);
     }
 
     /**

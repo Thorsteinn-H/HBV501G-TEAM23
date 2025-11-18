@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface TeamService {
 
-
     List<Team> findTeamFilter(
              String name, Boolean isActive,
             String country, String venueName,
