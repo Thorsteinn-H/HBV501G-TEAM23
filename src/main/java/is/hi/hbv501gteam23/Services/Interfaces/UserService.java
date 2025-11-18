@@ -78,9 +78,10 @@ public interface UserService {
     User uploadImage(User user, MultipartFile file) throws IOException;
 
     /**
+     * Deletes the image associated with a user.
      *
-     * @param user
-     * @return
+     * @param user the user whose image should be deleted
+     * @return the updated {@link User} entity with the image removed
      */
     User deleteImage(User user);
 
@@ -102,10 +103,11 @@ public interface UserService {
     String getImageType(User user);
 
     /**
+     * Updates the profile information of the specified user.
      *
-     * @param user
-     * @param request
-     * @return
+     * @param user    the user whose profile will be updated
+     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
+     * @return the updated {@link User} entity after the profile change
      */
     User updateProfile(User user, UserDto.UpdateProfileRequest request);
 

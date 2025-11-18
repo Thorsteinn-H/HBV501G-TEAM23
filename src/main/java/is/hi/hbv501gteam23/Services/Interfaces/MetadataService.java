@@ -7,8 +7,7 @@ import java.util.List;
 public interface MetadataService {
 
     /**
-     *
-     * @return
+     * @return list of all countries
      */
     List<MetadataDto> getAllCountries();
 }
