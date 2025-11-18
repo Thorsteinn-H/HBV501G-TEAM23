@@ -110,10 +110,16 @@ public class ProfileController {
     }
 
     /**
+     * Updates the password of the currently authenticated user.
+     * <p>
+     * The user must be logged in. If no authenticated user is found, a 401 (Unauthorized)
+     * response is returned. If the user cannot be found in the database or is inactive,
+     * an {@link EntityNotFoundException} is thrown.
      *
-     * @param userDetails
-     * @param request
-     * @return
+     * @param userDetails the authenticated user's details injected by Spring Security
+     * @param request     the password update request containing the current and new password
+     * @return {@link ResponseEntity} with status 200 (OK) containing the updated user mapped to
+     * {@link UserDto.UserResponse}, or 401 (Unauthorized) if no user is authenticated
      */
     @PatchMapping("/password")
     @Operation(summary = "Update password", description = "Update password of currently logged-in user. Must be logged in.")
@@ -133,9 +139,14 @@ public class ProfileController {
     }
 
     /**
-     * Get profile picture of currently logged-in user
-     * @param userDetails
-     * @return
+     * Retrieves the profile picture (avatar) of the currently authenticated user.
+     * <p>
+     * If the user does not have a profile image stored, a 404 (Not Found) response is returned.
+     *
+     * @param userDetails the authenticated user's details injected by Spring Security
+     * @return {@link ResponseEntity} with status 200 (OK) containing the image bytes in the body
+     * and a {@code Content-Type} header matching the stored image type,
+     * or 404 (Not Found) if no profile image exists for the user
      */
     @GetMapping("/avatar")
     @Operation(summary = "Get profile picture")

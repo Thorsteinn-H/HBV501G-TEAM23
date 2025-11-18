@@ -16,6 +16,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * REST controller that exposes read/write operations for {@link Venue} resources.
+ * <p>
+ * Base path is /venues.
+ */
 @RestController
 @RequestMapping("/venues")
 @Tag(name = "Venue")
@@ -25,10 +30,14 @@ public class VenueController {
 
     /**
      * Lists all venues with optional filters
+     * * If {@code name} and/or {@code address} are provided, they are used to filter the results.
+     *      * Matching is typically case-insensitive and may support partial matches,
+     *      * depending on the {@link VenueService} implementation.
      *
-     * @param name    optional name filter (case-insensitive, partial matches allowed)
-     * @param address optional address filter (case-insensitive, partial matches allowed)
+     * @param name    name filter (case-insensitive, partial matches allowed)
+     * @param address address filter (case-insensitive, partial matches allowed)
      * @return list of {@link VenueDto.VenueResponse} matching the criteria
+     * @throws ResponseStatusException with status 500 if an unexpected error occurs while retrieving venues
      */
     @GetMapping
     @ResponseBody
@@ -62,9 +71,13 @@ public class VenueController {
 
     /**
      * Creates a new venue.
+     * Only admin is allowed
      *
      * @param body venue creation request
-     * @return the newly created {@link VenueDto.VenueResponse}
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the newly created
+     * {@link VenueDto.VenueResponse} and a {@code Location} header pointing to
+     * /venues/{id}
+     * @throws ResponseStatusException with status 500 if an unexpected error occurs while creating the venue
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -84,10 +97,10 @@ public class VenueController {
     }
 
     /**
-     * Helper method to map a Venue entity to its response DTO.
+     * Maps a {@link Venue} entity to a {@link VenueDto.VenueResponse} DTO.
      *
-     * @param v the Venue entity
-     * @return mapped {@link VenueDto.VenueResponse}
+     * @param v the venue entity to map
+     * @return the mapped {@link VenueDto.VenueResponse}
      */
     private VenueDto.VenueResponse toResponse(Venue v) {
         return new VenueDto.VenueResponse(

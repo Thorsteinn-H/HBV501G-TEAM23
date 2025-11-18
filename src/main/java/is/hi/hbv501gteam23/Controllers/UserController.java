@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller that exposes read/write operations for users
+ * REST controller that exposes read/write operations for {@link User} resources.
+ * <p>
+ * All endpoints in this controller are restricted to administrators.
+ * Base path is /users
  */
 @RestController
 @RequestMapping("/users")
@@ -62,7 +65,7 @@ public class UserController {
      * Creates a new user. Admin only.
      *
      * @param request the {@link UserDto.CreateUserRequest} containing the user details
-     * @return the created {@link UserDto.UserResponse}
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the created {@link UserDto.UserResponse}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -80,7 +83,7 @@ public class UserController {
      *
      * @param id the ID of the user to update
      * @param request the {@link UserDto.PatchUserRequest} containing fields to update
-     * @return the updated {@link UserDto.UserResponse}
+     * @return {@link ResponseEntity} with status 200 (OK) containing the mapped {@link UserDto.UserResponse}
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -95,10 +98,10 @@ public class UserController {
 
     /**
      * Performs a soft delete on a user by marking them as inactive
-     * and anonymizing their data.
+     * and anonymizing their data. Admin only.
      *
-     * @param id  the id of the user to delete
-     * @return a {@link UserDto.UserResponse} containing the mapped data
+     * @param id the ID of the user to deactivate
+     * @return {@link ResponseEntity} with status 204 (NO_CONTENT) if the operation is successful
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -110,7 +113,7 @@ public class UserController {
 
     /**
      * Maps a {@link User} entity to a {@link UserDto.UserResponse} DTO.
-     * @param u user entity
+     * @param u user entity to map
      * @return mapped {@link UserDto.UserResponse}
      */
     private UserDto.UserResponse toResponse(User u) {
