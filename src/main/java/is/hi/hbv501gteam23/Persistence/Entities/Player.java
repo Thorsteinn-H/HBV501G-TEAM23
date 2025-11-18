@@ -35,7 +35,7 @@ public class Player {
     @Column(name = "player_country", length = 80)
     private String country;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id")
     private Team team;
 
