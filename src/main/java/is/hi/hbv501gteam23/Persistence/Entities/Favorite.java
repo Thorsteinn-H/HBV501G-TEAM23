@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
