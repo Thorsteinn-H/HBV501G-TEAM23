@@ -50,7 +50,8 @@ public class UserServiceImplementation implements UserService {
      * Finds a user by their email address.
      *
      * @param email the email address of the user to find
-     * @return the matching {@link User} entity
+     * @return an {@link Optional} containing the matching {@link User} if found,
+     * or empty if not found
      */
     @Override
     public Optional<User> findByEmail(String email) {
@@ -61,7 +62,7 @@ public class UserServiceImplementation implements UserService {
      * Finds a user by their id.
      *
      * @param id the id of the user to find
-     * @return the matching {@link User} entity
+     * @return the matching {@link User} entity, or {@code null} if not found
      */
     @Override
     public User findById(Long id) {
@@ -71,9 +72,10 @@ public class UserServiceImplementation implements UserService {
     /**
      * Validates a raw password against a hashed password.
      *
-     * @param rawPassword   the plain text password provided for verification
-     * @param storedPassword  the stored hashed password
-     * @return {@code true} if the raw password matches the hashed password otherwise {@code false}
+     * @param rawPassword    the plain text password provided for verification
+     * @param storedPassword the stored hashed password
+     * @return {@code true} if the raw password matches the hashed password,
+     * otherwise {@code false}
      */
     @Override
     public boolean validatePassword(String rawPassword, String storedPassword) {
@@ -81,9 +83,14 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
+     * Creates a new user.
+     * <p>
+     * Validates that the email is not already in use. Sets default role to {@code "USER"}
+     * and default active status to {@code true} if not provided.
      *
-     * @param request  the {@link UserDto.CreateUserRequest} containing user details
-     * @return
+     * @param request the {@link UserDto.CreateUserRequest} containing user details
+     * @return the created {@link User} entity
+     * @throws RuntimeException if the email is already in use
      */
     @Override
     public User createUser(UserDto.CreateUserRequest request) {
@@ -106,10 +113,12 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
+     * Updates an existing user by ID.
      *
-     * @param id       the ID of the user to update
-     * @param request  the {@link UserDto.PatchUserRequest} containing fields to update
-     * @return
+     * @param id      the ID of the user to update
+     * @param request the {@link UserDto.PatchUserRequest} containing fields to update
+     * @return the updated {@link User} entity
+     * @throws RuntimeException if the user is not found
      */
     @Override
     public User updateUser(Long id, UserDto.PatchUserRequest request) {
@@ -152,11 +161,17 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Uploads an image file to a specific user.
-     * @param user
-     * @param file
-     * @return
-     * @throws IOException
+     * Uploads a profile image for a specific user.
+     * <p>
+     * Validates that the file is present, has an allowed content type and does not exceed
+     * the maximum file size. The image data and type are stored on the {@link User}'s
+     * {@link Image} entity.
+     *
+     * @param user the user to associate the image with
+     * @param file the uploaded image file
+     * @return the updated {@link User} with the new image
+     * @throws IOException              if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if the file is missing, unsupported or too large
      */
     @Override
     public User uploadImage(User user, MultipartFile file) throws IOException {
@@ -178,8 +193,9 @@ public class UserServiceImplementation implements UserService {
     /**
      * Deletes the image associated with a user.
      *
-     * @param user  the user whose image should be deleted
-     * @return the updated {@link User} object with image cleared
+     * @param user the user whose image should be deleted
+     * @return the updated {@link User} object with the image cleared
+     * @throws IllegalArgumentException if the user is {@code null}
      */
     @Override
     public User deleteImage(User user) {
@@ -192,8 +208,9 @@ public class UserServiceImplementation implements UserService {
     /**
      * Retrieves the stored image data for the specified user.
      *
-     * @param user  the user whose image will be retrieved
+     * @param user the user whose image will be retrieved
      * @return a byte array containing the image data
+     * @throws IllegalArgumentException if the user or profile image is {@code null}
      */
     @Override
     public byte[] getImage(User user) {
@@ -201,11 +218,12 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Retrieves the type of image file for a users image
+     * Retrieves the type of the image file for a user's profile image.
      *
-     * @param user  the user whose image type will be retrieved
-     * @return a {@link String} representing the image type (e.g., "image/png", "jpg"),
-     *
+     * @param user the user whose image type will be retrieved
+     * @return a {@link String} representing the image MIME type
+     *         (e.g., {@code "image/png"}, {@code "image/jpeg"})
+     * @throws IllegalArgumentException if the user or profile image is {@code null}
      */
     @Override
     public String getImageType(User user) {
@@ -214,10 +232,13 @@ public class UserServiceImplementation implements UserService {
 
     /**
      * Updates the password for the specified user.
+     * <p>
+     * Verifies that the old password matches before setting the new password.
      *
-     * @param user     the user whose password will be updated
-     * @param request  a {@link UserDto.UpdatePassword} containing the old and new passwords
+     * @param user    the user whose password will be updated
+     * @param request a {@link UserDto.UpdatePassword} containing the old and new passwords
      * @return the updated {@link User} object after the password change
+     * @throws RuntimeException if the old password does not match
      */
     @Override
     public User updatePassword(User user, UserDto.UpdatePassword request) {
@@ -229,11 +250,13 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Updates the username of the specified user.
+     * Updates the profile information of the specified user.
+     * <p>
+     * Currently supports updating username and gender.
      *
-     * @param user     the user whose username will be updated
-     * @param request  a {@link UserDto.UpdateProfileRequest}  containing the new username
-     * @return the updated {@link User} object after the username change
+     * @param user    the user whose profile will be updated
+     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
+     * @return the updated {@link User} object after the profile change
      */
     @Override
     public User updateProfile(User user, UserDto.UpdateProfileRequest request) {

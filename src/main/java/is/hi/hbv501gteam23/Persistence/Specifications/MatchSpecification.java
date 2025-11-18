@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 public class MatchSpecification {
 
-
     public static Specification<Match> matchDate(LocalDate startDate, LocalDate endDate){
         return (root, query, criteriaBuilder) -> {
             if (startDate == null && endDate == null) return null;
@@ -53,7 +52,4 @@ public class MatchSpecification {
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + name.toLowerCase() + "%");
 
     }
-
-
-
 }
