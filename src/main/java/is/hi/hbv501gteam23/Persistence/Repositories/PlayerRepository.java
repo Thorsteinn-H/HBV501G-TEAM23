@@ -44,25 +44,11 @@ public interface PlayerRepository extends JpaRepository<Player, Long>, JpaSpecif
     List<Player> findByIsActive(Boolean isActive);
 
     /**
-     * Retrieves all players with the same position
-     * @param position a players position in football
-     * @return A list of players with the same football position
-     */
-    List<Player> findByPosition(String position);
-
-    /**
      *  Retrieves all players from the same country
      * @param country a players country of origin
      * @return A list of players from the same country
      */
     List<Player> findByCountry(String country);
-
-    /**
-     * Retrieves all players with equal or greater amount of goals
-     * @param goals number of goals by a player
-     * @return A list of players that have scored equal or greater amount of goals
-     */
-    List<Player> findByGoalsGreaterThan(int goals);
 
     /**
      * This serves as a purpose when a team is deleted

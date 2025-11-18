@@ -16,7 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 /**
- * Service implementation for handling favorite items
+ * Service implementation for handling favorite items.
+ * Provides operations for adding, removing, checking and listing favorites
+ * for a given user across different entity types (players, teams, matches).
  */
 @Service
 @RequiredArgsConstructor
@@ -26,6 +28,16 @@ public class FavoriteServiceImplementation implements FavoriteService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
 
+    /**
+     * Adds a new favorite item for the given user and entity.
+     *
+     * @param userId   the ID of the user adding the favorite
+     * @param type     the type of the favorited entity (MATCH, PLAYER, TEAM)
+     * @param entityId the ID of the entity to mark as favorite
+     * @return a {@link FavoriteDto.favoriteResponse} representing the created favorite
+     * @throws ResponseStatusException with status 404 if the target entity does not exist
+     * @throws ResponseStatusException with status 409 if the favorite already exists
+     */
     @Override
     @Transactional
     public FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId) {
@@ -55,7 +67,14 @@ public class FavoriteServiceImplementation implements FavoriteService {
         return toResponse(saved);
     }
 
-
+    /**
+     * Removes an existing favorite for the given user and entity.
+     *
+     * @param userId   the ID of the user
+     * @param type     the type of the favorited entity
+     * @param entityId the ID of the entity whose favorite should be removed
+     * @throws ResponseStatusException with status 404 if the favorite does not exist
+     */
     @Override
     public void removeFavorite(Long userId, Favorite.EntityType type, Long entityId) {
         var existing = favoriteRepository.findByUserIdAndEntityTypeAndEntityId(userId, type, entityId)
@@ -63,12 +82,26 @@ public class FavoriteServiceImplementation implements FavoriteService {
         favoriteRepository.delete(existing);
     }
 
+    /**
+     * Checks whether a given entity is a favorite for the user.
+     *
+     * @param userId   the ID of the user
+     * @param type     the type of the entity
+     * @param entityId the ID of the entity
+     * @return {@code true} if the entity is a favorite for the user, otherwise {@code false}
+     */
     @Override
     @Transactional(readOnly = true)
     public boolean isFavorite(Long userId, Favorite.EntityType type, Long entityId) {
         return favoriteRepository.existsByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
     }
 
+    /**
+     * Lists all favorites for a given user.
+     *
+     * @param userId the ID of the user
+     * @return a list of {@link FavoriteDto.favoriteResponse} representing all favorites of the user
+     */
     @Override
     @Transactional(readOnly = true)
     public List<FavoriteDto.FavoriteResponse> listAllForUser(Long userId) {
@@ -77,6 +110,13 @@ public class FavoriteServiceImplementation implements FavoriteService {
                 .toList();
     }
 
+    /**
+     * Lists all favorites for a given user filtered by entity type.
+     *
+     * @param userId the ID of the user
+     * @param type   the type of the favorited entities to list
+     * @return a list of {@link FavoriteDto.favoriteResponse} for the given user and type
+     */
     @Override
     @Transactional(readOnly = true)
     public List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type) {
@@ -85,6 +125,12 @@ public class FavoriteServiceImplementation implements FavoriteService {
                 .toList();
     }
 
+    /**
+     * Maps a {@link Favorite} entity to a {@link FavoriteDto.favoriteResponse} DTO.
+     *
+     * @param f the favorite entity to map
+     * @return the mapped {@link FavoriteDto.favoriteResponse}
+     */
     private FavoriteDto.FavoriteResponse toResponse(Favorite f) {
         return new FavoriteDto.FavoriteResponse(
                 f.getId(),

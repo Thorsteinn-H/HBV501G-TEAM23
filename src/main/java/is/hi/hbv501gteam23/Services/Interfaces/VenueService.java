@@ -15,10 +15,13 @@ public interface VenueService {
     List<Venue> getAllVenues();
 
     /**
+     * Retrieves venues filtered by optional name and address.
+     * <p>
+     * Both filters are optional, when {@code null} or blank, they are ignored.
      *
-     * @param name
-     * @param address
-     * @return
+     * @param name    venue name filter (case-insensitive, partial matches allowed)
+     * @param address venue address filter (case-insensitive, partial matches allowed)
+     * @return a list of {@link Venue} entities matching the given filters
      */
     List<Venue> findByFilters(String name, String address);
 

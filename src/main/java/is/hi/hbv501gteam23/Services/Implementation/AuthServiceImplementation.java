@@ -81,6 +81,12 @@ public class AuthServiceImplementation implements AuthService {
         return new AuthDto.AuthResponse(accessToken, refreshToken, mapToDto(savedUser));
     }
 
+    /**
+     * Maps a {@link User} entity to a {@link UserDto.UserResponse} DTO.
+     *
+     * @param user the user entity to map
+     * @return the mapped {@link UserDto.UserResponse}
+     */
     private UserDto.UserResponse mapToDto(User user) {
         return new UserDto.UserResponse(
             user.getId(),

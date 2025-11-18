@@ -9,17 +9,20 @@ import java.util.List;
 public interface PlayerService {
 
     /**
+     * Finds players using optional filters, with sorting and pagination.
+     * <p>
+     * All filter parameters are optional; when {@code null} or blank, they are ignored.
      *
-     * @param name
-     * @param teamId
-     * @param teamName
-     * @param country
-     * @param isActive
-     * @param sortBy
-     * @param sortDir
-     * @param page
-     * @param size
-     * @return
+     * @param name     player name filter
+     * @param teamId   team ID to filter by
+     * @param teamName team name filter
+     * @param country  country code to filter by
+     * @param isActive active status filter
+     * @param sortBy   field to sort by
+     * @param sortDir  sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @param page     zero-based page index
+     * @param size     page size (maximum number of players per page)
+     * @return list of {@link Player} entities matching the given filters
      */
     List<Player> findPlayers(
         String name,
