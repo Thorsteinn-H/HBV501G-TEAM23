@@ -71,7 +71,7 @@ public class FavouriteController {
      */
     @GetMapping
     @Operation(summary = "List favorites")
-    public ResponseEntity<List<FavoriteDto.favoriteResponse>> getAllFavorites() {
+    public ResponseEntity<List<FavoriteDto.FavoriteResponse>> getAllFavorites() {
         Long userId = getCurrentUserId();
         var list = favoriteService.listAllForUser(userId);
         return ResponseEntity.ok(list);
@@ -86,7 +86,7 @@ public class FavouriteController {
      */
     @GetMapping(value = "/{type}")
     @Operation(summary = "Get favorites by type")
-    public ResponseEntity<List<FavoriteDto.favoriteResponse>> getFavoritesByType(@PathVariable String type) {
+    public ResponseEntity<List<FavoriteDto.FavoriteResponse>> getFavoritesByType(@PathVariable String type) {
         Long userId = getCurrentUserId();
         var entityType = parseType(type);
         var list = favoriteService.listForUserAndType(userId, entityType);

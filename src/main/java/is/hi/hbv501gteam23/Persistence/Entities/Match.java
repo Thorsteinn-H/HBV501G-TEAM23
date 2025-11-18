@@ -19,7 +19,7 @@ public class Match {
     private Long id;
 
     @Column(name = "match_date", nullable = false)
-    private LocalDate date;
+    private LocalDate matchDate;
 
     @Column(name = "home_goals", nullable = false)
     private Integer homeGoals = 0;

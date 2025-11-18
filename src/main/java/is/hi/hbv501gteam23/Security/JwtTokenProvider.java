@@ -26,7 +26,7 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Generates a token with username as subject, an expiry date,
+     * Generates a token with username as subject, an expiry matchDate,
      * and HMAC-SHA-256 to sign
      * @param userDetails the details for the subject
      * @return
@@ -36,7 +36,7 @@ public class JwtTokenProvider {
         Date expiry = new Date(now.getTime() + jwtExpirationMillis);
 
         return Jwts.builder()
-            .setSubject(userDetails.getId().toString())
+            .setSubject(userDetails.getEmail())
             .claim("role", userDetails.getRole())
             .setIssuedAt(now)
             .setExpiration(expiry)
@@ -49,7 +49,7 @@ public class JwtTokenProvider {
         Date expiry = new Date(now.getTime() + jwtExpirationMillis * 10);
 
         return Jwts.builder()
-            .setSubject(user.getId().toString())
+            .setSubject(user.getEmail())
             .setIssuedAt(now)
             .setExpiration(expiry)
             .signWith(key, SignatureAlgorithm.HS512)

@@ -15,9 +15,9 @@ public interface FavoriteService {
      * @param userId   the ID of the user
      * @param type     the type of the entity (PLAYER, TEAM, MATCH)
      * @param entityId the ID of the entity to favorite
-     * @return the created favorite as a {@link FavoriteDto.favoriteResponse}
+     * @return the created favorite as a {@link FavoriteDto.FavoriteResponse}
      */
-    FavoriteDto.favoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId);
+    FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId);
 
     /**
      * Removes an existing favorite for the given user and entity.
@@ -44,7 +44,7 @@ public interface FavoriteService {
      * @param userId the ID of the user
      * @return list of favorites for the user
      */
-    List<FavoriteDto.favoriteResponse> listAllForUser(Long userId);
+    List<FavoriteDto.FavoriteResponse> listAllForUser(Long userId);
 
     /**
      * Lists favorites for a given user filtered by entity type.
@@ -53,5 +53,5 @@ public interface FavoriteService {
      * @param type   the type of the favorited entities
      * @return list of favorites of the given type for the user
      */
-    List<FavoriteDto.favoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type);
+    List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type);
 }

@@ -4,6 +4,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.AuthDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
 import is.hi.hbv501gteam23.Security.JwtTokenProvider;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
@@ -66,7 +67,7 @@ public class AuthServiceImplementation implements AuthService {
         user.setEmail(request.email());
         user.setName(request.username());
         user.setGender(request.gender());
-        user.setRole("USER");
+        user.setRole(SystemRole.USER);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setCreatedAt(LocalDateTime.now());
         user.setActive(true);

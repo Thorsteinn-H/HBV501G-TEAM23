@@ -32,5 +32,5 @@ public interface MatchRepository extends JpaRepository<Match, Long> , JpaSpecifi
      * @return list of matches whose {@code date} is between {@code from} and {@code to},
      * ordered from oldest to newest
      */
-    List<Match> findByDateBetweenOrderByDateAsc(LocalDate from, LocalDate to);
+    List<Match> findByMatchDateBetweenOrderByMatchDateAsc(LocalDate from, LocalDate to);
 }

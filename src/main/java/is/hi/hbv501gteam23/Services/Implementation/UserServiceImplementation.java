@@ -4,7 +4,6 @@ import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
-import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +25,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
     private final AuthRepository authRepository;
-    private final FavoriteService favoriteService;
     private final PasswordEncoder passwordEncoder;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -105,7 +103,7 @@ public class UserServiceImplementation implements UserService {
         if (request.gender() != null) {
             user.setGender(request.gender());
         }
-        user.setRole(request.role() != null ? request.role() : "USER");
+        user.setRole(request.role());
         user.setActive(request.isActive() != null ? request.isActive() : true);
         user.setCreatedAt(LocalDateTime.now());
 

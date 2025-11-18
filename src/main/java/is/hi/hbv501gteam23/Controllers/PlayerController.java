@@ -112,7 +112,7 @@ public class PlayerController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
         Player created = playerService.createPlayer(body);
-        return ResponseEntity.created(URI.create("/players" + created.getId())).body(toResponse(created));
+        return ResponseEntity.created(URI.create("/players/" + created.getId())).body(toResponse(created));
     }
 
     /**

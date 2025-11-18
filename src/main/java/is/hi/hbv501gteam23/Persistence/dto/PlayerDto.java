@@ -1,7 +1,11 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import io.swagger.v3.oas.annotations.media.Schema;
+import is.hi.hbv501gteam23.Persistence.enums.PlayerPosition;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public final class PlayerDto {
@@ -13,7 +17,7 @@ public final class PlayerDto {
      *      goals and teamID
      *
      * @param name the name of the player
-     * @param dateOfBirth the date of players birth
+     * @param dateOfBirth the matchDate of players birth
      * @param country players country of origin
      * @param position the position a players plays for the team
      * @param isActive    whether the player is currently active
@@ -21,11 +25,22 @@ public final class PlayerDto {
      * @param teamId the ID of a team the player belongs too
      */
     public record CreatePlayerRequest(
+            @NotBlank
             String name,
+
+            @NotNull
             LocalDate dateOfBirth,
+
+            @NotBlank
             String country,
-            Player.PlayerPosition position,
+
+            @NotNull
+            @Schema(enumAsRef = true)
+            PlayerPosition position,
+
+            @NotNull
             Boolean isActive,
+
             Integer goals,
             Long teamId
     ) {}
@@ -38,7 +53,7 @@ public final class PlayerDto {
      *      or reassigning the team to a different venue.
      *
      * @param name the name of the player
-     * @param dateOfBirth the date of players birth
+     * @param dateOfBirth the matchDate of players birth
      * @param country players country of origin
      * @param position the position a players plays for the team
      * @param goals how many goals a player has scored
@@ -50,7 +65,7 @@ public final class PlayerDto {
             String name,
             LocalDate dateOfBirth,
             String country,
-            Player.PlayerPosition position,
+            PlayerPosition position,
             Integer goals,
             Boolean isActive,
             Long teamId
@@ -68,7 +83,7 @@ public final class PlayerDto {
      * @param position the position a players plays for the team
      * @param goals how many goals a player has scored
      * @param country players country of origin
-     * @param dateOfBirth the date of players birth
+     * @param dateOfBirth the matchDate of players birth
      * @param teamId the ID of a team the player belongs too
      * @param teamName the name of a team the player belongs too
      */
@@ -76,7 +91,7 @@ public final class PlayerDto {
             Long id,
             String name,
             Boolean isActive,
-            Player.PlayerPosition position,
+            PlayerPosition position,
             Integer goals,
             String country,
             LocalDate dateOfBirth,

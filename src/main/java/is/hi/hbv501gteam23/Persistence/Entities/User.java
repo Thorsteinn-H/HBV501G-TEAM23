@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -53,8 +54,9 @@ public class User implements Serializable {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private String role;
+    private SystemRole role;
 
     @OneToOne
     @JoinColumn(name = "profile_image_id")
