@@ -87,7 +87,7 @@ CREATE TABLE players (
      player_name VARCHAR(120) NOT NULL,
      player_country CHAR(2) REFERENCES countries(code),
      team_id BIGINT REFERENCES teams(team_id),
-     player_position player_position_enum NOT NULL,
+     player_position VARCHAR(20) NOT NULL,
      date_of_birth DATE,
      gender VARCHAR(10),
      goals INTEGER NOT NULL DEFAULT 0,
@@ -143,7 +143,7 @@ CREATE TABLE users (
 CREATE TABLE favorites (
     favorite_id BIGINT PRIMARY KEY DEFAULT nextval('favorite_sequence'),
     user_id BIGINT NOT NULL,
-    entity_type favorite_type_enum NOT NULL,
+    entity_type VARCHAR(20) NOT NULL,
     entity_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now(),
