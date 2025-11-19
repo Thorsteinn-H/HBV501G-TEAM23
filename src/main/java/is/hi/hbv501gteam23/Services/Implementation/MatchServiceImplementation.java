@@ -28,6 +28,22 @@ public class MatchServiceImplementation implements MatchService {
     private final TeamRepository teamRepository;
     private final VenueRepository venueRepository;
 
+    /**
+     * Retrieves a list of matches filtered by the given optional criteria and sorted by the given field.
+     * <p>
+     * All filter parameters are optional; when {@code null}, they are ignored in the specification.
+     *
+     * @param startDate    lower bound for the match date
+     * @param endDate      upper bound for the match date
+     * @param homeGoals    exact number of goals scored by the home team
+     * @param awayGoals    exact number of goals scored by the away team
+     * @param homeTeamName home team name filter
+     * @param awayTeamName away team name filter
+     * @param venueName    venue name filter
+     * @param sortBy       field to sort by
+     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @return list of {@link Match} entities matching the given filters
+     */
     @Override
     public List<Match> findMatchFilter(LocalDate startDate,
                                        LocalDate endDate,Integer homeGoals,
@@ -37,13 +53,12 @@ public class MatchServiceImplementation implements MatchService {
                                        String venueName, String sortBy, String sortDir) {
 
         Specification<Match> spec= Specification.allOf(
-                MatchSpecifications.matchDate(startDate,endDate),
-                MatchSpecifications.matchHomeGoals(homeGoals),
-                MatchSpecifications.matchAwayGoals(awayGoals),
-                MatchSpecifications.matchHomeTeamName(homeTeamName),
-                MatchSpecifications.matchAwayTeamName(awayTeamName),
-                MatchSpecifications.matchVenueName(venueName)
-
+            MatchSpecifications.matchDate(startDate,endDate),
+            MatchSpecifications.matchHomeGoals(homeGoals),
+            MatchSpecifications.matchAwayGoals(awayGoals),
+            MatchSpecifications.matchHomeTeamName(homeTeamName),
+            MatchSpecifications.matchAwayTeamName(awayTeamName),
+            MatchSpecifications.matchVenueName(venueName)
         );
 
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
@@ -57,6 +72,7 @@ public class MatchServiceImplementation implements MatchService {
      *
      * @param id the id of the match
      * @return the {@link Match} with the specified id
+     * @throws ResponseStatusException with status 404 if the match is not found
      */
     @Override
     public Match getMatchById(Long id) {
@@ -69,6 +85,8 @@ public class MatchServiceImplementation implements MatchService {
      *
      * @param teamId the ID of the team
      * @return a list of {@link Match} entities involving the specified team
+     * @throws ResponseStatusException with status 400 if {@code teamId} is null
+     * @throws ResponseStatusException with status 404 if the team does not exist
      */
     @Override
     public List<Match> getMatchesByTeamId(Long teamId) {
@@ -82,10 +100,13 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
+     * Retrieves all matches played between the given dates (inclusive), ordered by date ascending.
      *
-     * @param from
-     * @param to
-     * @return
+     * @param from the start date (inclusive)
+     * @param to   the end date (inclusive)
+     * @return list of {@link Match} entities whose date is between {@code from} and {@code to}
+     * @throws ResponseStatusException with status 400 if either date is null
+     * @throws ResponseStatusException with status 400 if {@code to} is before {@code from}
      */
     @Override
     public List<Match> getMatchesBetween(LocalDate from, LocalDate to) {
@@ -100,6 +121,7 @@ public class MatchServiceImplementation implements MatchService {
 
     /**
      * Partially updates a {@link Match} identified by {@code id}.
+     * <p>
      * Applies only the non-null fields from {@code body}. Supported fields:
      * {@code matchDate}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
      * {@code homeGoals}, {@code awayGoals}. Team and venue identifiers (if present)
@@ -110,8 +132,8 @@ public class MatchServiceImplementation implements MatchService {
      * @return the updated {@link Match}
      *
      * @throws EntityNotFoundException
-     *  *         if the match does not exist, or if any referenced team/venue id in the
-     *  *         payload cannot be found
+     *         if the match does not exist, or if any referenced team/venue id in the
+     *         payload cannot be found
      */
     @Override
     @Transactional
@@ -142,9 +164,18 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Creates a match
-     * @param body the {@link Match} entity to create
-     * @return the created match
+     * Creates a new match from the provided request body.
+     * <p>
+     * Validates that required IDs and date are present, that team IDs are different, and
+     * that goal values (if provided) are non-negative. Also checks that referenced teams
+     * and venue exist.
+     *
+     * @param body the {@link MatchDto.CreateMatchRequest} containing match details
+     * @return the created {@link Match}
+     *
+     * @throws ResponseStatusException with status 400 if required fields are missing
+     *                                 or invalid
+     * @throws ResponseStatusException with status 404 if referenced teams or venue are not found
      */
     @Override
     @Transactional
@@ -196,7 +227,7 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Deletes a match by its id
+     * Deletes a match by its id.
      *
      * @param id the id of the match to delete
      */

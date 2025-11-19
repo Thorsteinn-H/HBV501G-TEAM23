@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+/**
+ * Service implementation for handling business logic related to {@link Venue} entities.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -31,10 +34,15 @@ public class VenueServiceImplementation implements VenueService {
     }
 
     /**
+     * Retrieves venues filtered by optional name and address.
+     * <p>
+     * Both filters are optional; when provided, they are combined with a logical AND.
+     * If both {@code name} and {@code address} are {@code null} or blank,
+     * all venues are returned.
      *
-     * @param name
-     * @param address
-     * @return
+     * @param name    venue name filter (case-insensitive, partial matches allowed)
+     * @param address venue address filter (case-insensitive, partial matches allowed)
+     * @return a list of {@link Venue} entities matching the given filters
      */
     @Override
     public List<Venue> findByFilters(String name, String address) {
@@ -50,6 +58,13 @@ public class VenueServiceImplementation implements VenueService {
         return venueRepository.findAll(spec);
     }
 
+    /**
+     * Retrieves a single venue by its ID.
+     *
+     * @param id the id of the venue
+     * @return the {@link Venue} with the specified id
+     * @throws ResponseStatusException with status 404 if the venue is not found
+     */
     @Override
     public Venue findById(Long id) {
         return venueRepository.findById(id)
@@ -61,6 +76,7 @@ public class VenueServiceImplementation implements VenueService {
      *
      * @param name the name of the venue
      * @return the {@link Venue} with the specified name
+     * @throws ResponseStatusException with status 404 if the venue is not found
      */
     @Override
     public Venue findByName(String name) {
@@ -72,10 +88,16 @@ public class VenueServiceImplementation implements VenueService {
     }
 
     /**
-     * Creates a new venue
+     * Creates a new venue.
+     * <p>
+     * Validates that the request body, name and address are present, and that
+     * no other venue with the same name already exists.
      *
-     * @param body the {@link Venue} entity to create
+     * @param body the {@link VenueDto.VenueRequest} containing venue data to create
      * @return the newly created {@link Venue} entity
+     *
+     * @throws ResponseStatusException with status 400 if required fields are missing
+     * @throws ResponseStatusException with status 409 if a venue with the same name already exists
      */
     @Override
     @Transactional

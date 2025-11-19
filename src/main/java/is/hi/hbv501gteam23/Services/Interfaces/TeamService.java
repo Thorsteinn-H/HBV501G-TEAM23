@@ -6,6 +6,20 @@ import java.util.List;
 
 public interface TeamService {
 
+    /**
+     * Finds teams using optional filters, with sorting.
+     * <p>
+     * All filter parameters are optional; when {@code null}, they are ignored.
+     * Supports filtering by name, active status, country and venue name.
+     *
+     * @param name      team name filter (partial, case-insensitive)
+     * @param isActive  active status filter
+     * @param country   country code filter
+     * @param venueName venue name filter (partial, case-insensitive)
+     * @param sortBy    field to sort by
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @return list of {@link Team} entities matching the given filters
+     */
     List<Team> findTeamFilter(
              String name, Boolean isActive,
             String country, String venueName,
