@@ -3,50 +3,46 @@ package is.hi.hbv501gteam23.Controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.dto.ProfileDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
+import is.hi.hbv501gteam23.Services.Interfaces.ProfileService;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Controller for handling profile-related operations.
- * Provides endpoints for viewing, updating, and deleting
- * the currently authenticated user's profile.
- * Base URL for this controller is `/profile`.
+ * REST controller for managing the currently authenticated user's profile.
  */
 @RestController
 @RequestMapping("/profile")
-@Tag(name = "Profile", description = "Restricted to authenticated users only")
+@Tag(name = "Profile", description = "Operations for authenticated users only")
+@Validated
 @RequiredArgsConstructor
 public class ProfileController {
     private final UserService userService;
+    private final ProfileService profileService;
 
     /**
      * Get profile of currently logged-in user
+     *
      * @param userDetails the logged-in user's profile information
      * @return a {@link UserDto.UserResponse} containing the mapped data
      */
     @GetMapping
-    @Operation(summary = "Get profile", description = "Get profile of currently logged-in user. Must be logged in.")
-    public ResponseEntity<UserDto.UserResponse> loggedIn(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
+    @Operation(summary = "Get current user profile", description = "Get profile of currently logged-in user. Must be logged in.")
+    public ResponseEntity<ProfileDto.ProfileResponse> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(toResponse(user));
     }
 
@@ -58,87 +54,58 @@ public class ProfileController {
      * @param picture optional profile image to upload
      * @return the updated user profile response
      * @throws IOException if an error occurs while reading the image
+     * @throws IllegalArgumentException if the uploaded file is invalid
      */
     @PatchMapping
-    @Operation(summary = "Update profile", description = "Update profile of currently logged-in user. Must be logged in.")
-    public ResponseEntity<UserDto.UserResponse> updateProfile(
+    @Operation(summary = "Update profile", description = "Updates profile information for logged-in user")
+    public ResponseEntity<ProfileDto.ProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart(required = false) UserDto.UpdateProfileRequest request,
+            @Valid @RequestPart(required = false) UserDto.UpdateProfileRequest request,
             @RequestPart(required = false) MultipartFile picture
     ) throws IOException {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        User user = getAuthenticatedUser(userDetails);
 
-        User user = userService.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if (request != null) user = profileService.updateProfile(user, new ProfileDto.UpdateProfileRequest(request.username(), request.gender()));
+        if (picture != null && !picture.isEmpty()) user = userService.uploadImage(user, picture);
 
-        if (user == null || !user.isActive()) throw new EntityNotFoundException("User not found");
-
-        if (request != null && request.username() != null) user.setName(request.username());
-
-        if (request != null && request.gender() != null) {
-            user.setGender(request.gender());
-        }
-
-        if (picture != null) {
-            String fileType = picture.getContentType();
-            if (fileType != null && fileType.startsWith("image")) {
-                user = userService.uploadImage(user, picture);
-            } else {
-                throw new EntityNotFoundException("File type incorrect");
-            }
-        }
         return ResponseEntity.ok(toResponse(user));
     }
 
     /**
-     * Soft deletes the authenticated user's account by marking as inactive and anonymizing data.
-     * @return void
-     */
-    @DeleteMapping
-    @Operation(summary = "Deactivate account", description = "Marks currently logged-in user as inactive and anonymizes data")
-    public ResponseEntity<Void> deactivateAccount() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByEmail(email)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        if (user == null || !user.isActive()) return ResponseEntity.notFound().build();
-
-        userService.deleteUser(user.getId());
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Updates the password of the currently authenticated user.
-     * <p>
-     * The user must be logged in. If no authenticated user is found, a 401 (Unauthorized)
-     * response is returned. If the user cannot be found in the database or is inactive,
-     * an {@link EntityNotFoundException} is thrown.
+     * Updates the authenticated user's password.
      *
      * @param userDetails the authenticated user's details injected by Spring Security
      * @param request     the password update request containing the current and new password
-     * @return {@link ResponseEntity} with status 200 (OK) containing the updated user mapped to
-     * {@link UserDto.UserResponse}, or 401 (Unauthorized) if no user is authenticated
+     * @return updated ProfileResponse
+     * @throws RuntimeException if old password does not match
      */
     @PatchMapping("/password")
-    @Operation(summary = "Update password", description = "Update password of currently logged-in user. Must be logged in.")
-    public ResponseEntity<UserDto.UserResponse> updatePassword(
+    @Operation(summary = "Change password", description = "Update the logged-in user's password.")
+    public ResponseEntity<ProfileDto.ProfileResponse> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody UserDto.UpdatePassword request
+            @Valid @RequestBody UserDto.UpdatePassword request
     ) {
-        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         User user = getAuthenticatedUser(userDetails);
-
-        User updatedUser = userService.updatePassword(user, request);
+        User updatedUser = userService.updatePassword(user, new UserDto.UpdatePassword(request.newPassword(), request.oldPassword()));
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
     /**
-     * Retrieves the profile picture (avatar) of the currently authenticated user.
-     * <p>
-     * If the user does not have a profile image stored, a 404 (Not Found) response is returned.
+     * Soft deletes the authenticated user's account by marking as inactive and anonymizing data.
+     *
+     * @param userDetails Authenticated user details
+     * @return 204 No Content
+     */
+    @DeleteMapping
+    @Operation(summary = "Deactivate account", description = "Soft-deletes the logged-in user by marking as inactive")
+    public ResponseEntity<Void> deactivateAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+        profileService.deactivateAccount(user);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Retrieves the authenticated user's profile picture.
      *
      * @param userDetails the authenticated user's details injected by Spring Security
      * @return {@link ResponseEntity} with status 200 (OK) containing the image bytes in the body
@@ -146,59 +113,56 @@ public class ProfileController {
      * or 404 (Not Found) if no profile image exists for the user
      */
     @GetMapping("/avatar")
-    @Operation(summary = "Get profile picture")
+    @Operation(summary = "Get profile picture", description = "Retrieves the logged-in user's profile picture")
     public ResponseEntity<byte[]> getAvatar(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
+        if (user.getProfileImage() == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No profile image found");
 
-        if (user == null || user.getProfileImage() == null) {
-            return ResponseEntity.notFound().build();
-        }
+        byte[] imageBytes = user.getProfileImage().getImageData();
+        String contentType = user.getProfileImage().getImageType();
+
         return ResponseEntity.ok()
-                .header("Content-Type", user.getProfileImage().getImageType())
-                .body(user.getProfileImage().getImageData());
+            .contentType(MediaType.parseMediaType(contentType))
+            .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate())
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"avatar_" + user.getId() + "\"")
+            .body(imageBytes);
     }
 
     /**
-     * Sets the logged-in user's image
-     * @param userDetails the logged inn user's details
-     * @param file the image file
-     * @return a {@link ResponseEntity} containing the user's image as a byte array and
-     * the image type
-     * @throws IOException if an error occurs while reading or storing the file
+     * Uploads or updates the authenticated user's profile picture.
+     *
+     * @param userDetails the authenticated user's details
+     * @param file a multipart image file
+     * @return updated ProfileResponse
+     * @throws IOException if file cannot be read
      */
     @PutMapping("/avatar")
-    @Operation(summary = "Upload profile picture")
-    public ResponseEntity<UserDto.UserResponse> uploadAvatar(
+    @Operation(summary = "Upload profile picture", description = "Uploads or updates the logged-in user's profile picture")
+    public ResponseEntity<ProfileDto.ProfileResponse> uploadAvatar(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
+            @RequestParam("file") MultipartFile file
+    ) throws IOException {
         User user = getAuthenticatedUser(userDetails);
-
         User updatedUser = userService.uploadImage(user, file);
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
     /**
-     * Deletes the logged-in user's image
+     * Deletes the authenticated user's profile picture.
      *
-     * @param userDetails the logged inn user's details
-     * @return a {@link ResponseEntity} containing the user's details
-     *
+     * @param userDetails the authenticated user's details
+     * @return 204 No Content
      */
     @DeleteMapping("/avatar")
-    @Operation(summary = "Delete profile picture")
+    @Operation(summary = "Delete profile picture", description = "Removes logged-in user's profile picture")
     public ResponseEntity<Void> deleteAvatar(@AuthenticationPrincipal CustomUserDetails userDetails){
-        if (userDetails == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
         User user = getAuthenticatedUser(userDetails);
-
         userService.deleteImage(user);
         return ResponseEntity.noContent().build();
     }
 
     private User getAuthenticatedUser(CustomUserDetails userDetails) {
+        if (userDetails == null) throw new EntityNotFoundException("User not authenticated");
         return userService.findByEmail(userDetails.getUsername())
             .filter(User::isActive)
             .orElseThrow(() -> new EntityNotFoundException("User not found or inactive"));
@@ -209,16 +173,15 @@ public class ProfileController {
      * @param user the {@link User} entity to map
      * @return a {@link UserDto.UserResponse} containing mapped data
      */
-    private UserDto.UserResponse toResponse(User user) {
-        return new UserDto.UserResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getGender(),
-                user.getRole(),
-                user.isActive(),
-                user.getCreatedAt(),
-                user.getProfileImage()
+    private ProfileDto.ProfileResponse toResponse(User user) {
+        String imageUrl = (user.getProfileImage() != null) ? "/profile/avatar" : null;
+        return new ProfileDto.ProfileResponse(
+            user.getId(),
+            user.getEmail(),
+            user.getName(),
+            user.getGender(),
+            user.getCreatedAt(),
+            imageUrl
         );
     }
 }

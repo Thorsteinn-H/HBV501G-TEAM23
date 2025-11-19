@@ -5,7 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 
-public class MatchSpecification {
+public class MatchSpecifications {
 
     public static Specification<Match> matchDate(LocalDate startDate, LocalDate endDate){
         return (root, query, criteriaBuilder) -> {

@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import is.hi.hbv501gteam23.Persistence.dto.MetadataDto;
 import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import is.hi.hbv501gteam23.Persistence.enums.PlayerPosition;
@@ -32,12 +31,11 @@ public class MetadataController {
     @GetMapping("/countries")
     @Operation(
         summary = "List countries",
-        description = "Fetches a list of all countries that can be assigned to a team or player."
+        description = "Fetches a list of countries that can be assigned to a team or player."
     )
     public Map<String, List<Map<String, String>>> getAllCountries() {
         List<Map<String, String>> countries = metadataService.getAllCountries()
             .stream()
-            .map(c -> new MetadataDto(c.label(), c.value()))
             .map(dto -> Map.of(
                 "name", dto.label(),
                 "code", dto.value()

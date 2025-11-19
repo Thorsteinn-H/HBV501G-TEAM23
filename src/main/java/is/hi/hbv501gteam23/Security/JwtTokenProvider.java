@@ -1,13 +1,14 @@
 package is.hi.hbv501gteam23.Security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 
@@ -32,42 +33,47 @@ public class JwtTokenProvider {
      * @return
      */
     public String generateAccessToken(CustomUserDetails userDetails) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpirationMillis);
+        Instant now = Instant.now();
+        Instant expiry = now.plusMillis(jwtExpirationMillis);
 
         return Jwts.builder()
-            .setSubject(userDetails.getEmail())
+            .subject(userDetails.getEmail())
             .claim("role", userDetails.getRole())
-            .setIssuedAt(now)
-            .setExpiration(expiry)
-            .signWith(key, SignatureAlgorithm.HS512)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(expiry))
+            .signWith(key)
             .compact();
     }
 
+    /**
+     *
+     * @param user
+     * @return
+     */
     public String generateRefreshToken(User user) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + jwtExpirationMillis * 10);
+        Instant now = Instant.now();
+        Instant expiry = now.plusMillis(jwtExpirationMillis * 10);
 
         return Jwts.builder()
-            .setSubject(user.getEmail())
-            .setIssuedAt(now)
-            .setExpiration(expiry)
-            .signWith(key, SignatureAlgorithm.HS512)
+            .subject(user.getEmail())
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(expiry))
+            .signWith(key)
             .compact();
     }
 
     /**
      *
      * @param token
-     * @return the subject
+     * @return
      */
     public String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        Claims claims = Jwts.parser()
+            .verifyWith(key)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+        return claims.getSubject();
     }
 
     /**
@@ -77,7 +83,10 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
             return false;

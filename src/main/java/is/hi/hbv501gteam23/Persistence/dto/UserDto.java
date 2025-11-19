@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.validation.constraints.Email;
@@ -22,27 +21,27 @@ public class UserDto {
      * @param isActive
      */
     public record CreateUserRequest(
-            @Schema(example = "admin@team23.com")
-            @Email(message = "Invalid email")
-            @NotBlank(message = "Email is required")
-            String email,
+        @Schema(example = "admin@team23.com")
+        @Email(message = "Invalid email")
+        @NotBlank(message = "Email is required")
+        String email,
 
-            @Schema(example = "username")
-            @NotBlank(message = "Username is required")
-            String username,
+        @Schema(example = "username")
+        @NotBlank(message = "Username is required")
+        String username,
 
-            @Schema(example = "password")
-            @NotBlank(message = "Password is required")
-            String password,
+        @Schema(example = "password")
+        @NotBlank(message = "Password is required")
+        String password,
 
-            @Schema(example = "FEMALE")
-            Gender gender,
+        @Schema(example = "FEMALE")
+        Gender gender,
 
-            @Schema(example = "USER")
-            SystemRole role,
+        @Schema(example = "USER")
+        SystemRole role,
 
-            @Schema(example = "true")
-            Boolean isActive
+        @Schema(example = "true")
+        Boolean isActive
     ) {}
 
     /**
@@ -57,24 +56,24 @@ public class UserDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchUserRequest(
-            @Schema(example = "admin@team23.com")
-            @Email(message = "Invalid email")
-            String email,
+        @Schema(example = "admin@team23.com")
+        @Email(message = "Invalid email")
+        String email,
 
-            @Schema(example = "username")
-            String username,
+        @Schema(example = "username")
+        String username,
 
-            @Schema(example = "password")
-            String password,
+        @Schema(example = "password")
+        String password,
 
-            @Schema(example = "FEMALE")
-            Gender gender,
+        @Schema(example = "FEMALE")
+        Gender gender,
 
-            @Schema(example = "USER")
-            SystemRole role,
+        @Schema(example = "USER")
+        SystemRole role,
 
-            @Schema(example = "true")
-            Boolean isActive
+        @Schema(example = "true")
+        Boolean isActive
     ) {}
 
     /**
@@ -85,10 +84,10 @@ public class UserDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record UpdateProfileRequest(
-            @Schema(example = "username")
-            String username,
-            @Schema(example = "MALE")
-            Gender gender
+        @Schema(example = "username")
+        String username,
+        @Schema(example = "MALE")
+        Gender gender
     ) {}
 
     /**
@@ -97,10 +96,10 @@ public class UserDto {
      * @param oldPassword The old password for the user
      */
     public record UpdatePassword(
-            @Schema(example = "newPassword456")
-            String newPassword,
-            @Schema(example = "oldPassword123")
-            String oldPassword
+        @Schema(example = "newPassword456")
+        String newPassword,
+        @Schema(example = "oldPassword123")
+        String oldPassword
     ) {}
 
     /**
@@ -114,25 +113,13 @@ public class UserDto {
      * @param createdAt timestamp when user was created
      */
     public record UserResponse(
-            Long id,
-
-            @Schema(example = "admin@team23.com")
-            String email,
-
-            @Schema(example = "username")
-            String username,
-
-            @Schema(example = "FEMALE")
-            Gender gender,
-
-            @Schema(example = "USER")
-            SystemRole role,
-
-            @Schema(example = "true")
-            Boolean isActive,
-
-            LocalDateTime createdAt,
-
-            Image profileImage
+        Long id,
+        String email,
+        String username,
+        Gender gender,
+        SystemRole role,
+        Boolean isActive,
+        LocalDateTime createdAt,
+        String profileImageUrl
     ) {}
 }

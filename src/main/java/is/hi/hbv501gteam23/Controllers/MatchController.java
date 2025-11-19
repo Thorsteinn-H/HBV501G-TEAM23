@@ -47,8 +47,8 @@ public class MatchController {
      * {@link MatchDto.MatchResponse} that match the given filters
      */
     @GetMapping
-    @Operation(summary = "Filter match")
-    public ResponseEntity<List<MatchDto.MatchResponse>> filterMatch(
+    @Operation(summary = "List matches")
+    public ResponseEntity<List<MatchDto.MatchResponse>> listMatches(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) Integer homeGoals,
@@ -60,7 +60,6 @@ public class MatchController {
             @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
     )
     {
-
         List<Match> matches=matchService.findMatchFilter(startDate,endDate,homeGoals,awayGoals,homeTeamName,awayTeamName
                 ,venueName,sortBy,sortDir);
 
@@ -82,7 +81,6 @@ public class MatchController {
     public MatchDto.MatchResponse getMatchById(@PathVariable Long id) {
         return toResponse(matchService.getMatchById(id));
     }
-
 
     /**
      * Creates a new match.
