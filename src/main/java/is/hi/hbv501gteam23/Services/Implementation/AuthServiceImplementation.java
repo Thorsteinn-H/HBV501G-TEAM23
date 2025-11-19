@@ -4,6 +4,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.AuthDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import is.hi.hbv501gteam23.Security.CustomUserDetails;
 import is.hi.hbv501gteam23.Security.JwtTokenProvider;
 import is.hi.hbv501gteam23.Services.Interfaces.AuthService;
@@ -60,13 +61,13 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public AuthDto.AuthResponse register(AuthDto.RegisterUserRequest request) {
         if (userService.findByEmail(request.email()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new IllegalArgumentException("Incorrect email or password");
         }
         User user = new User();
         user.setEmail(request.email());
         user.setName(request.username());
         user.setGender(request.gender());
-        user.setRole("USER");
+        user.setRole(SystemRole.USER);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setCreatedAt(LocalDateTime.now());
         user.setActive(true);
@@ -80,7 +81,15 @@ public class AuthServiceImplementation implements AuthService {
         return new AuthDto.AuthResponse(accessToken, refreshToken, mapToDto(savedUser));
     }
 
+    /**
+     * Maps a {@link User} entity to a {@link UserDto.UserResponse} DTO.
+     *
+     * @param user the user entity to map
+     * @return the mapped {@link UserDto.UserResponse}
+     */
     private UserDto.UserResponse mapToDto(User user) {
+        String profileImageUrl = user.getProfileImage() != null ? "/profile/avatar/" : null;
+
         return new UserDto.UserResponse(
             user.getId(),
             user.getEmail(),
@@ -89,7 +98,7 @@ public class AuthServiceImplementation implements AuthService {
             user.getRole(),
             user.isActive(),
             user.getCreatedAt(),
-            user.getProfileImage()
+            profileImageUrl
         );
     }
 }

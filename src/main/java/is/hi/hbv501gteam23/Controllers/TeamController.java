@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Team} resources.
- * Base path is /players
+ * Base path is /teams
  */
 @Tag(name = "Team")
 @RestController
@@ -30,10 +30,25 @@ public class TeamController {
     private final TeamService teamService;
     private final MetadataService metadataService;
 
-
+    /**
+     * Retrieves a list of teams filtered by the given optional criteria.
+     * <p>
+     * All parameters are optional; when a parameter is {@code null}, it is ignored in the filter.
+     * If a country is provided, it must be one of the configured countries in {@link MetadataService},
+     * otherwise a 400 (Bad Request) response is returned with an empty list.
+     *
+     * @param name      team name
+     * @param isActive  active status of the team
+     * @param country   country code to filter by
+     * @param venueName venue name to filter by
+     * @param sortBy    field to sort by (defaults to {@code "name"})
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @return {@link ResponseEntity} with status 200 (OK) containing a list of {@link TeamResponse},
+     * or 400 (Bad Request) with an empty list if the country is invalid
+     */
     @GetMapping
-    @Operation(summary = "Filter teams")
-    public ResponseEntity<List<TeamDto.TeamResponse>> filterTeams(
+    @Operation(summary = "List teams")
+    public ResponseEntity<List<TeamDto.TeamResponse>> listTeams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) String country,
@@ -90,7 +105,9 @@ public class TeamController {
     /**
      * Creates a new team.
      * @param body the team data to create
-     * @return the created team mapped to {@link TeamResponse}
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the created team
+     * mapped to {@link TeamResponse} and a {@code Location} header pointing to
+     * /teams/{id}
      */
     @PostMapping
     @ResponseBody
@@ -105,7 +122,8 @@ public class TeamController {
      * Updates an existing team. Team can be marked as inactive with isActive = false.
      * @param id the id of the team to update
      * @param body the fields to update
-     * @return the updated team mapped to {@link TeamResponse}
+     * @return {@link ResponseEntity} with status 200 (OK) containing the updated team
+     * mapped to {@link TeamResponse}
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -118,8 +136,12 @@ public class TeamController {
 
     /**
      * Maps a {@link Team} entity to a {@link TeamDto.TeamResponse} DTO.
-     * @param t team entity
-     * @return mapped {@link TeamDto.TeamResponse}
+     * <p>
+     * If a team has no venue or the venue has no non-blank name, the venue name
+     * defaults to the string {@code "Enginn heimavöllur"}.
+     *
+     * @param t the team entity to map
+     * @return the mapped {@link TeamDto.TeamResponse}
      */
     private TeamDto.TeamResponse toResponse(Team t) {
         var v = t.getVenue();
@@ -131,7 +153,7 @@ public class TeamController {
                 t.getId(),
                 t.getName(),
                 t.isActive(),
-                t.getCountry(),
+                t.getCountry() != null ? t.getCountry().getCode() : null,
                 venueId,
                 venueName
         );

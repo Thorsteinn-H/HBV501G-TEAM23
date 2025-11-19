@@ -11,13 +11,6 @@ import java.util.Optional;
 public interface UserService {
 
     /**
-     * Retrieves all users who are currently active.
-     *
-     * @return a list of active {@link User} entities
-     */
-    List<User> getAllUsers();
-
-    /**
      * Finds a user by their email address.
      *
      * @param email the email address of the user to find
@@ -32,15 +25,6 @@ public interface UserService {
      * @return the matching {@link User} entity
      */
     User findById(Long id);
-
-    /**
-     * Validates a raw password against a hashed password.
-     *
-     * @param rawPassword   the plain text password provided for verification
-     * @param hashedPassword  the stored hashed password
-     * @return {@code true} if the raw password matches the hashed password otherwise {@code false}
-     */
-    boolean validatePassword(String rawPassword, String hashedPassword);
 
     /**
      * Creates a new user in the system.
@@ -68,6 +52,12 @@ public interface UserService {
     void deleteUser(Long id);
 
     /**
+     *
+     * @param id
+     */
+    void deactivateUser(Long id);
+
+    /**
      * Uploads an image file to a specific user.
      *
      * @param user      the user uploading the specific image
@@ -78,9 +68,10 @@ public interface UserService {
     User uploadImage(User user, MultipartFile file) throws IOException;
 
     /**
+     * Deletes the image associated with a user.
      *
-     * @param user
-     * @return
+     * @param user the user whose image should be deleted
+     * @return the updated {@link User} entity with the image removed
      */
     User deleteImage(User user);
 
@@ -102,10 +93,11 @@ public interface UserService {
     String getImageType(User user);
 
     /**
+     * Updates the profile information of the specified user.
      *
-     * @param user
-     * @param request
-     * @return
+     * @param user    the user whose profile will be updated
+     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
+     * @return the updated {@link User} entity after the profile change
      */
     User updateProfile(User user, UserDto.UpdateProfileRequest request);
 
@@ -117,4 +109,16 @@ public interface UserService {
      * @return the updated {@link User} entity after the password change
      */
     User updatePassword(User user, UserDto.UpdatePassword request);
+
+    /**
+     *
+     * @param email
+     * @param name
+     * @param role
+     * @param active
+     * @param sortBy
+     * @param order
+     * @return
+     */
+    List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order);
 }

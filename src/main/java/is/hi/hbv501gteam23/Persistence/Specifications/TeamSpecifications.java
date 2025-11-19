@@ -6,7 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class TeamSpecifications {
 
-
     public static Specification<Team> teamName(String name) {
         return (root, query, criteriaBuilder) ->
                 (name == null || name.isBlank()) ? null:
@@ -32,5 +31,4 @@ public class TeamSpecifications {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + venueName.toLowerCase() + "%");
 
     }
-
 }

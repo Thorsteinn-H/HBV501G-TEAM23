@@ -3,15 +3,19 @@ package is.hi.hbv501gteam23.Services.Implementation;
 import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.UserSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
-import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
+import is.hi.hbv501gteam23.Security.PasswordValidationUtil;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +30,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
     private final AuthRepository authRepository;
-    private final FavoriteService favoriteService;
     private final PasswordEncoder passwordEncoder;
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -36,21 +39,30 @@ public class UserServiceImplementation implements UserService {
         "image/gif"
     );
 
-    /**
-     * Retrieves all users.
-     *
-     * @return a list of {@link User} entities
-     */
-    @Override
-    public List<User> getAllUsers() {
-        return authRepository.findAllUsers();
+    public List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order) {
+        Specification<User> spec = UserSpecifications.emailContains(email)
+            .and(UserSpecifications.nameContains(name))
+            .and(UserSpecifications.roleEquals(role))
+            .and(UserSpecifications.isActive(active));
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        if (sortBy != null) {
+            Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            sort = switch (sortBy.toLowerCase()) {
+                case "email" -> Sort.by(direction, "email");
+                case "name" -> Sort.by(direction, "name");
+                case "createdat" -> Sort.by(direction, "createdAt");
+                default -> Sort.by(direction, "id");
+            };
+        }
+        return authRepository.findAll(spec, sort);
     }
 
     /**
      * Finds a user by their email address.
      *
      * @param email the email address of the user to find
-     * @return the matching {@link User} entity
+     * @return an {@link Optional} containing the matching {@link User} if found,
+     * or empty if not found
      */
     @Override
     public Optional<User> findByEmail(String email) {
@@ -61,7 +73,7 @@ public class UserServiceImplementation implements UserService {
      * Finds a user by their id.
      *
      * @param id the id of the user to find
-     * @return the matching {@link User} entity
+     * @return the matching {@link User} entity, or {@code null} if not found
      */
     @Override
     public User findById(Long id) {
@@ -69,26 +81,18 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Validates a raw password against a hashed password.
+     * Creates a new user.
+     * Validates that the email is not already in use. Sets default role to {@code "USER"}
+     * and default active status to {@code true} if not provided.
      *
-     * @param rawPassword   the plain text password provided for verification
-     * @param storedPassword  the stored hashed password
-     * @return {@code true} if the raw password matches the hashed password otherwise {@code false}
-     */
-    @Override
-    public boolean validatePassword(String rawPassword, String storedPassword) {
-        return passwordEncoder.matches(rawPassword, storedPassword);
-    }
-
-    /**
-     *
-     * @param request  the {@link UserDto.CreateUserRequest} containing user details
-     * @return
+     * @param request the {@link UserDto.CreateUserRequest} containing user details
+     * @return the created {@link User} entity
+     * @throws RuntimeException if the email is already in use
      */
     @Override
     public User createUser(UserDto.CreateUserRequest request) {
         if (authRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new RuntimeException("Incorrect email or password");
         }
 
         User user = new User();
@@ -98,7 +102,7 @@ public class UserServiceImplementation implements UserService {
         if (request.gender() != null) {
             user.setGender(request.gender());
         }
-        user.setRole(request.role() != null ? request.role() : "USER");
+        user.setRole(request.role());
         user.setActive(request.isActive() != null ? request.isActive() : true);
         user.setCreatedAt(LocalDateTime.now());
 
@@ -106,16 +110,22 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
+     * Updates an existing user by ID.
      *
-     * @param id       the ID of the user to update
-     * @param request  the {@link UserDto.PatchUserRequest} containing fields to update
-     * @return
+     * @param id      the ID of the user to update
+     * @param request the {@link UserDto.PatchUserRequest} containing fields to update
+     * @return the updated {@link User} entity
+     * @throws RuntimeException if the user is not found
      */
     @Override
     public User updateUser(Long id, UserDto.PatchUserRequest request) {
         User user = findById(id);
         if (user == null) {
             throw new RuntimeException("User not found");
+        }
+
+        if (request.password() != null && !PasswordValidationUtil.isValid(request.password())) {
+            throw new IllegalArgumentException("Password does not meet complexity requirements");
         }
 
         if (request.email() != null) user.setEmail(request.email());
@@ -138,7 +148,7 @@ public class UserServiceImplementation implements UserService {
      * @param id  the id of the user to delete
      */
     @Override
-    public void deleteUser(Long id) {
+    public void deactivateUser(Long id) {
         User user = findById(id);
         if (user != null && user.isActive()) {
             user.setActive(false);
@@ -152,34 +162,61 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Uploads an image file to a specific user.
-     * @param user
-     * @param file
-     * @return
-     * @throws IOException
+     * Deletes a user from the database.
+     *
+     * @param id  the id of the user to delete
+     */
+    @Override
+    public void deleteUser(Long id) {
+        User user = findById(id);
+        if (user != null) {
+            authRepository.delete(user);
+        }
+    }
+
+    /**
+     * Uploads a profile image for a specific user.
+     * <p>
+     * Validates that the file is present, has an allowed content type and does not exceed
+     * the maximum file size. The image data and type are stored on the {@link User}'s
+     * {@link Image} entity.
+     *
+     * @param user the user to associate the image with
+     * @param file the uploaded image file
+     * @return the updated {@link User} with the new image
+     * @throws IOException              if an I/O error occurs while reading the file
+     * @throws IllegalArgumentException if the file is missing, unsupported or too large
      */
     @Override
     public User uploadImage(User user, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) throw new IllegalArgumentException("File is required");
-        if (!ALLOWED_TYPES.contains(file.getContentType()))
+        if (file.getSize() > MAX_FILE_SIZE) throw new IllegalArgumentException("File size exceeds 5MB");
+
+        String type = file.getContentType();
+        if (!ALLOWED_TYPES.contains(type))
             throw new IllegalArgumentException("Unsupported file type: " + file.getContentType());
-        if (file.getSize() > MAX_FILE_SIZE)
-            throw new IllegalArgumentException("File size exceeds 5MB");
+
+        try (var is = file.getInputStream()) {
+            if (ImageIO.read(is) == null)
+                throw new IllegalArgumentException("Invalid image content");
+        }
 
         Image image = user.getProfileImage();
+        if (image == null) image = new Image();
 
         image.setImageData(file.getBytes());
-        image.setImageType(file.getContentType());
-
+        image.setImageType(type);
         user.setProfileImage(image);
+
         return authRepository.save(user);
     }
 
     /**
      * Deletes the image associated with a user.
      *
-     * @param user  the user whose image should be deleted
-     * @return the updated {@link User} object with image cleared
+     * @param user the user whose image should be deleted
+     * @return the updated {@link User} object with the image cleared
+     * @throws IllegalArgumentException if the user is {@code null}
      */
     @Override
     public User deleteImage(User user) {
@@ -192,8 +229,9 @@ public class UserServiceImplementation implements UserService {
     /**
      * Retrieves the stored image data for the specified user.
      *
-     * @param user  the user whose image will be retrieved
+     * @param user the user whose image will be retrieved
      * @return a byte array containing the image data
+     * @throws IllegalArgumentException if the user or profile image is {@code null}
      */
     @Override
     public byte[] getImage(User user) {
@@ -201,11 +239,12 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Retrieves the type of image file for a users image
+     * Retrieves the type of the image file for a user's profile image.
      *
-     * @param user  the user whose image type will be retrieved
-     * @return a {@link String} representing the image type (e.g., "image/png", "jpg"),
-     *
+     * @param user the user whose image type will be retrieved
+     * @return a {@link String} representing the image MIME type
+     *         (e.g., {@code "image/png"}, {@code "image/jpeg"})
+     * @throws IllegalArgumentException if the user or profile image is {@code null}
      */
     @Override
     public String getImageType(User user) {
@@ -214,10 +253,13 @@ public class UserServiceImplementation implements UserService {
 
     /**
      * Updates the password for the specified user.
+     * <p>
+     * Verifies that the old password matches before setting the new password.
      *
-     * @param user     the user whose password will be updated
-     * @param request  a {@link UserDto.UpdatePassword} containing the old and new passwords
+     * @param user    the user whose password will be updated
+     * @param request a {@link UserDto.UpdatePassword} containing the old and new passwords
      * @return the updated {@link User} object after the password change
+     * @throws RuntimeException if the old password does not match
      */
     @Override
     public User updatePassword(User user, UserDto.UpdatePassword request) {
@@ -229,11 +271,13 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
-     * Updates the username of the specified user.
+     * Updates the profile information of the specified user.
+     * <p>
+     * Currently supports updating username and gender.
      *
-     * @param user     the user whose username will be updated
-     * @param request  a {@link UserDto.UpdateProfileRequest}  containing the new username
-     * @return the updated {@link User} object after the username change
+     * @param user    the user whose profile will be updated
+     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
+     * @return the updated {@link User} object after the profile change
      */
     @Override
     public User updateProfile(User user, UserDto.UpdateProfileRequest request) {

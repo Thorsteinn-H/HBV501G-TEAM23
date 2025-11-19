@@ -28,9 +28,27 @@ import java.util.stream.Collectors;
 public class MatchController {
     private final MatchService matchService;
 
+    /**
+     * Retrieves a list of matches filtered by the given optional criteria.
+     * <p>
+     * All parameters are optional; when a parameter is {@code null}, it is ignored in the filter.
+     * The result can be sorted by a given field and direction.
+     *
+     * @param startDate    lower bound for the match date
+     * @param endDate      upper bound for the match date
+     * @param homeGoals    exact number of goals scored by the home team
+     * @param awayGoals    exact number of goals scored by the away team
+     * @param homeTeamName name of the home team to filter by
+     * @param awayTeamName name of the away team to filter by
+     * @param venueName    name of the venue to filter by
+     * @param sortBy       field to sort by (defaults to {@code "id"} if not provided)
+     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @return {@link ResponseEntity} with status 200 (OK) containing a list of
+     * {@link MatchDto.MatchResponse} that match the given filters
+     */
     @GetMapping
-    @Operation(summary = "Filter teams")
-    public ResponseEntity<List<MatchDto.MatchResponse>> filterMatch(
+    @Operation(summary = "List matches")
+    public ResponseEntity<List<MatchDto.MatchResponse>> listMatches(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) Integer homeGoals,
@@ -42,7 +60,6 @@ public class MatchController {
             @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
     )
     {
-
         List<Match> matches=matchService.findMatchFilter(startDate,endDate,homeGoals,awayGoals,homeTeamName,awayTeamName
                 ,venueName,sortBy,sortDir);
 
@@ -65,12 +82,12 @@ public class MatchController {
         return toResponse(matchService.getMatchById(id));
     }
 
-
     /**
      * Creates a new match.
      *
      * @param body the match data to create
-     * @return the created match mapped to {@link MatchResponse}
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the created match
+     * mapped to {@link MatchResponse} and a {@code Location} header pointing to /matches/{id}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -82,11 +99,12 @@ public class MatchController {
     }
 
     /**
-     * Updates an existing match.
+     * Partially updates an existing match.
      *
-     * @param id the id of the match to update
+     * @param id   the ID of the match to update
      * @param body the fields to update
-     * @return the updated match mapped to {@link MatchResponse}
+     * @return {@link ResponseEntity} with status 200 (OK) containing the updated match
+     * mapped to {@link MatchResponse}
      */
     @PatchMapping("/{id}")
     @Operation(summary = "Modify a match")
@@ -97,13 +115,13 @@ public class MatchController {
 
     /**
      * Maps a {@link Match} entity to a {@link MatchDto.MatchResponse} DTO.
-     * @param m match entity
+     * @param m match entity to map
      * @return mapped {@link MatchDto.MatchResponse}
      */
     private MatchDto.MatchResponse toResponse(Match m) {
         return new MatchDto.MatchResponse(
                 m.getId(),
-                m.getDate(),
+                m.getMatchDate(),
                 m.getHomeTeam() != null ? m.getHomeTeam().getId()   : null,
                 m.getHomeTeam() != null ? m.getHomeTeam().getName() : null,
                 m.getAwayTeam() != null ? m.getAwayTeam().getId()   : null,

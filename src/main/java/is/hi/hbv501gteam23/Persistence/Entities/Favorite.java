@@ -1,7 +1,11 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
+import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Getter
@@ -10,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "favorites", uniqueConstraints = @UniqueConstraint(name="uk_user_entity", columnNames={"userId","entityType","entityId"})
+@Table(name = "favorites", uniqueConstraints = @UniqueConstraint(name="uk_user_entity", columnNames={"user_id","entity_type","entity_id"})
 )
 public class Favorite {
     @Id
@@ -22,11 +26,18 @@ public class Favorite {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    public enum EntityType { PLAYER, TEAM, MATCH }
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", nullable = false)
-    private EntityType entityType;
+    private FavoriteType entityType;
 
     @Column(name = "entity_id", nullable = false)
     private Long entityId;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

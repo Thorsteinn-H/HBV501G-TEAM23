@@ -2,8 +2,11 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.annotations.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +19,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@FilterDef(name = "activeUserFilter", parameters = @ParamDef(name = "isActive", type = Boolean.class))
+@Filter(name = "activeUserFilter", condition = "is_active = :isActive")
 public class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -33,7 +38,7 @@ public class User implements Serializable {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = true)
+    @Column(name = "gender", nullable = true, columnDefinition = "gender_enum")
     private Gender gender;
 
     @JsonIgnore
@@ -41,22 +46,28 @@ public class User implements Serializable {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Builder.Default
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt  = LocalDateTime.now();
-
-    @JsonIgnore
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @JsonIgnore
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "role", nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, columnDefinition = "role_enum")
+    private SystemRole role;
 
     @OneToOne
+    @JsonIgnore
+    @JoinColumn(name = "profile_image_id")
     private Image profileImage;
 
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @JsonIgnore
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }

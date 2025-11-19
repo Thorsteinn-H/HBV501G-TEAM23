@@ -32,17 +32,23 @@ public class PlayerController {
     private final MetadataService metadataService;
 
     /**
+     * Lists players using optional filters, with sorting and pagination.
+     * <p>
+     * All filter parameters are optional; when {@code null}, they are ignored.
+     * If a country is provided, it must be one of the configured countries from {@link MetadataService},
+     * otherwise a 400 (Bad Request) is returned with an empty list.
      *
-     * @param name
-     * @param teamId
-     * @param teamName
-     * @param country
-     * @param isActive
-     * @param sortBy
-     * @param sortDir
-     * @param page
-     * @param size
-     * @return
+     * @param name      player name to filter by
+     * @param teamId    team ID to filter by
+     * @param teamName  team name to filter by
+     * @param country   country code to filter by; must be a valid-configured country
+     * @param isActive  active status filter (e.g. only active players)
+     * @param sortBy    field to sort by (defaults to {@code "name"})
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @param page      zero-based page index (defaults to 0)
+     * @param size      page size, i.e. maximum number of players per page (defaults to 20)
+     * @return {@link ResponseEntity} with status 200 (OK) containing a list of {@link PlayerResponse},
+     * or 400 (Bad Request) with an empty list if the country is invalid
      */
     @GetMapping
     @Operation(
@@ -93,9 +99,12 @@ public class PlayerController {
     }
 
     /**
-     * Creates a new player. Only for admins.
-     * @param body the player data
-     * @return the new player
+     * Creates a new player. Admin only.
+     *
+     * @param body the player data to create
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the created player
+     * mapped to {@link PlayerResponse} and a {@code Location} header pointing to
+     * /players/{id}
      */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -103,14 +112,16 @@ public class PlayerController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<PlayerDto.PlayerResponse> createPlayer(@RequestBody PlayerDto.CreatePlayerRequest body) {
         Player created = playerService.createPlayer(body);
-        return ResponseEntity.created(URI.create("/players" + created.getId())).body(toResponse(created));
+        return ResponseEntity.created(URI.create("/players/" + created.getId())).body(toResponse(created));
     }
 
     /**
-     * Modifies an existing player. Only for admins.
-     * @param id the player's id
+     * Partially updates an existing player. Admin only.
+     *
+     * @param id   the player's ID
      * @param body the data that should be modified
-     * @return the updated player
+     * @return {@link ResponseEntity} with status 200 (OK) containing the updated player
+     * mapped to {@link PlayerResponse}
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -121,10 +132,8 @@ public class PlayerController {
     }
 
     /**
-
-    /**
      * Maps a {@link Player} entity to a {@link PlayerResponse} DTO.
-     * @param p player entity
+     * @param p player entity to map
      * @return mapped {@link PlayerResponse}
      */
     private PlayerResponse toResponse(Player p) {
@@ -134,7 +143,7 @@ public class PlayerController {
                 p.isActive(),
                 p.getPosition(),
                 p.getGoals(),
-                p.getCountry(),
+                p.getCountry() != null ? p.getCountry().getCode() : null,
                 p.getDateOfBirth(),
                 p.getTeam() != null ? p.getTeam().getId()   : null,
                 p.getTeam() != null ? p.getTeam().getName() : null

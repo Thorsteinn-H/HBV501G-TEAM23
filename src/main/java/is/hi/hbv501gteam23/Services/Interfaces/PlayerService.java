@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
 
+import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 
@@ -9,17 +10,20 @@ import java.util.List;
 public interface PlayerService {
 
     /**
+     * Finds players using optional filters, with sorting and pagination.
+     * <p>
+     * All filter parameters are optional; when {@code null} or blank, they are ignored.
      *
-     * @param name
-     * @param teamId
-     * @param teamName
-     * @param country
-     * @param isActive
-     * @param sortBy
-     * @param sortDir
-     * @param page
-     * @param size
-     * @return
+     * @param name     player name filter
+     * @param teamId   team ID to filter by
+     * @param teamName team name filter
+     * @param country  country code to filter by
+     * @param isActive active status filter
+     * @param sortBy   field to sort by
+     * @param sortDir  sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @param page     zero-based page index
+     * @param size     page size (maximum number of players per page)
+     * @return list of {@link Player} entities matching the given filters
      */
     List<Player> findPlayers(
         String name,
@@ -79,7 +83,7 @@ public interface PlayerService {
      * @param country the country to filter by
      * @return a list of all {@link Player} entities from the specified country
      */
-    List<Player> findPlayerByCountry(String country);
+    List<Player> findByPlayerCountry(Country country);
 
     /**
      * Creates a player
