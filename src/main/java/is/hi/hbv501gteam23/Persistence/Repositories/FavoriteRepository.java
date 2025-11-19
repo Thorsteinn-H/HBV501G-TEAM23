@@ -1,7 +1,7 @@
 package is.hi.hbv501gteam23.Persistence.Repositories;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
-import is.hi.hbv501gteam23.Persistence.Entities.Favorite.EntityType;
+import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,8 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
-    Optional<Favorite> findByUserIdAndEntityTypeAndEntityId(Long userId, EntityType type, Long entityId);
+    Optional<Favorite> findByUserIdAndEntityTypeAndEntityId(Long userId, FavoriteType type, Long entityId);
     List<Favorite> findByUserId(Long userId);
-    List<Favorite> findByUserIdAndEntityType(Long userId, EntityType type);
-    boolean existsByUserIdAndEntityTypeAndEntityId(Long userId, EntityType type, Long entityId);
+    List<Favorite> findByUserIdAndEntityType(Long userId, FavoriteType type);
+    void deleteByUserIdAndEntityTypeAndEntityId(Long userId, FavoriteType type, Long entityId);
+    boolean existsByUserIdAndEntityTypeAndEntityId(Long userId, FavoriteType type, Long entityId);
 }

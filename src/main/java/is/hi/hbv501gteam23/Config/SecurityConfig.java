@@ -12,8 +12,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -30,7 +31,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new Argon2PasswordEncoder(16, 32, 1, 65536, 4);
     }
 
     @Bean
@@ -48,7 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/auth/login",
-                    "/auth/register"
+                    "/auth/signup"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/players/**",
@@ -81,6 +82,31 @@ public class SecurityConfig {
                 ).hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
+            .headers(headers -> headers
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)
+                )
+                .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives(
+                        "default-src 'self'; " +
+                        "img-src 'self' data:; " +
+                        "script-src 'self'; " +
+                        "style-src 'self';" +
+                        "connect-src 'self';"
+                    )
+                )
+                .referrerPolicy(ref -> ref
+                    .policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                )
+                .addHeaderWriter((request, response) -> {
+                    response.setHeader(
+                        "Permissions-Policy",
+                        "geolocation=(), microphone=(), payment=(), usb=()"
+                    );
+                })
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(auditCleanupFilter, JwtAuthenticationFilter.class)
             .exceptionHandling(ex -> ex
@@ -91,6 +117,7 @@ public class SecurityConfig {
                     res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: You do not have permission");
                 })
             );
+
             return http.build();
     }
 }

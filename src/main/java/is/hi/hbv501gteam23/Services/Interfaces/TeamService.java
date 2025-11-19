@@ -5,6 +5,7 @@ import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import java.util.List;
 
 public interface TeamService {
+
     /**
      * Finds teams using optional filters, with sorting.
      * <p>

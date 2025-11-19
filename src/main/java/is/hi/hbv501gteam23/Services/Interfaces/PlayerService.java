@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
 
+import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 
@@ -82,7 +83,7 @@ public interface PlayerService {
      * @param country the country to filter by
      * @return a list of all {@link Player} entities from the specified country
      */
-    List<Player> findPlayerByCountry(String country);
+    List<Player> findByPlayerCountry(Country country);
 
     /**
      * Creates a player

@@ -143,7 +143,7 @@ public class PlayerController {
                 p.isActive(),
                 p.getPosition(),
                 p.getGoals(),
-                p.getCountry(),
+                p.getCountry() != null ? p.getCountry().getCode() : null,
                 p.getDateOfBirth(),
                 p.getTeam() != null ? p.getTeam().getId()   : null,
                 p.getTeam() != null ? p.getTeam().getName() : null

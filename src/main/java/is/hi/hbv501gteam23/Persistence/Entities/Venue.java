@@ -2,6 +2,11 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -24,8 +29,16 @@ public class Venue {
     private String address;
 
     @Column(name = "latitude")
-    private String latitude;
+    private BigDecimal latitude;
 
     @Column(name = "longitude")
-    private String longitude;
+    private BigDecimal longitude;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

@@ -61,7 +61,7 @@ public class AuthServiceImplementation implements AuthService {
     @Override
     public AuthDto.AuthResponse register(AuthDto.RegisterUserRequest request) {
         if (userService.findByEmail(request.email()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new IllegalArgumentException("Incorrect email or password");
         }
         User user = new User();
         user.setEmail(request.email());
@@ -88,6 +88,8 @@ public class AuthServiceImplementation implements AuthService {
      * @return the mapped {@link UserDto.UserResponse}
      */
     private UserDto.UserResponse mapToDto(User user) {
+        String profileImageUrl = user.getProfileImage() != null ? "/profile/avatar/" : null;
+
         return new UserDto.UserResponse(
             user.getId(),
             user.getEmail(),
@@ -96,7 +98,7 @@ public class AuthServiceImplementation implements AuthService {
             user.getRole(),
             user.isActive(),
             user.getCreatedAt(),
-            user.getProfileImage()
+            profileImageUrl
         );
     }
 }

@@ -1,6 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
+import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 
 /**
  * DTO types for creating and returning {@link Favorite} entities.
@@ -13,8 +13,8 @@ public final class FavoriteDto {
      * @param entityId   the ID of the entity to mark as favorite
      */
     public record CreateFavoriteRequest(
-            Favorite.EntityType entityType,
-            Long entityId
+        FavoriteType favoriteType,
+        Long favoriteId
     ) {}
 
     /**
@@ -26,9 +26,9 @@ public final class FavoriteDto {
      * @param entityId   the ID of the favorited entity
      */
     public record FavoriteResponse(
-            Long id,
-            Long userId,
-            Favorite.EntityType entityType,
-            Long entityId
+        Long id,
+        Long userId,
+        FavoriteType favoriteType,
+        Long favoriteId
     ) {}
 }

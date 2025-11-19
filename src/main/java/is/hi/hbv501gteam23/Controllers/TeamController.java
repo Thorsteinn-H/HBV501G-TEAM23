@@ -153,7 +153,7 @@ public class TeamController {
                 t.getId(),
                 t.getName(),
                 t.isActive(),
-                t.getCountry(),
+                t.getCountry() != null ? t.getCountry().getCode() : null,
                 venueId,
                 venueName
         );

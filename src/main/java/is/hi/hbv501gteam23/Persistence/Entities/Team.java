@@ -2,6 +2,10 @@ package is.hi.hbv501gteam23.Persistence.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,10 +27,19 @@ public class Team {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Column(name = "team_country", nullable = false, length = 80)
-    private String country;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_country", referencedColumnName = "code", nullable = false)
+    private Country country;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "venue_id")
     private Venue venue;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

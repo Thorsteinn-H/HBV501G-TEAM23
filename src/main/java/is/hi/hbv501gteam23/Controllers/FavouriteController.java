@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
+import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -48,16 +49,16 @@ public class FavouriteController {
     }
 
     /**
-     * Parses a string representation of a favorite entity type to a {@link Favorite.EntityType}.
+     * Parses a string representation of a favorite entity type to a {@link FavoriteType}.
      *
      * @param type the type as a string (e.g. {@code "PLAYER"}, {@code "TEAM"}, {@code "MATCH"},
      *             case-insensitive)
-     * @return the corresponding {@link Favorite.EntityType}
+     * @return the corresponding {@link FavoriteType}
      * @throws ResponseStatusException with status 400 (BAD_REQUEST) if the type is invalid
      */
-    private Favorite.EntityType parseType(String type) {
+    private FavoriteType parseType(String type) {
         try {
-            return Favorite.EntityType.valueOf(type.trim().toUpperCase());
+            return FavoriteType.valueOf(type.trim().toUpperCase());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid type. Use one of: PLAYER, TEAM, MATCH.");
         }
@@ -66,8 +67,7 @@ public class FavouriteController {
     /**
      * Lists all favorites for the currently authenticated user.
      *
-     * @return {@link ResponseEntity} with status 200 (OK) containing a list of
-     * {@link FavoriteDto.favoriteResponse} for the current user
+     * @return a list of favorites
      */
     @GetMapping
     @Operation(summary = "List favorites")
@@ -82,14 +82,14 @@ public class FavouriteController {
      *
      * @param type the type of favorite to filter by (PLAYER, TEAM, or MATCH, case-insensitive)
      * @return {@link ResponseEntity} with status 200 (OK) containing a list of
-     * {@link FavoriteDto.favoriteResponse} of the requested type for the current user
+     * {@link FavoriteDto.FavoriteResponse} of the requested type for the current user
      */
     @GetMapping(value = "/{type}")
     @Operation(summary = "Get favorites by type")
     public ResponseEntity<List<FavoriteDto.FavoriteResponse>> getFavoritesByType(@PathVariable String type) {
         Long userId = getCurrentUserId();
-        var entityType = parseType(type);
-        var list = favoriteService.listForUserAndType(userId, entityType);
+        var favoriteType = parseType(type);
+        var list = favoriteService.listForUserAndType(userId, favoriteType);
         return ResponseEntity.ok(list);
     }
 
@@ -104,8 +104,8 @@ public class FavouriteController {
             @PathVariable String type,
             @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        var entityType = parseType(type);
-        boolean isFav = favoriteService.isFavorite(userId, entityType, itemId);
+        var favoriteType = parseType(type);
+        boolean isFav = favoriteService.isFavorite(userId, favoriteType, itemId);
         return ResponseEntity.ok(isFav);
     }
 
@@ -123,10 +123,10 @@ public class FavouriteController {
             @PathVariable String type,
             @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        var entityType = parseType(type);
+        var favoriteType = parseType(type);
 
-        var created = favoriteService.addFavorite(userId, entityType, itemId);
-        var location = URI.create(String.format("/favorites/%s/%d", entityType, itemId));
+        var created = favoriteService.addFavorite(userId, favoriteType, itemId);
+        var location = URI.create(String.format("/favorites/%s/%d", favoriteType, itemId));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .header(HttpHeaders.LOCATION, location.toString())
@@ -148,8 +148,8 @@ public class FavouriteController {
             @PathVariable String type,
             @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        var entityType = parseType(type);
-        favoriteService.removeFavorite(userId, entityType, itemId);
+        var favoriteType = parseType(type);
+        favoriteService.removeFavorite(userId, favoriteType, itemId);
         return ResponseEntity.noContent().build();
     }
 }
