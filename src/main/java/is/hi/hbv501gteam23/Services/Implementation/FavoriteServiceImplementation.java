@@ -52,8 +52,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
                     HttpStatus.NOT_FOUND, type + " " + entityId + " not found");
         }
 
-        var existing = favoriteRepository
-                .findByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
+        var existing = favoriteRepository.findByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
         if (existing.isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Already in favorites");
