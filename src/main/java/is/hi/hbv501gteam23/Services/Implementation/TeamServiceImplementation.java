@@ -99,7 +99,7 @@ public class TeamServiceImplementation implements TeamService {
      */
     @Override
     public List<Team> findByCountry(String countryCode) {
-        if (country == null || country.isBlank()) {
+        if (countryCode == null || countryCode.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
         }
         Country country = countryRepository.findById(countryCode.toUpperCase())

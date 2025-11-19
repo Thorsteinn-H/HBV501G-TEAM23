@@ -174,6 +174,7 @@ public class UserServiceImplementation implements UserService {
         }
     }
 
+    /**
      * Uploads a profile image for a specific user.
      * <p>
      * Validates that the file is present, has an allowed content type and does not exceed
