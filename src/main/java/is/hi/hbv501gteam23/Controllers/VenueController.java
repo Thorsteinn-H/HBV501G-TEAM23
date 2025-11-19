@@ -1,38 +1,59 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
-import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
 
-@Controller
+/**
+ * REST controller that exposes read/write operations for {@link Venue} resources.
+ * <p>
+ * Base path is /venues.
+ */
+@RestController
 @RequestMapping("/venues")
+@Tag(name = "Venue")
 @RequiredArgsConstructor
 public class VenueController {
     private final VenueService venueService;
 
     /**
-     * Retrieves all {@link Venue} entities.
-     * @return list of venue mapped to {@link VenueDto.VenueResponse}
+     * Lists all venues with optional filters
+     * * If {@code name} and/or {@code address} are provided, they are used to filter the results.
+     *      * Matching is typically case-insensitive and may support partial matches,
+     *      * depending on the {@link VenueService} implementation.
+     *
+     * @param name    name filter (case-insensitive, partial matches allowed)
+     * @param address address filter (case-insensitive, partial matches allowed)
+     * @return list of {@link VenueDto.VenueResponse} matching the criteria
+     * @throws ResponseStatusException with status 500 if an unexpected error occurs while retrieving venues
      */
-    @Operation(summary = "List all venues")
-    @ApiResponse(responseCode = "200", description = "Venues successfully fetched")
     @GetMapping
     @ResponseBody
-    public List<VenueDto.VenueResponse> getAllVenues(){
-        return venueService.getAllVenues()
-                .stream().map(this::toResponse).toList();
+    @Operation(summary = "List venues", description = "List all venues or filter by optional parameters.")
+    public List<VenueDto.VenueResponse> getVenues(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String address
+    ) {
+        try {
+            return venueService.findByFilters(name, address)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving venues", e);
+        }
     }
 
     /**
@@ -41,41 +62,45 @@ public class VenueController {
      * @return the team mapped to a {@link VenueDto.VenueResponse}
      */
     @GetMapping("/{id}")
+    @Operation(summary = "Get venue by ID", description = "Get a venue by its ID.")
     @ResponseBody
-    public VenueDto.VenueResponse getVenueById(@PathVariable Long id){
+    public VenueDto.VenueResponse getVenueById(
+            @Parameter @PathVariable Long id){
         return toResponse(venueService.findById(id));
     }
 
     /**
-     * Retrieves a {@link Venue} entity by name
-     * @param name name of the venue to be retrieved
-     * @return the team mapped to a {@link VenueDto.VenueResponse}
-     */
-    @GetMapping(params = "name")
-    @ResponseBody
-    public VenueDto.VenueResponse getVenueByName(@RequestParam String name) {
-        return toResponse(venueService.findByName(name));
-    }
-
-    /**
      * Creates a new venue.
-     * @param body the venue data to create
-     * @return the created team mapped to {@link VenueDto.VenueResponse}
+     * Only admin is allowed
+     *
+     * @param body venue creation request
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the newly created
+     * {@link VenueDto.VenueResponse} and a {@code Location} header pointing to
+     * /venues/{id}
+     * @throws ResponseStatusException with status 500 if an unexpected error occurs while creating the venue
      */
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
+    @Operation(summary = "Create venue", description = "Admin only.")
     public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.VenueRequest body) {
-        Venue created = venueService.createVenue(body);
-        return ResponseEntity
-                .created(URI.create("/venues/" + created.getId()))
-                .body(toResponse(created));
+        try {
+            Venue created = venueService.createVenue(body);
+            return ResponseEntity
+                    .created(URI.create("/venues/" + created.getId()))
+                    .body(toResponse(created));
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating venue", e);
+        }
     }
 
     /**
      * Maps a {@link Venue} entity to a {@link VenueDto.VenueResponse} DTO.
-     * @param v venue entity
-     * @return mapped {@link VenueDto.VenueResponse}
+     *
+     * @param v the venue entity to map
+     * @return the mapped {@link VenueDto.VenueResponse}
      */
     private VenueDto.VenueResponse toResponse(Venue v) {
         return new VenueDto.VenueResponse(

@@ -5,12 +5,13 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.TeamSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
-import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
-import is.hi.hbv501gteam23.Utils.CountryUtils;
-import jakarta.persistence.EntityNotFoundException;
+import is.hi.hbv501gteam23.Utils.MetadataUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +26,35 @@ public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final VenueRepository venueRepository;
-    private final VenueService venueService;
-
 
     /**
-     * Retrieves all teams
+     * Finds teams using optional filters, with sorting.
+     * All filter parameters are optional; when {@code null}, they are ignored.
      *
-     * @return a list of all {@link Team} entities
+     * @param name      team name filter
+     * @param isActive  active status filter
+     * @param country   country code filter
+     * @param venueName venue name filter
+     * @param sortBy    field to sort by
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @return list of {@link Team} entities matching the given filters
      */
     @Override
-    public List<Team> getAllTeams(){
-        return teamRepository.findAll();
+    public List<Team> findTeamFilter(String name, Boolean isActive,
+                                     String country, String venueName,
+                                     String sortBy, String sortDir) {
+
+        Specification<Team> spec= Specification.allOf(
+                TeamSpecifications.teamName(name),
+                TeamSpecifications.teamStatus(isActive),
+                TeamSpecifications.teamCountry(country),
+                TeamSpecifications.teamVenueName(venueName)
+                );
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        return teamRepository.findAll(spec,sort);
     }
 
     /**
@@ -43,6 +62,7 @@ public class TeamServiceImplementation implements TeamService {
      *
      * @param id the id of the team
      * @return the {@link Team} with the specified id
+     * @throws ResponseStatusException with status 404 if the team is not found
      */
     @Override
     public Team getTeamById(Long id){
@@ -51,10 +71,11 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves a single team by its name
+     * Retrieves a single team by its name.
      *
      * @param name the name of the team
      * @return the {@link Team} with the specified name
+     * @throws ResponseStatusException with status 404 if the team is not found
      */
     @Override
     public Team findByName(String name){
@@ -66,13 +87,14 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves a single team by its country of origin
+     * Retrieves teams by their country of origin.
      *
-     * @param country the teams country of origin
-     * @return a list of {@link Team} entities from a specific country
+     * @param country the team's country of origin
+     * @return a list of {@link Team} entities from the specified country
+     * @throws ResponseStatusException with status 400 if the country is null or blank
+     * @throws ResponseStatusException with status 404 if no teams are found for the country
      */
     @Override
-
     public List<Team> findByCountry(String country) {
         if (country == null || country.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
@@ -86,10 +108,11 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves all teams in a specific venue
+     * Retrieves all teams that play at a specific venue.
      *
-     * @param venueId the id of the team
-     * @return a list of {@link Team} entities involving the specified team
+     * @param venueId the id of the venue
+     * @return a list of {@link Team} entities associated with the specified venue
+     * @throws ResponseStatusException with status 404 if the venue does not exist
      */
     @Override
     public List<Team> findByVenueId(Long venueId) {
@@ -100,7 +123,7 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves all teams with a specific active status
+     * Retrieves all teams with a specific active status.
      *
      * @param isActive the active status of a team
      * @return a list of teams with the same active status
@@ -111,7 +134,9 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Deletes a team by its id
+     * Deletes a team by its id.
+     * <p>
+     * Before deletion, the team reference is cleared from all players belonging to the team.
      *
      * @param id the id of the team to delete
      */
@@ -123,10 +148,17 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Creates a new team
+     * Creates a new team from the given request body.
+     * <p>
+     * Validates that the name and country are provided, that the venue exists,
+     * and that a team with the same name does not already exist.
      *
-     * @param body the {@link Team} entity to create
+     * @param body the {@link TeamDto.CreateTeamRequest} containing team data
      * @return the newly created {@link Team} entity
+     *
+     * @throws ResponseStatusException with status 409 if a team with the same name already exists
+     * @throws ResponseStatusException with status 404 if the venue is not found
+     * @throws ResponseStatusException with status 400 if required fields are missing
      */
     @Override
     @Transactional
@@ -147,7 +179,7 @@ public class TeamServiceImplementation implements TeamService {
         if (body.country() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
         }
-        t.setCountry(CountryUtils.normalizeCountryCode(body.country()));
+        t.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
         t.setActive(true);
         t.setVenue(venue);
 
@@ -156,16 +188,16 @@ public class TeamServiceImplementation implements TeamService {
 
     /**
      * Partially updates a {@link Team} by id.
+     * <p>
      * Applies only non-null fields from {@code body}. Supported fields:
-     * {@code name}, {@code country}, and {@code venueId}. If {@code venueId} is present,
-     * it must reference an existing venue.
+     * {@code name}, {@code country}, {@code isActive} and {@code venueId}.
+     * If {@code venueId} is present, it must reference an existing venue.
      *
      * @param id   the id of the team to update
      * @param body partial update payload for the team
      * @return the updated {@link Team}
      *
-     * @throws jakarta.persistence.EntityNotFoundException
-     *         if the team does not exist, or if a provided {@code venueId} cannot be found
+     * @throws ResponseStatusException with status 404 if the team or venue is not found
      */
     @Override
     @Transactional
@@ -174,7 +206,7 @@ public class TeamServiceImplementation implements TeamService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + id + " not found"));
 
         if (body.name() != null)    t.setName(body.name());
-        if (body.country() != null) t.setCountry(CountryUtils.normalizeCountryCode(body.country()));
+        if (body.country() != null) t.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
         if (body.isActive() != null) t.setActive(body.isActive());
         if (body.venueId() != null) {
             Venue v = venueRepository.findById(body.venueId())

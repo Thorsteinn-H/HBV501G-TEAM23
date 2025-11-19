@@ -1,6 +1,7 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Favorites;
+import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
+import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
 
 import java.util.List;
 
@@ -9,42 +10,48 @@ import java.util.List;
  */
 public interface FavoriteService {
     /**
-     * Get or create favorites for a user
-     * @param userId The ID of the user
-     * @return The user's favorites
+     * Adds a new favorite for the given user and entity.
+     *
+     * @param userId   the ID of the user
+     * @param type     the type of the entity (PLAYER, TEAM, MATCH)
+     * @param entityId the ID of the entity to favorite
+     * @return the created favorite as a {@link FavoriteDto.FavoriteResponse}
      */
-    Favorites getOrCreateFavorites(Long userId);
-    
+    FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId);
+
     /**
-     * Add an item to user's favorites
-     * @param userId The ID of the user
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to add
+     * Removes an existing favorite for the given user and entity.
+     *
+     * @param userId   the ID of the user
+     * @param type     the type of the entity
+     * @param entityId the ID of the entity
      */
-    void addFavorite(Long userId, String type, Long itemId);
-    
+    void removeFavorite(Long userId, Favorite.EntityType type, Long entityId);
+
     /**
-     * Remove an item from user's favorites
-     * @param userId The ID of the user
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to remove
+     * Checks whether a given entity is a favorite for the user.
+     *
+     * @param userId   the ID of the user
+     * @param type     the type of the entity
+     * @param entityId the ID of the entity
+     * @return {@code true} if the entity is a favorite, otherwise {@code false}
      */
-    void removeFavorite(Long userId, String type, Long itemId);
-    
+    boolean isFavorite(Long userId, Favorite.EntityType type, Long entityId);
+
     /**
-     * Get all favorites of a specific type for a user
-     * @param userId The ID of the user
-     * @param type The type of favorites to get (match, player, score, team, venue)
-     * @return List of favorite item IDs
+     * Lists all favorites for a given user.
+     *
+     * @param userId the ID of the user
+     * @return list of favorites for the user
      */
-    List<Long> getFavorites(Long userId, String type);
-    
+    List<FavoriteDto.FavoriteResponse> listAllForUser(Long userId);
+
     /**
-     * Check if an item is in user's favorites
-     * @param userId The ID of the user
-     * @param type The type of the favorite (match, player, score, team, venue)
-     * @param itemId The ID of the item to check
-     * @return true if the item is in favorites, false otherwise
+     * Lists favorites for a given user filtered by entity type.
+     *
+     * @param userId the ID of the user
+     * @param type   the type of the favorited entities
+     * @return list of favorites of the given type for the user
      */
-    boolean isFavorite(Long userId, String type, Long itemId);
+    List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type);
 }

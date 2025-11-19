@@ -6,10 +6,13 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.MatchSpecification;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,13 +29,42 @@ public class MatchServiceImplementation implements MatchService {
     private final VenueRepository venueRepository;
 
     /**
-     * Retrieves all matches
+     * Retrieves a list of matches filtered by the given optional criteria and sorted by the given field.
+     * <p>
+     * All filter parameters are optional; when {@code null}, they are ignored in the specification.
      *
-     * @return a list of all {@link Match} entities
+     * @param startDate    lower bound for the match date
+     * @param endDate      upper bound for the match date
+     * @param homeGoals    exact number of goals scored by the home team
+     * @param awayGoals    exact number of goals scored by the away team
+     * @param homeTeamName home team name filter
+     * @param awayTeamName away team name filter
+     * @param venueName    venue name filter
+     * @param sortBy       field to sort by
+     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @return list of {@link Match} entities matching the given filters
      */
     @Override
-    public List<Match> getAllMatches() {
-        return matchRepository.findAll();
+    public List<Match> findMatchFilter(LocalDate startDate,
+                                       LocalDate endDate,Integer homeGoals,
+                                       Integer awayGoals,
+                                       String homeTeamName,
+                                       String awayTeamName,
+                                       String venueName, String sortBy, String sortDir) {
+
+        Specification<Match> spec= Specification.allOf(
+                MatchSpecification.matchDate(startDate,endDate),
+                MatchSpecification.matchHomeGoals(homeGoals),
+                MatchSpecification.matchAwayGoals(awayGoals),
+                MatchSpecification.matchHomeTeamName(homeTeamName),
+                MatchSpecification.matchAwayTeamName(awayTeamName),
+                MatchSpecification.matchVenueName(venueName)
+        );
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ?
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+
+        return matchRepository.findAll(spec,sort);
     }
 
     /**
@@ -40,6 +72,7 @@ public class MatchServiceImplementation implements MatchService {
      *
      * @param id the id of the match
      * @return the {@link Match} with the specified id
+     * @throws ResponseStatusException with status 404 if the match is not found
      */
     @Override
     public Match getMatchById(Long id) {
@@ -52,6 +85,8 @@ public class MatchServiceImplementation implements MatchService {
      *
      * @param teamId the ID of the team
      * @return a list of {@link Match} entities involving the specified team
+     * @throws ResponseStatusException with status 400 if {@code teamId} is null
+     * @throws ResponseStatusException with status 404 if the team does not exist
      */
     @Override
     public List<Match> getMatchesByTeamId(Long teamId) {
@@ -65,10 +100,13 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
+     * Retrieves all matches played between the given dates (inclusive), ordered by date ascending.
      *
-     * @param from
-     * @param to
-     * @return
+     * @param from the start date (inclusive)
+     * @param to   the end date (inclusive)
+     * @return list of {@link Match} entities whose date is between {@code from} and {@code to}
+     * @throws ResponseStatusException with status 400 if either date is null
+     * @throws ResponseStatusException with status 400 if {@code to} is before {@code from}
      */
     @Override
     public List<Match> getMatchesBetween(LocalDate from, LocalDate to) {
@@ -78,13 +116,14 @@ public class MatchServiceImplementation implements MatchService {
         if (to.isBefore(from)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'to' must be on/after 'from'");
         }
-        return matchRepository.findByDateBetweenOrderByDateAsc(from, to); // inclusive
+        return matchRepository.findByMatchDateBetweenOrderByMatchDateAsc(from, to); // inclusive
     }
 
     /**
      * Partially updates a {@link Match} identified by {@code id}.
+     * <p>
      * Applies only the non-null fields from {@code body}. Supported fields:
-     * {@code date}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
+     * {@code matchDate}, {@code homeTeamId}, {@code awayTeamId}, {@code venueId},
      * {@code homeGoals}, {@code awayGoals}. Team and venue identifiers (if present)
      * are looked up and validated before being set.
      *
@@ -93,8 +132,8 @@ public class MatchServiceImplementation implements MatchService {
      * @return the updated {@link Match}
      *
      * @throws EntityNotFoundException
-     *  *         if the match does not exist, or if any referenced team/venue id in the
-     *  *         payload cannot be found
+     *         if the match does not exist, or if any referenced team/venue id in the
+     *         payload cannot be found
      */
     @Override
     @Transactional
@@ -102,7 +141,7 @@ public class MatchServiceImplementation implements MatchService {
         Match m = matchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
 
-        if (body.date() != null)      m.setDate(body.date());
+        if (body.matchDate() != null)      m.setMatchDate(body.matchDate());
         if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
         if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
         if (body.homeTeamId() != null) {
@@ -125,9 +164,18 @@ public class MatchServiceImplementation implements MatchService {
     }
 
     /**
-     * Creates a match
-     * @param body the {@link Match} entity to create
-     * @return the created match
+     * Creates a new match from the provided request body.
+     * <p>
+     * Validates that required IDs and date are present, that team IDs are different, and
+     * that goal values (if provided) are non-negative. Also checks that referenced teams
+     * and venue exist.
+     *
+     * @param body the {@link MatchDto.CreateMatchRequest} containing match details
+     * @return the created {@link Match}
+     *
+     * @throws ResponseStatusException with status 400 if required fields are missing
+     *                                 or invalid
+     * @throws ResponseStatusException with status 404 if referenced teams or venue are not found
      */
     @Override
     @Transactional
@@ -144,8 +192,8 @@ public class MatchServiceImplementation implements MatchService {
         if (body.venueId() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "venueId is required");
         }
-        if (body.date() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "date is required");
+        if (body.matchDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "matchDate is required");
         }
 
         if (body.homeTeamId().equals(body.awayTeamId())) {
@@ -172,14 +220,14 @@ public class MatchServiceImplementation implements MatchService {
         m.setHomeTeam(home);
         m.setAwayTeam(away);
         m.setVenue(venue);
-        m.setDate(body.date());
+        m.setMatchDate(body.matchDate());
         m.setHomeGoals(body.homeGoals() != null ? body.homeGoals() : 0);
         m.setAwayGoals(body.awayGoals() != null ? body.awayGoals() : 0);
         return matchRepository.save(m);
     }
 
     /**
-     * Deletes a match by its id
+     * Deletes a match by its id.
      *
      * @param id the id of the match to delete
      */

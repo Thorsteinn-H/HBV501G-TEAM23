@@ -1,9 +1,12 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import is.hi.hbv501gteam23.Persistence.enums.Gender;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -15,7 +18,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     @Id
     @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
@@ -28,15 +33,18 @@ public class User implements Serializable {
     @Column(name = "email", nullable = false, unique = true, length = 320)
     private String email;
 
-    @Column(name = "gender")
-    private String gender;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = true)
+    private Gender gender;
 
     @JsonIgnore
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = false;
+    private boolean isActive = true;
+
+    @Builder.Default
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt  = LocalDateTime.now();
 
     @JsonIgnore
     @Column(name = "deleted_at")
@@ -46,13 +54,12 @@ public class User implements Serializable {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private String role;
+    private SystemRole role;
 
-    @Lob
-    @Column(name="image")
-    private byte[] image;
+    @OneToOne
+    @JoinColumn(name = "profile_image_id")
+    private Image profileImage;
 
-    @Column(name="imageType")
-    private String imageType;
 }

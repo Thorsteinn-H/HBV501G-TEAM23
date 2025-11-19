@@ -1,8 +1,6 @@
 package is.hi.hbv501gteam23.Services.Interfaces;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
-import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 
 import java.util.List;
@@ -15,6 +13,17 @@ public interface VenueService {
      * @return a list of all {@link Venue} entities
      */
     List<Venue> getAllVenues();
+
+    /**
+     * Retrieves venues filtered by optional name and address.
+     * <p>
+     * Both filters are optional, when {@code null} or blank, they are ignored.
+     *
+     * @param name    venue name filter (case-insensitive, partial matches allowed)
+     * @param address venue address filter (case-insensitive, partial matches allowed)
+     * @return a list of {@link Venue} entities matching the given filters
+     */
+    List<Venue> findByFilters(String name, String address);
 
     /**
      * Retrieves a single venue by its unique identifier.

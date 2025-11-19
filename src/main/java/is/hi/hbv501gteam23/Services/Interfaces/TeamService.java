@@ -5,13 +5,25 @@ import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import java.util.List;
 
 public interface TeamService {
-
     /**
-     * Retrieves all teams
+     * Finds teams using optional filters, with sorting.
+     * <p>
+     * All filter parameters are optional; when {@code null}, they are ignored.
+     * Supports filtering by name, active status, country and venue name.
      *
-     * @return a list of all {@link Team} entities
+     * @param name      team name filter (partial, case-insensitive)
+     * @param isActive  active status filter
+     * @param country   country code filter
+     * @param venueName venue name filter (partial, case-insensitive)
+     * @param sortBy    field to sort by
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @return list of {@link Team} entities matching the given filters
      */
-    List<Team> getAllTeams();
+    List<Team> findTeamFilter(
+             String name, Boolean isActive,
+            String country, String venueName,
+            String sortBy, String sortDir
+    );
 
     /**
      * Retrieves a single team by its unique identifier.

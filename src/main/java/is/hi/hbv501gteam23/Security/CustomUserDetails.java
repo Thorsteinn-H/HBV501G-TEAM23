@@ -1,33 +1,46 @@
 package is.hi.hbv501gteam23.Security;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
+@Getter
 public class CustomUserDetails implements UserDetails {
-    private final User user;
+    private final Long id;
+    private final String email;
+    private final String passwordHash;
+    private final boolean active;
+    private final SystemRole role;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(User user) {
-        this.user = user;
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.passwordHash = user.getPasswordHash();
+        this.active = user.isActive();
+        this.role = user.getRole();
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        return user.getPasswordHash();
+        return passwordHash;
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return email;
     }
 
     @Override
@@ -37,7 +50,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return active;
     }
 
     @Override
@@ -47,10 +60,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 
-    public User getUser() {
-        return user;
-    }
 }

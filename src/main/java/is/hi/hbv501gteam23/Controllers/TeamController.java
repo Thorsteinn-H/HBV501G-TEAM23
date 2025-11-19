@@ -1,10 +1,12 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
+import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,28 +14,66 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Team} resources.
- * Base path is /players
+ * Base path is /teams
  */
+@Tag(name = "Team")
 @RestController
 @RequestMapping("/teams")
 @RequiredArgsConstructor
 public class TeamController {
     private final TeamService teamService;
+    private final MetadataService metadataService;
 
     /**
-     * Retrieves all {@link Team} entities.
-     * @return list of teams mapped to {@link TeamResponse}
+     * Retrieves a list of teams filtered by the given optional criteria.
+     * <p>
+     * All parameters are optional; when a parameter is {@code null}, it is ignored in the filter.
+     * If a country is provided, it must be one of the configured countries in {@link MetadataService},
+     * otherwise a 400 (Bad Request) response is returned with an empty list.
+     *
+     * @param name      team name
+     * @param isActive  active status of the team
+     * @param country   country code to filter by
+     * @param venueName venue name to filter by
+     * @param sortBy    field to sort by (defaults to {@code "name"})
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @return {@link ResponseEntity} with status 200 (OK) containing a list of {@link TeamResponse},
+     * or 400 (Bad Request) with an empty list if the country is invalid
      */
     @GetMapping
-    @Operation(summary = "List all teams")
-    @ApiResponse(responseCode = "200", description = "Teams successfully fetched")
-    public List<TeamResponse> getAllTeams(){
-        return teamService.getAllTeams()
-                .stream().map(this::toResponse).toList();
+    @Operation(summary = "Filter teams")
+    public ResponseEntity<List<TeamDto.TeamResponse>> filterTeams(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String venueName,
+            @Parameter @RequestParam(required = false,defaultValue = "name") String sortBy,
+            @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
+    )
+    {
+        if (country != null) {
+            boolean validCountry = metadataService.getAllCountries().stream()
+                    .anyMatch(c -> c.value().equalsIgnoreCase(country));
+            if (!validCountry) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(Collections.emptyList());
+            }
+        }
+
+        List<Team> teams=teamService.findTeamFilter(name,isActive,country,venueName,sortBy,sortDir);
+
+        List<TeamDto.TeamResponse> response = teams.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -42,38 +82,11 @@ public class TeamController {
      * @return the team mapped to a {@link TeamResponse}
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Get team by id")
-    @ApiResponse(responseCode = "200", description = "Team successfully fetched")
+    @Operation(summary = "Get team by ID")
     public TeamResponse getTeamById(@PathVariable Long id){
         return toResponse(teamService.getTeamById(id));
     }
 
-    /**
-     * Retrieves a {@link Team} entity by name
-     * @param name name of the team to be retrieved
-     * @return the team mapped to a {@link TeamResponse}
-     */
-    @GetMapping(params = "name")
-    @Operation(summary = "Get team by name")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
-    public TeamResponse getTeamByName(@RequestParam String name) {
-        return toResponse(teamService.findByName(name));
-    }
-
-    /**
-     *
-     * @param isActive the active status of a team
-     * @return
-     */
-    @GetMapping("/isActive={isActive}")
-    @Operation(summary = "Get team by active status")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
-    public List<TeamResponse> getActiveTeams(@PathVariable("isActive") Boolean isActive) {
-        return teamService.findByActiveStatus(isActive)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
 
     /**
      * Retrieves a list of {@link Team} entities by venue.
@@ -82,7 +95,6 @@ public class TeamController {
      */
     @GetMapping("/venue/{venueId}")
     @Operation(summary = "Get team by venue ID")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
     public List<TeamResponse> getByVenueId(@PathVariable("venueId") Long venueId) {
         return teamService.findByVenueId(venueId)
                 .stream()
@@ -91,30 +103,16 @@ public class TeamController {
     }
 
     /**
-     * Retrieves a list of {@link Team} entities from a specific country.
-     * @param country the country of the teams to be retrieved.
-     * @return list of teams mapped to {@link TeamResponse}
-     */
-    @GetMapping(params = "country")
-    @Operation(summary = "Get team by country")
-    @ApiResponse(responseCode = "200", description = "Search results retrieved")
-    public List<TeamResponse> getTeamByCountry(@RequestParam String country) {
-        return teamService.findByCountry(country)
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    /**
      * Creates a new team.
      * @param body the team data to create
-     * @return the created team mapped to {@link TeamResponse}
+     * @return {@link ResponseEntity} with status 201 (CREATED) containing the created team
+     * mapped to {@link TeamResponse} and a {@code Location} header pointing to
+     * /teams/{id}
      */
     @PostMapping
     @ResponseBody
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully created")
     public ResponseEntity<TeamDto.TeamResponse> createTeam(@RequestBody TeamDto.CreateTeamRequest body) {
         Team created = teamService.createTeam(body);
         return ResponseEntity.created(URI.create("/teams" + created.getId())).body(toResponse(created));
@@ -124,13 +122,13 @@ public class TeamController {
      * Updates an existing team. Team can be marked as inactive with isActive = false.
      * @param id the id of the team to update
      * @param body the fields to update
-     * @return the updated team mapped to {@link TeamResponse}
+     * @return {@link ResponseEntity} with status 200 (OK) containing the updated team
+     * mapped to {@link TeamResponse}
      */
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
     @Operation(summary = "Modify a team")
-    @ApiResponse(responseCode = "200", description = "Team successfully modified")
     public ResponseEntity<TeamDto.TeamResponse> updateTeam(@PathVariable Long id, @RequestBody TeamDto.PatchTeamRequest body) {
         Team updatedTeam = teamService.patchTeam(id, body);
         return ResponseEntity.ok(toResponse(updatedTeam));
@@ -138,8 +136,12 @@ public class TeamController {
 
     /**
      * Maps a {@link Team} entity to a {@link TeamDto.TeamResponse} DTO.
-     * @param t team entity
-     * @return mapped {@link TeamDto.TeamResponse}
+     * <p>
+     * If a team has no venue or the venue has no non-blank name, the venue name
+     * defaults to the string {@code "Enginn heimavöllur"}.
+     *
+     * @param t the team entity to map
+     * @return the mapped {@link TeamDto.TeamResponse}
      */
     private TeamDto.TeamResponse toResponse(Team t) {
         var v = t.getVenue();

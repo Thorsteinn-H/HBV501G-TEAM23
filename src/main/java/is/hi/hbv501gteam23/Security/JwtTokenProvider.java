@@ -4,9 +4,9 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import is.hi.hbv501gteam23.Persistence.Entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
@@ -14,33 +14,46 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
     private final SecretKey key;
-    private final long expirationMillis;
+    private final long jwtExpirationMillis;
 
     public JwtTokenProvider(
         @Value("${jwt.secret}") String secret,
-        @Value("${jwt.expiration}") long expirationMillis
+        @Value("${jwt.expiration}") long jwtExpirationMillis
     ) {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         this.key = Keys.hmacShaKeyFor(decodedKey);
-        this.expirationMillis = expirationMillis;
+        this.jwtExpirationMillis = jwtExpirationMillis;
     }
 
     /**
-     * Generates a token with username as subject, an expiry date,
+     * Generates a token with username as subject, an expiry matchDate,
      * and HMAC-SHA-256 to sign
-     * @param username the username for the subject
+     * @param userDetails the details for the subject
      * @return
      */
-    public String generateToken(String username) {
+    public String generateAccessToken(CustomUserDetails userDetails) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expirationMillis);
+        Date expiry = new Date(now.getTime() + jwtExpirationMillis);
 
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(userDetails.getEmail())
+            .claim("role", userDetails.getRole())
+            .setIssuedAt(now)
+            .setExpiration(expiry)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
+    }
+
+    public String generateRefreshToken(User user) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + jwtExpirationMillis * 10);
+
+        return Jwts.builder()
+            .setSubject(user.getEmail())
+            .setIssuedAt(now)
+            .setExpiration(expiry)
+            .signWith(key, SignatureAlgorithm.HS512)
+            .compact();
     }
 
     /**
@@ -58,8 +71,8 @@ public class JwtTokenProvider {
     }
 
     /**
-     *
-     * @param token
+     * Validates the JWT token
+     * @param token the token to validate
      * @return false if invalid, otherwise true
      */
     public boolean validateToken(String token) {

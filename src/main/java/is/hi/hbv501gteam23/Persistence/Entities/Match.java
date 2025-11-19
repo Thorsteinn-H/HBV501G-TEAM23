@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "match")
+@Table(name = "matches")
 public class Match {
     @Id
     @SequenceGenerator(name = "match_sequence", sequenceName = "match_sequence", allocationSize = 1)
@@ -19,7 +19,7 @@ public class Match {
     private Long id;
 
     @Column(name = "match_date", nullable = false)
-    private LocalDate date;
+    private LocalDate matchDate;
 
     @Column(name = "home_goals", nullable = false)
     private Integer homeGoals = 0;
