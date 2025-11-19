@@ -172,8 +172,11 @@ public class TeamServiceImplementation implements TeamService {
         if (teamRepository.findByNameContainingIgnoreCase(body.name()) != null)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Team with name already exists");
 
-        Venue venue = venueRepository.findById(body.venueId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
+        Venue venue = null;
+        if (body.venueId() != null) {
+            venue = venueRepository.findById(body.venueId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
+        }
 
         String normalizedCode = MetadataUtils.normalizeCountryCode(body.country());
         Country country = countryRepository.findById(normalizedCode)
