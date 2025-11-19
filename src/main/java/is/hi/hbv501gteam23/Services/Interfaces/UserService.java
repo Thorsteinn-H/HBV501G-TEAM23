@@ -52,6 +52,12 @@ public interface UserService {
     void deleteUser(Long id);
 
     /**
+     *
+     * @param id
+     */
+    void deactivateUser(Long id);
+
+    /**
      * Uploads an image file to a specific user.
      *
      * @param user      the user uploading the specific image
@@ -102,5 +108,15 @@ public interface UserService {
      */
     User updatePassword(User user, UserDto.UpdatePassword request);
 
+    /**
+     *
+     * @param email
+     * @param name
+     * @param role
+     * @param active
+     * @param sortBy
+     * @param order
+     * @return
+     */
     List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order);
 }

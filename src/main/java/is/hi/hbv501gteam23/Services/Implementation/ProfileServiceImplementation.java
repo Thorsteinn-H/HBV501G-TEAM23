@@ -61,6 +61,6 @@ public class ProfileServiceImplementation implements ProfileService {
 
     @Override
     public void deactivateAccount(User user) {
-        userService.deleteUser(user.getId());
+        userService.deactivateUser(user.getId());
     }
 }

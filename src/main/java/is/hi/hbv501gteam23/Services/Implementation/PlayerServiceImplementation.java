@@ -1,7 +1,9 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Repositories.CountryRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
@@ -30,13 +32,14 @@ import java.util.List;
 public class PlayerServiceImplementation implements PlayerService {
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
+    private final CountryRepository countryRepository;
 
     /**
      *
      * @param name
      * @param teamId
      * @param teamName
-     * @param country
+     * @param countryCode
      * @param isActive
      * @param sortBy
      * @param sortDir
@@ -49,47 +52,40 @@ public class PlayerServiceImplementation implements PlayerService {
             String name,
             Long teamId,
             String teamName,
-            String country,
+            String countryCode,
             Boolean isActive,
             String sortBy,
             String sortDir,
             int page,
             int size
     ) {
-        Specification<Player> spec = (root, query, criteriaBuilder) -> {
-            Predicate p = criteriaBuilder.conjunction();
+        Specification<Player> spec = (root, query, cb) -> {
+            Predicate p = cb.conjunction();
 
             if (name != null && !name.isBlank()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+                p = cb.and(p, cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
             }
 
             if (teamId != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("team").get("id"), teamId));
+                p = cb.and(p, cb.equal(root.get("team").get("id"), teamId));
             }
 
             if (teamName != null && !teamName.isBlank()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.like(
-                        criteriaBuilder.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%"));
+                p = cb.and(p, cb.like(cb.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%"));
             }
 
-            if (country != null && !country.isBlank()) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(
-                        root.get("country"), country.toUpperCase()));
+            if (countryCode != null && !countryCode.isBlank()) {
+                p = cb.and(p, cb.equal(root.get("country").get("code"), countryCode.toUpperCase()));
             }
 
             if (isActive != null) {
-                p = criteriaBuilder.and(p, criteriaBuilder.equal(root.get("active"), isActive));
+                p = cb.and(p, cb.equal(root.get("active"), isActive));
             }
 
             return p;
         };
 
-        Sort.Direction direction = Sort.Direction.ASC;
-        if ("DESC".equalsIgnoreCase(sortDir)) {
-            direction = Sort.Direction.DESC;
-        }
-
+        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         return playerRepository.findAll(spec, pageable).getContent();
@@ -178,7 +174,7 @@ public class PlayerServiceImplementation implements PlayerService {
      * @return a list of all {@link Player} entities from the country
      */
     @Override
-    public List<Player> findPlayerByCountry(String country) {
+    public List<Player> findByPlayerCountry(Country country) {
         return playerRepository.findByCountry(country);
     }
 
@@ -192,46 +188,33 @@ public class PlayerServiceImplementation implements PlayerService {
     @Override
     @Transactional
     public Player createPlayer(PlayerDto.CreatePlayerRequest body) {
-        if (body == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
-        }
+        if (body == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
 
         String name = body.name() == null ? null : body.name().trim();
-        if (name == null || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player name is required");
-        }
-        if (body.dateOfBirth() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth is required");
-        }
-        if (body.dateOfBirth().isAfter(java.time.LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth cannot be in the future");
-        }
-        if (body.goals() != null && body.goals() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "goals must be >= 0");
-        }
-        String country = body.country() == null ? null : body.country().trim();
-        if (country == null || country.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
-        }
-        if (body.position() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "position is required");
-        }
+        if (name == null || name.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player name is required");
+        if (body.dateOfBirth() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth is required");
+        if (body.dateOfBirth().isAfter(java.time.LocalDate.now())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dateOfBirth cannot be in the future");
+        if (body.goals() != null && body.goals() < 0) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "goals must be >= 0");
+        if (body.position() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "position is required");
 
-        Player existing = playerRepository.findByNameContainingIgnoreCase(name);
-        if (existing != null) {
+        if (playerRepository.findByNameContainingIgnoreCase(name) != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Player " + name + " already exists");
         }
 
         Team team = null;
         if (body.teamId() != null) {
             team = teamRepository.findById(body.teamId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + body.teamId() + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + body.teamId() + " not found"));
         }
+
+        String normalizedCode = MetadataUtils.normalizeCountryCode(body.country());
+        Country country = countryRepository.findById(normalizedCode)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + normalizedCode + " not found"));
 
         Player p = new Player();
         p.setName(name);
         p.setDateOfBirth(body.dateOfBirth());
-        p.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
+        p.setCountry(country);
         p.setPosition(body.position());
         p.setGoals(body.goals() != null ? body.goals() : 0);
         p.setTeam(team);
@@ -258,11 +241,16 @@ public class PlayerServiceImplementation implements PlayerService {
     @Transactional
     public Player patchPlayer(Long id, PlayerDto.PatchPlayerRequest body) {
         Player p = playerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Player " + id + " not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Player " + id + " not found"));
 
         if (body.name() != null)        p.setName(body.name());
         if (body.dateOfBirth() != null) p.setDateOfBirth(body.dateOfBirth());
-        if (body.country() != null)     p.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
+        if (body.country() != null) {
+            String normalizedCode = MetadataUtils.normalizeCountryCode(body.country());
+            Country country = countryRepository.findById(normalizedCode)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + normalizedCode + " not found"));
+            p.setCountry(country);
+        }
         if (body.position() != null)    p.setPosition(body.position());
         if (body.goals() != null)       p.setGoals(body.goals());
         if (body.isActive() != null)    p.setActive(body.isActive());

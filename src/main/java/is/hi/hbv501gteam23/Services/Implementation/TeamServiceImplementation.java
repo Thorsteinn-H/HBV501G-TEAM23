@@ -1,7 +1,9 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
+import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Entities.Venue;
+import is.hi.hbv501gteam23.Persistence.Repositories.CountryRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.VenueRepository;
@@ -26,6 +28,7 @@ public class TeamServiceImplementation implements TeamService {
     private final TeamRepository teamRepository;
     private final PlayerRepository playerRepository;
     private final VenueRepository venueRepository;
+    private final CountryRepository countryRepository;
 
     @Override
     public List<Team> findTeamFilter(String name, Boolean isActive,
@@ -75,20 +78,20 @@ public class TeamServiceImplementation implements TeamService {
     /**
      * Retrieves a single team by its country of origin
      *
-     * @param country the teams country of origin
+     * @param countryCode the teams country of origin
      * @return a list of {@link Team} entities from a specific country
      */
     @Override
 
-    public List<Team> findByCountry(String country) {
-        if (country == null || country.isBlank()) {
+    public List<Team> findByCountry(String countryCode) {
+        if (countryCode == null || countryCode.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
         }
-        String q = country.trim();
-        List<Team> teams = teamRepository.findAllByCountryIgnoreCase(q);
-        if (teams.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No teams found for country " + q);
-        }
+        Country country = countryRepository.findById(countryCode.toUpperCase())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + countryCode + " not found"));
+
+        List<Team> teams = teamRepository.findByCountry(country);
+        if (teams.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No teams found for country " + country);
         return teams;
     }
 
@@ -138,23 +141,22 @@ public class TeamServiceImplementation implements TeamService {
     @Override
     @Transactional
     public Team createTeam(TeamDto.CreateTeamRequest body) {
-        Team existing = teamRepository.findByNameContainingIgnoreCase(body.name());
-        if (existing != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Team with name already exists");
+        if (body.name() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name is required");
+        if (body.country() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
+
+        if (teamRepository.findByNameContainingIgnoreCase(body.name()) != null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Team with name already exists");
 
         Venue venue = venueRepository.findById(body.venueId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
 
+        String normalizedCode = MetadataUtils.normalizeCountryCode(body.country());
+        Country country = countryRepository.findById(normalizedCode)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + normalizedCode + " not found"));
 
         Team t = new Team();
-        if (body.name() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name is required");
-        }
         t.setName(body.name());
-
-        if (body.country() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
-        }
-        t.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
+        t.setCountry(country);
         t.setActive(true);
         t.setVenue(venue);
 
@@ -178,14 +180,19 @@ public class TeamServiceImplementation implements TeamService {
     @Transactional
     public Team patchTeam(Long id, TeamDto.PatchTeamRequest body) {
         Team t = teamRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + id + " not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Team " + id + " not found"));
 
         if (body.name() != null)    t.setName(body.name());
-        if (body.country() != null) t.setCountry(MetadataUtils.normalizeCountryCode(body.country()));
+        if (body.country() != null) {
+            String normalizedCode = MetadataUtils.normalizeCountryCode(body.country());
+            Country country = countryRepository.findById(normalizedCode)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + normalizedCode + " not found"));
+            t.setCountry(country);
+        }
         if (body.isActive() != null) t.setActive(body.isActive());
         if (body.venueId() != null) {
             Venue v = venueRepository.findById(body.venueId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + body.venueId() + " not found"));
             t.setVenue(v);
         }
 

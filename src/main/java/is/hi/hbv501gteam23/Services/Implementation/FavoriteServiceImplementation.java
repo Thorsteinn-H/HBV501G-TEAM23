@@ -6,6 +6,7 @@ import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
 import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
+import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Service implementation for handling favorite items
@@ -28,7 +29,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional
-    public FavoriteDto.FavoriteResponse addFavorite(Long userId, Favorite.EntityType type, Long entityId) {
+    public FavoriteDto.FavoriteResponse addFavorite(Long userId, FavoriteType type, Long entityId) {
         boolean targetExists = switch (type) {
             case MATCH  -> matchRepository.existsById(entityId);
             case PLAYER -> playerRepository.existsById(entityId);
@@ -57,7 +58,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
 
     @Override
-    public void removeFavorite(Long userId, Favorite.EntityType type, Long entityId) {
+    public void removeFavorite(Long userId, FavoriteType type, Long entityId) {
         var existing = favoriteRepository.findByUserIdAndEntityTypeAndEntityId(userId, type, entityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Favorite not found"));
         favoriteRepository.delete(existing);
@@ -65,7 +66,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isFavorite(Long userId, Favorite.EntityType type, Long entityId) {
+    public boolean isFavorite(Long userId, FavoriteType type, Long entityId) {
         return favoriteRepository.existsByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
     }
 
@@ -79,7 +80,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, Favorite.EntityType type) {
+    public List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, FavoriteType type) {
         return favoriteRepository.findByUserIdAndEntityType(userId, type).stream()
                 .map(this::toResponse)
                 .toList();

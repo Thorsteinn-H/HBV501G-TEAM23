@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import is.hi.hbv501gteam23.Persistence.Entities.Image;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -46,18 +45,11 @@ public final class ProfileDto {
      * Does not include admin-only fields like SystemRole or isActive.
      */
     public record ProfileResponse(
-            Long id,
-
-            @Schema(example = "user@team23.com")
-            String email,
-
-            @Schema(example = "username")
-            String username,
-
-            @Schema(example = "FEMALE")
-            Gender gender,
-
-            LocalDateTime createdAt,
-            Image profileImage
+        Long id,
+        String email,
+        String username,
+        Gender gender,
+        LocalDateTime createdAt,
+        String profileImageUrl
     ) {}
 }

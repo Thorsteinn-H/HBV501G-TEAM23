@@ -5,6 +5,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.Specifications.UserSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Security.PasswordValidationUtil;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -85,7 +87,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public User createUser(UserDto.CreateUserRequest request) {
         if (authRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new RuntimeException("Incorrect email or password");
         }
 
         User user = new User();
@@ -115,6 +117,10 @@ public class UserServiceImplementation implements UserService {
             throw new RuntimeException("User not found");
         }
 
+        if (request.password() != null && !PasswordValidationUtil.isValid(request.password())) {
+            throw new IllegalArgumentException("Password does not meet complexity requirements");
+        }
+
         if (request.email() != null) user.setEmail(request.email());
         if (request.username() != null) user.setName(request.username());
         if (request.password() != null) user.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -135,7 +141,7 @@ public class UserServiceImplementation implements UserService {
      * @param id  the id of the user to delete
      */
     @Override
-    public void deleteUser(Long id) {
+    public void deactivateUser(Long id) {
         User user = findById(id);
         if (user != null && user.isActive()) {
             user.setActive(false);
@@ -149,6 +155,18 @@ public class UserServiceImplementation implements UserService {
     }
 
     /**
+     *
+     * @param id  the id of the user to delete
+     */
+    @Override
+    public void deleteUser(Long id) {
+        User user = findById(id);
+        if (user != null) {
+            authRepository.delete(user);
+        }
+    }
+
+    /**
      * Uploads an image file to a specific user.
      * @param user
      * @param file
@@ -158,17 +176,24 @@ public class UserServiceImplementation implements UserService {
     @Override
     public User uploadImage(User user, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) throw new IllegalArgumentException("File is required");
-        if (!ALLOWED_TYPES.contains(file.getContentType()))
+        if (file.getSize() > MAX_FILE_SIZE) throw new IllegalArgumentException("File size exceeds 5MB");
+
+        String type = file.getContentType();
+        if (!ALLOWED_TYPES.contains(type))
             throw new IllegalArgumentException("Unsupported file type: " + file.getContentType());
-        if (file.getSize() > MAX_FILE_SIZE)
-            throw new IllegalArgumentException("File size exceeds 5MB");
+
+        try (var is = file.getInputStream()) {
+            if (ImageIO.read(is) == null)
+                throw new IllegalArgumentException("Invalid image content");
+        }
 
         Image image = user.getProfileImage();
+        if (image == null) image = new Image();
 
         image.setImageData(file.getBytes());
-        image.setImageType(file.getContentType());
-
+        image.setImageType(type);
         user.setProfileImage(image);
+
         return authRepository.save(user);
     }
 

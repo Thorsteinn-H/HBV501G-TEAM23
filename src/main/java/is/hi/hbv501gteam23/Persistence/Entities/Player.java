@@ -4,8 +4,11 @@ import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import is.hi.hbv501gteam23.Persistence.enums.PlayerPosition;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -31,11 +34,12 @@ public class Player {
     private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = true)
+    @Column(name = "gender", nullable = true, columnDefinition = "gender_enum")
     private Gender gender;
 
-    @Column(name = "player_country", length = 2)
-    private String country;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "player_country", referencedColumnName = "code", nullable = false)
+    private Country country;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id")
@@ -46,5 +50,14 @@ public class Player {
     private PlayerPosition position;
 
     @Column(name = "goals", nullable = false)
-    private Integer goals;
+    @Builder.Default
+    private Integer goals = 0;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }
