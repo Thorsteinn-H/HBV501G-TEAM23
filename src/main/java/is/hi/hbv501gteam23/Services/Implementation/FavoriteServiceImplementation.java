@@ -35,7 +35,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * @param userId   the ID of the user adding the favorite
      * @param type     the type of the favorited entity (MATCH, PLAYER, TEAM)
      * @param entityId the ID of the entity to mark as favorite
-     * @return a {@link FavoriteDto.favoriteResponse} representing the created favorite
+     * @return a {@link FavoriteDto.FavoriteResponse} representing the created favorite
      * @throws ResponseStatusException with status 404 if the target entity does not exist
      * @throws ResponseStatusException with status 409 if the favorite already exists
      */
@@ -101,7 +101,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * Lists all favorites for a given user.
      *
      * @param userId the ID of the user
-     * @return a list of {@link FavoriteDto.favoriteResponse} representing all favorites of the user
+     * @return a list of {@link FavoriteDto.FavoriteResponse} representing all favorites of the user
      */
     @Override
     @Transactional(readOnly = true)
@@ -116,7 +116,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      *
      * @param userId the ID of the user
      * @param type   the type of the favorited entities to list
-     * @return a list of {@link FavoriteDto.favoriteResponse} for the given user and type
+     * @return a list of {@link FavoriteDto.FavoriteResponse} for the given user and type
      */
     @Override
     @Transactional(readOnly = true)
@@ -127,10 +127,10 @@ public class FavoriteServiceImplementation implements FavoriteService {
     }
 
     /**
-     * Maps a {@link Favorite} entity to a {@link FavoriteDto.favoriteResponse} DTO.
+     * Maps a {@link Favorite} entity to a {@link FavoriteDto.FavoriteResponse} DTO.
      *
      * @param f the favorite entity to map
-     * @return the mapped {@link FavoriteDto.favoriteResponse}
+     * @return the mapped {@link FavoriteDto.FavoriteResponse}
      */
     private FavoriteDto.FavoriteResponse toResponse(Favorite f) {
         return new FavoriteDto.FavoriteResponse(
