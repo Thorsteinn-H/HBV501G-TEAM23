@@ -47,8 +47,8 @@ public class TeamController {
      * or 400 (Bad Request) with an empty list if the country is invalid
      */
     @GetMapping
-    @Operation(summary = "Filter teams")
-    public ResponseEntity<List<TeamDto.TeamResponse>> filterTeams(
+    @Operation(summary = "List teams")
+    public ResponseEntity<List<TeamDto.TeamResponse>> listTeams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) String country,
