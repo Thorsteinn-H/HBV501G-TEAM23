@@ -1,14 +1,19 @@
-package is.hi.hbv501gteam23.Config;/******************************************************************************
- *  Nafn    : Helga Björg Helgadóttir
- *  T-póstur: hbh54@hi.is
- *
- *  Lýsing  : Prentar út Halló heimur á console
- *
- *
- *****************************************************************************/
+package is.hi.hbv501gteam23.Config;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
 public class CountryScheduledSync {
-    public static void main(String[] args) {
-        
+
+    private final CountrySyncService countrySyncService;
+
+    /** Runs daily at midnight */
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void dailySync() {
+        countrySyncService.syncCountriesBulk();
+        System.out.println("Countries table synchronized (scheduled).");
     }
 }
