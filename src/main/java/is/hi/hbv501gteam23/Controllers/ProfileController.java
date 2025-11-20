@@ -56,7 +56,7 @@ public class ProfileController {
      * @throws IOException if an error occurs while reading the image
      * @throws IllegalArgumentException if the uploaded file is invalid
      */
-    @PatchMapping
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update profile", description = "Updates profile information for logged-in user")
     public ResponseEntity<ProfileDto.ProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -136,7 +136,7 @@ public class ProfileController {
      * @return updated ProfileResponse
      * @throws IOException if file cannot be read
      */
-    @PutMapping("/avatar")
+    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload profile picture", description = "Uploads or updates the logged-in user's profile picture")
     public ResponseEntity<ProfileDto.ProfileResponse> uploadAvatar(
             @AuthenticationPrincipal CustomUserDetails userDetails,

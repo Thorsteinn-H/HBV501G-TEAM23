@@ -62,6 +62,7 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
                 .requestMatchers("/users/**").hasRole("ADMIN")
+                .requestMatchers("/profile/**").authenticated()
                 .requestMatchers(HttpMethod.POST,
                     "/players/**",
                     "/venues/**",
