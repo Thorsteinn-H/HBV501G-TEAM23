@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Config;
 
 import is.hi.hbv501gteam23.Security.AuditCleanupFilter;
 import is.hi.hbv501gteam23.Security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -109,15 +108,7 @@ public class SecurityConfig {
                 })
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(auditCleanupFilter, JwtAuthenticationFilter.class)
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((req, res, e) -> {
-                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Invalid or missing token");
-                })
-                .accessDeniedHandler((req, res, e) -> {
-                    res.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden: You do not have permission");
-                })
-            );
+            .addFilterAfter(auditCleanupFilter, JwtAuthenticationFilter.class);
 
             return http.build();
     }

@@ -24,7 +24,7 @@ public class Image {
     private String imageType;
 
     @Lob
-    @Column(name = "image_data", nullable = false, columnDefinition = "bytea")
+    @Column(name = "image_data", nullable = false)
     private byte[] imageData;
 
     @CreationTimestamp
