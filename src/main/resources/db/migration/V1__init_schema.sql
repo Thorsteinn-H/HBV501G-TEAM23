@@ -134,7 +134,7 @@ CREATE TABLE users (
     deleted_at TIMESTAMP,
     profile_image_id BIGINT REFERENCES images(id),
     image_type VARCHAR(255),
-    updated_at TIMESTAMP NOT NULL DEFAULT now()
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
     CONSTRAINT chk_gender CHECK (gender IN ('MALE', 'FEMALE', 'OTHER')),
     CONSTRAINT chk_role CHECK (role IN ('USER', 'ADMIN'))
 );
