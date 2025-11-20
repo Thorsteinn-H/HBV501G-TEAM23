@@ -85,28 +85,12 @@ public class FavouriteController {
      * {@link FavoriteDto.FavoriteResponse} of the requested type for the current user
      */
     @GetMapping(value = "/{type}")
-    @Operation(summary = "Get favorites by type")
+    @Operation(summary = "Get favorites by type", description = "Type can either be PLAYER, TEAM, or MATCH.")
     public ResponseEntity<List<FavoriteDto.FavoriteResponse>> getFavoritesByType(@PathVariable String type) {
         Long userId = getCurrentUserId();
         var favoriteType = parseType(type);
         var list = favoriteService.listForUserAndType(userId, favoriteType);
         return ResponseEntity.ok(list);
-    }
-
-    /**
-     *
-     * @param type
-     * @param itemId
-     * @return
-     */
-    @GetMapping("/{type}/{itemId}")
-    public ResponseEntity<Boolean> isFavorite(
-            @PathVariable String type,
-            @PathVariable Long itemId) {
-        Long userId = getCurrentUserId();
-        var favoriteType = parseType(type);
-        boolean isFav = favoriteService.isFavorite(userId, favoriteType, itemId);
-        return ResponseEntity.ok(isFav);
     }
 
     /**
@@ -119,13 +103,11 @@ public class FavouriteController {
      */
     @PostMapping("/{type}/{itemId}")
     @Operation(summary = "Add to favorites")
-    public ResponseEntity<?> addFavorite(
-            @PathVariable String type,
-            @PathVariable Long itemId) {
+    public ResponseEntity<FavoriteDto.FavoriteResponse> addFavorite(@PathVariable String type, @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        var favoriteType = parseType(type);
+        FavoriteType favoriteType = parseType(type);
+        FavoriteDto.FavoriteResponse created = favoriteService.addFavorite(userId, favoriteType, itemId);
 
-        var created = favoriteService.addFavorite(userId, favoriteType, itemId);
         var location = URI.create(String.format("/favorites/%s/%d", favoriteType, itemId));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -144,11 +126,9 @@ public class FavouriteController {
      */
     @DeleteMapping("/{type}/{itemId}")
     @Operation(summary = "Remove favorite")
-    public ResponseEntity<Void> removeFavorite(
-            @PathVariable String type,
-            @PathVariable Long itemId) {
+    public ResponseEntity<Void> removeFavorite(@PathVariable String type, @PathVariable Long itemId) {
         Long userId = getCurrentUserId();
-        var favoriteType = parseType(type);
+        FavoriteType favoriteType = parseType(type);
         favoriteService.removeFavorite(userId, favoriteType, itemId);
         return ResponseEntity.noContent().build();
     }

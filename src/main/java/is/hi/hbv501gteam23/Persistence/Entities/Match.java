@@ -31,15 +31,15 @@ public class Match {
     @Column(name = "away_goals", nullable = false)
     private Integer awayGoals = 0;
 
-    @ManyToOne(fetch = FetchType.LAZY,  optional = false)
+    @ManyToOne(fetch = FetchType.EAGER,  optional = false)
     @JoinColumn(name = "home_team_id", nullable = false)
     private Team homeTeam;
 
-    @ManyToOne(fetch = FetchType.LAZY,   optional = false)
+    @ManyToOne(fetch = FetchType.EAGER,   optional = false)
     @JoinColumn(name = "away_team_id", nullable = false)
     private Team awayTeam;
 
-    @ManyToOne(fetch = FetchType.LAZY,   optional = false)
+    @ManyToOne(fetch = FetchType.EAGER,   optional = false)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
 

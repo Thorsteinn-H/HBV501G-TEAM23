@@ -51,22 +51,21 @@ public class ProfileController {
      *
      * @param userDetails the details of the authenticated user
      * @param request optional request object with updated profile data
-     * @param picture optional profile image to upload
      * @return the updated user profile response
-     * @throws IOException if an error occurs while reading the image
      * @throws IllegalArgumentException if the uploaded file is invalid
      */
-    @PatchMapping
+    @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Update profile", description = "Updates profile information for logged-in user")
     public ResponseEntity<ProfileDto.ProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestPart(required = false) UserDto.UpdateProfileRequest request,
-            @RequestPart(required = false) MultipartFile picture
-    ) throws IOException {
+            @Valid @RequestBody UserDto.UpdateProfileRequest request
+    ) {
         User user = getAuthenticatedUser(userDetails);
 
-        if (request != null) user = profileService.updateProfile(user, new ProfileDto.UpdateProfileRequest(request.username(), request.gender()));
-        if (picture != null && !picture.isEmpty()) user = userService.uploadImage(user, picture);
+        user = profileService.updateProfile(
+                user,
+                new ProfileDto.UpdateProfileRequest(request.username(), request.gender())
+        );
 
         return ResponseEntity.ok(toResponse(user));
     }
@@ -136,7 +135,7 @@ public class ProfileController {
      * @return updated ProfileResponse
      * @throws IOException if file cannot be read
      */
-    @PutMapping("/avatar")
+    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload profile picture", description = "Uploads or updates the logged-in user's profile picture")
     public ResponseEntity<ProfileDto.ProfileResponse> uploadAvatar(
             @AuthenticationPrincipal CustomUserDetails userDetails,
