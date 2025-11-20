@@ -55,7 +55,7 @@ public class User implements Serializable {
     @Column(name = "role", nullable = false, columnDefinition = "role_enum")
     private SystemRole role;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonIgnore
     @JoinColumn(name = "profile_image_id")
     private Image profileImage;

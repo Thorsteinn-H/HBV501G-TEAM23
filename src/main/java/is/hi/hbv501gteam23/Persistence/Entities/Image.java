@@ -23,7 +23,6 @@ public class Image {
     @Column(name = "image_type", nullable = false)
     private String imageType;
 
-    @Lob
     @Column(name = "image_data", nullable = false)
     private byte[] imageData;
 
