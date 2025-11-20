@@ -24,11 +24,9 @@ public class TeamSpecifications {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + country.toLowerCase() + "%");
     }
 
-
     public static Specification<Team> teamVenueName(String venueName){
         return (root, query, criteriaBuilder) ->
                 (venueName == null || venueName.isBlank()) ? null:
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + venueName.toLowerCase() + "%");
-
     }
 }
