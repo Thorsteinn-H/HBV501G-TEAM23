@@ -27,6 +27,7 @@ public class Player {
     @Column(name = "player_name", nullable = false, length = 120)
     private String name;
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
@@ -49,8 +50,8 @@ public class Player {
     @Column(name = "player_position", length = 40, nullable = false)
     private PlayerPosition position;
 
-    @Column(name = "goals", nullable = false)
     @Builder.Default
+    @Column(name = "goals", nullable = false)
     private Integer goals = 0;
 
     @CreationTimestamp

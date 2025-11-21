@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,11 +22,13 @@ public class Match {
     private Long id;
 
     @Column(name = "match_date", nullable = false)
-    private LocalDate matchDate;
+    private LocalDateTime matchDate;
 
+    @Builder.Default
     @Column(name = "home_goals", nullable = false)
     private Integer homeGoals = 0;
 
+    @Builder.Default
     @Column(name = "away_goals", nullable = false)
     private Integer awayGoals = 0;
 
