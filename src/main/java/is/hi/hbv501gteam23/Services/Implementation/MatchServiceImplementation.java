@@ -141,7 +141,7 @@ public class MatchServiceImplementation implements MatchService {
         Match m = matchRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Match " + id + " not found"));
 
-        if (body.matchDate() != null)      m.setMatchDate(body.matchDate());
+        if (body.matchDate() != null) m.setMatchDate(body.matchDate());
         if (body.homeGoals() != null) m.setHomeGoals(body.homeGoals());
         if (body.awayGoals() != null) m.setAwayGoals(body.awayGoals());
         if (body.homeTeamId() != null) {
