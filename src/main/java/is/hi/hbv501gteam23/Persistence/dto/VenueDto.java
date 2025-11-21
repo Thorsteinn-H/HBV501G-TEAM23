@@ -1,7 +1,12 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
 public final class VenueDto {
-    public record VenueRequest(
+    public record CreateVenueRequest(
+            String name,
+            String address
+    ) {}
+
+    public record PatchVenueRequest(
             String name,
             String address
     ) {}
