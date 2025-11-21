@@ -93,7 +93,7 @@ public class VenueServiceImplementation implements VenueService {
      * Validates that the request body, name and address are present, and that
      * no other venue with the same name already exists.
      *
-     * @param body the {@link VenueDto.VenueRequest} containing venue data to create
+     * @param body the {@link VenueDto.CreateVenueRequest} containing venue data to create
      * @return the newly created {@link Venue} entity
      *
      * @throws ResponseStatusException with status 400 if required fields are missing
@@ -101,29 +101,69 @@ public class VenueServiceImplementation implements VenueService {
      */
     @Override
     @Transactional
-    public Venue createVenue(VenueDto.VenueRequest body) {
-        if (body == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
-        }
+    public Venue createVenue(VenueDto.CreateVenueRequest body) {
+        if (body == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
 
         String name = body.name() == null ? null : body.name().trim();
         String address = body.address() == null ? null : body.address().trim();
 
-        if (name == null || name.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue name is required");
-        }
-        if (address == null || address.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue address is required");
-        }
+        if (name == null || name.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue name is required");
+        if (address == null || address.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Venue address is required");
 
         Venue existing = venueRepository.findByNameIgnoreCase(name);
-        if (existing != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue name already exists"); // 409
-        }
+        if (existing != null) throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue name already exists"); // 409
 
         Venue v = new Venue();
         v.setName(name);
         v.setAddress(address);
         return venueRepository.save(v);
+    }
+
+    /**
+     * Updates a venue's name or address
+     *
+     * @param id the id of the venue
+     * @param body the {@link Venue} entity to update
+     * @return the updated {@link Venue} entity
+     */
+    @Override
+    @Transactional
+    public Venue updateVenue(Long id, VenueDto.PatchVenueRequest body) {
+        Venue venue = venueRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Venue " + id + " not found"
+            ));
+
+        if (body == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
+
+        String newName = body.name() == null ? null : body.name().trim();
+        String newAddress = body.address() == null ? null : body.address().trim();
+
+        if (newName != null && !newName.isBlank()) {
+            Venue existing = venueRepository.findByNameIgnoreCase(newName);
+            if (existing != null && !existing.getId().equals(id)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Venue name already exists");
+            venue.setName(newName);
+        }
+
+        if (newAddress != null && !newAddress.isBlank()) venue.setAddress(newAddress);
+
+        return venueRepository.save(venue);
+    }
+
+    /**
+     * Deletes a venue
+     *
+     * @param id the id of the venue
+     */
+    @Override
+    @Transactional
+    public void deleteVenue(Long id) {
+        Venue venue = venueRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Venue " + id + " not found"
+            ));
+        venueRepository.delete(venue);
     }
 }

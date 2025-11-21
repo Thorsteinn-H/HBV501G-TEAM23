@@ -47,5 +47,21 @@ public interface VenueService {
      * @param body the {@link Venue} entity to create
      * @return the newly created {@link Venue} entity
      */
-    Venue createVenue(VenueDto.VenueRequest body);
+    Venue createVenue(VenueDto.CreateVenueRequest body);
+
+    /**
+     * Updates a venue
+     *
+     * @param id the id of the venue
+     * @param body the {@link Venue} entity to update
+     * @return the updated {@link Venue} entity
+     */
+    Venue updateVenue(Long id, VenueDto.PatchVenueRequest body);
+
+    /**
+     * Deletes a venue
+     *
+     * @param id the id of the venue
+     */
+    void deleteVenue(Long id);
 }
