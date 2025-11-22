@@ -1,6 +1,8 @@
 package is.hi.hbv501gteam23.Persistence.dto;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDate;
+
+import java.time.OffsetDateTime;
 
 public final class MatchDto {
 
@@ -16,7 +18,7 @@ public final class MatchDto {
      */
     public record CreateMatchRequest(
             @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
-            LocalDate matchDate,
+            OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
             Long venueId,
@@ -37,7 +39,7 @@ public final class MatchDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchMatchRequest(
-            LocalDate matchDate,
+            OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
             Long venueId,
@@ -61,7 +63,7 @@ public final class MatchDto {
      */
     public record MatchResponse(
             Long id,
-            LocalDate matchDate,
+            OffsetDateTime matchDate,
             Long homeTeamId,
             String homeTeamName,
             Long awayTeamId,

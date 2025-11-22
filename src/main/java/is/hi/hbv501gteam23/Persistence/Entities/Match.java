@@ -5,8 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -22,14 +22,8 @@ public class Match {
     @Column(name = "match_id")
     private Long id;
 
-    @Column(name = "match_date", nullable = false)
-    private LocalDate matchDate;
-
-    @Column(name = "home_goals", nullable = false)
-    private Integer homeGoals = 0;
-
-    @Column(name = "away_goals", nullable = false)
-    private Integer awayGoals = 0;
+    @Column(name = "match_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    private OffsetDateTime matchDate;
 
     @ManyToOne(fetch = FetchType.EAGER,  optional = false)
     @JoinColumn(name = "home_team_id", nullable = false)
@@ -42,6 +36,14 @@ public class Match {
     @ManyToOne(fetch = FetchType.EAGER,   optional = false)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
+
+    @Builder.Default
+    @Column(name = "home_goals", nullable = false)
+    private Integer homeGoals = 0;
+
+    @Builder.Default
+    @Column(name = "away_goals", nullable = false)
+    private Integer awayGoals = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

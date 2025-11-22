@@ -83,7 +83,7 @@ public class VenueController {
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseBody
     @Operation(summary = "Create venue", description = "Admin only.")
-    public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.VenueRequest body) {
+    public ResponseEntity<VenueDto.VenueResponse> createVenue(@RequestBody VenueDto.CreateVenueRequest body) {
         try {
             Venue created = venueService.createVenue(body);
             return ResponseEntity
@@ -94,6 +94,34 @@ public class VenueController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating venue", e);
         }
+    }
+
+    /**
+     * Updates a venue
+     *
+     * @param id the id of the venue
+     * @param body the {@link Venue} entity to update
+     * @return the updated {@link Venue} entity
+     */
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update venue", description = "Modify venue fields. Admin only.")
+    public VenueDto.VenueResponse updateVenue(@PathVariable Long id, @RequestBody VenueDto.PatchVenueRequest body) {
+        Venue updated = venueService.updateVenue(id, body);
+        return toResponse(updated);
+    }
+
+    /**
+     * Deletes a venue
+     *
+     * @param id the id of the venue
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete venue", description = "Delete a venue by ID. Admin only.")
+    public ResponseEntity<Void> deleteVenue(@PathVariable Long id) {
+        venueService.deleteVenue(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
