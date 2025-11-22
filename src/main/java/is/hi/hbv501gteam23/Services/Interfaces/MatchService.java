@@ -10,25 +10,11 @@ public interface MatchService {
 
     /**
      * Finds matches using optional filters.
-     * <p>
-     * All parameters are optional; when {@code null}, the corresponding filter
-     * is ignored. Results can be sorted by a given field and direction.
      *
-     * @param startDate    lower bound (inclusive) for the match date
-     * @param endDate      upper bound (inclusive) for the match date
-     * @param homeGoals    exact number of goals scored by the home team
-     * @param awayGoals    exact number of goals scored by the away team
-     * @param homeTeamName home team name filter
-     * @param awayTeamName away team name filter
-     * @param venueName    venue name filter
-     * @param sortBy       field to sort by
-     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @param filter filter parameters for listing matches
      * @return a list of {@link Match} entities matching the filters
      */
-    List<Match> findMatchFilter(
-            LocalDate startDate,LocalDate endDate,Integer homeGoals,Integer
-                    awayGoals,String homeTeamName,String
-                    awayTeamName, String venueName, String sortBy, String sortDir);
+    List<Match> findMatchFilter(MatchDto.MatchFilter filter);
     /**
      * Retrieves a single match by its unique identifier.
      *

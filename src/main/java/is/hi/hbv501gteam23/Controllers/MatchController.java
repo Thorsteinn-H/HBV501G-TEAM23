@@ -8,6 +8,7 @@ import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto.MatchResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MatchService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,34 +35,15 @@ public class MatchController {
      * All parameters are optional; when a parameter is {@code null}, it is ignored in the filter.
      * The result can be sorted by a given field and direction.
      *
-     * @param startDate    lower bound for the match date
-     * @param endDate      upper bound for the match date
-     * @param homeGoals    exact number of goals scored by the home team
-     * @param awayGoals    exact number of goals scored by the away team
-     * @param homeTeamName name of the home team to filter by
-     * @param awayTeamName name of the away team to filter by
-     * @param venueName    name of the venue to filter by
-     * @param sortBy       field to sort by (defaults to {@code "id"} if not provided)
-     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @param filter  filter parameters for listing matches
      * @return {@link ResponseEntity} with status 200 (OK) containing a list of
      * {@link MatchDto.MatchResponse} that match the given filters
      */
     @GetMapping
     @Operation(summary = "List matches")
     public ResponseEntity<List<MatchDto.MatchResponse>> listMatches(
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) Integer homeGoals,
-            @RequestParam(required = false) Integer awayGoals,
-            @RequestParam(required = false) String homeTeamName,
-            @RequestParam(required = false) String awayTeamName,
-            @RequestParam(required = false) String venueName,
-            @Parameter @RequestParam(required = false,defaultValue = "id") String sortBy,
-            @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
-    )
-    {
-        List<Match> matches=matchService.findMatchFilter(startDate,endDate,homeGoals,awayGoals,homeTeamName,awayTeamName
-                ,venueName,sortBy,sortDir);
+            @ParameterObject @ModelAttribute MatchDto.MatchFilter filter) {
+        List<Match> matches = matchService.findMatchFilter(filter);
 
         List<MatchDto.MatchResponse> response = matches.stream()
                 .map(this::toResponse)

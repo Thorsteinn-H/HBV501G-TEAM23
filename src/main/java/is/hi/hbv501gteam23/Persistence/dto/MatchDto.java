@@ -2,6 +2,7 @@ package is.hi.hbv501gteam23.Persistence.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 public final class MatchDto {
@@ -72,5 +73,36 @@ public final class MatchDto {
             String venueName,
             Integer homeGoals,
             Integer awayGoals
+    ) {}
+
+    /**
+     * Filter parameters for listing matches.
+     * <p>
+     * All fields are optional. When {@code null}, a field is ignored in the filter.
+     * Sorting is controlled by {@code sortBy} and {@code sortDir}.
+     *
+     * @param startDate    lower bound (inclusive) for the match date
+     * @param endDate      upper bound (inclusive) for the match date
+     * @param homeGoals    minimum number of goals scored by the home team
+     * @param awayGoals    minimum number of goals scored by the away team
+     * @param homeTeamName home team name filter (substring, case-insensitive)
+     * @param awayTeamName away team name filter (substring, case-insensitive)
+     * @param venueName    venue name filter (substring, case-insensitive)
+     * @param sortBy       field to sort by (defaults to "id" if null/blank)
+     * @param sortDir      sort direction, either "ASC" or "DESC" (defaults to "ASC" if null/blank)
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record MatchFilter(
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
+            LocalDate startDate,
+            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
+            LocalDate endDate,
+            Integer homeGoals,
+            Integer awayGoals,
+            String homeTeamName,
+            String awayTeamName,
+            String venueName,
+            String sortBy,
+            String sortDir
     ) {}
 }

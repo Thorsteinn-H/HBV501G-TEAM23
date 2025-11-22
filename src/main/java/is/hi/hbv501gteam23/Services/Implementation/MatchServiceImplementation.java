@@ -29,28 +29,27 @@ public class MatchServiceImplementation implements MatchService {
     private final VenueRepository venueRepository;
 
     /**
-     * Retrieves a list of matches filtered by the given optional criteria and sorted by the given field.
-     * <p>
-     * All filter parameters are optional; when {@code null}, they are ignored in the specification.
+     * Finds matches using optional filters.
      *
-     * @param startDate    lower bound for the match date
-     * @param endDate      upper bound for the match date
-     * @param homeGoals    exact number of goals scored by the home team
-     * @param awayGoals    exact number of goals scored by the away team
-     * @param homeTeamName home team name filter
-     * @param awayTeamName away team name filter
-     * @param venueName    venue name filter
-     * @param sortBy       field to sort by
-     * @param sortDir      sort direction, either {@code "ASC"} or {@code "DESC"}
-     * @return list of {@link Match} entities matching the given filters
+     * @param filter filter parameters for listing matches
+     * @return a list of {@link Match} entities matching the filters
      */
     @Override
-    public List<Match> findMatchFilter(LocalDate startDate,
-                                       LocalDate endDate,Integer homeGoals,
-                                       Integer awayGoals,
-                                       String homeTeamName,
-                                       String awayTeamName,
-                                       String venueName, String sortBy, String sortDir) {
+    public List<Match> findMatchFilter(MatchDto.MatchFilter filter) {
+        LocalDate startDate    = filter != null ? filter.startDate()    : null;
+        LocalDate endDate      = filter != null ? filter.endDate()      : null;
+        Integer homeGoals      = filter != null ? filter.homeGoals()    : null;
+        Integer awayGoals      = filter != null ? filter.awayGoals()    : null;
+        String homeTeamName    = filter != null ? filter.homeTeamName() : null;
+        String awayTeamName    = filter != null ? filter.awayTeamName() : null;
+        String venueName       = filter != null ? filter.venueName()    : null;
+
+        String sortBy = (filter != null && filter.sortBy() != null && !filter.sortBy().isBlank())
+                ? filter.sortBy()
+                : "id";
+        String sortDir = (filter != null && filter.sortDir() != null && !filter.sortDir().isBlank())
+                ? filter.sortDir()
+                : "ASC";
 
         Specification<Match> spec= Specification.allOf(
             MatchSpecifications.matchDate(startDate,endDate),
@@ -61,8 +60,9 @@ public class MatchServiceImplementation implements MatchService {
             MatchSpecifications.matchVenueName(venueName)
         );
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
 
         return matchRepository.findAll(spec,sort);
     }
