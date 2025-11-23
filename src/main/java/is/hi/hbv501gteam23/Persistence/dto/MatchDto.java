@@ -19,7 +19,7 @@ public final class MatchDto {
      * @param awayGoals away teams goals
      */
     public record CreateMatchRequest(
-            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][.SSS][XXX]]")
             OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
@@ -41,7 +41,7 @@ public final class MatchDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchMatchRequest(
-            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][.SSS][XXX]]")
             OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
@@ -95,7 +95,7 @@ public final class MatchDto {
      */
     public record MatchResponse(
             Long id,
-            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][.SSS][XXX]]")
             OffsetDateTime matchDate,
             Long homeTeamId,
             String homeTeamName,

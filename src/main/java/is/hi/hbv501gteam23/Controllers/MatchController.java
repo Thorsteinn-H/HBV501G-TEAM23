@@ -83,10 +83,25 @@ public class MatchController {
      * mapped to {@link MatchResponse}
      */
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Modify a match")
     public ResponseEntity<MatchDto.MatchResponse> updateMatch(@PathVariable Long id, @RequestBody MatchDto.PatchMatchRequest body) {
         Match updatedMatch = matchService.patchMatch(id, body);
         return ResponseEntity.ok(toResponse(updatedMatch));
+    }
+
+    /**
+     * Deletes a match by its ID.
+     *
+     * @param id the ID of the match to delete
+     * @return {@link ResponseEntity} with status 204 (NO CONTENT) if deletion succeeds
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a match")
+    public ResponseEntity<Void> deleteMatch(@PathVariable Long id) {
+        matchService.deleteMatch(id);
+        return ResponseEntity.noContent().build();
     }
 
     /**
