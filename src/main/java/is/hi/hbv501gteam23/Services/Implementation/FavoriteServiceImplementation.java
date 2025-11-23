@@ -33,7 +33,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * Adds a new favorite item for the given user and entity.
      *
      * @param userId   the ID of the user adding the favorite
-     * @param type     the type of the favorited entity (MATCH, PLAYER, TEAM)
+     * @param type     the type of the entity marked as favorite (MATCH, PLAYER, TEAM)
      * @param entityId the ID of the entity to mark as favorite
      * @return a {@link FavoriteDto.FavoriteResponse} representing the created favorite
      * @throws ResponseStatusException with status 404 if the target entity does not exist
@@ -71,7 +71,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * Removes an existing favorite for the given user and entity.
      *
      * @param userId   the ID of the user
-     * @param type     the type of the favorited entity
+     * @param type     the type of the entity marked as favorite
      * @param entityId the ID of the entity whose favorite should be removed
      * @throws ResponseStatusException with status 404 if the favorite does not exist
      */
@@ -80,20 +80,6 @@ public class FavoriteServiceImplementation implements FavoriteService {
         var existing = favoriteRepository.findByUserIdAndEntityTypeAndEntityId(userId, type, entityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Favorite not found"));
         favoriteRepository.delete(existing);
-    }
-
-    /**
-     * Checks whether a given entity is a favorite for the user.
-     *
-     * @param userId   the ID of the user
-     * @param type     the type of the entity
-     * @param entityId the ID of the entity
-     * @return {@code true} if the entity is a favorite for the user, otherwise {@code false}
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public boolean isFavorite(Long userId, FavoriteType type, Long entityId) {
-        return favoriteRepository.existsByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
     }
 
     /**
@@ -114,7 +100,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * Lists all favorites for a given user filtered by entity type.
      *
      * @param userId the ID of the user
-     * @param type   the type of the favorited entities to list
+     * @param type   the type of the entities marked as favorite to list
      * @return a list of {@link FavoriteDto.FavoriteResponse} for the given user and type
      */
     @Override

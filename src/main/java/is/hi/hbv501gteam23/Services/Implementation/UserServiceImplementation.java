@@ -5,6 +5,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.Specifications.UserSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
+import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import is.hi.hbv501gteam23.Security.PasswordValidationUtil;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -39,22 +40,46 @@ public class UserServiceImplementation implements UserService {
         "image/gif"
     );
 
-    public List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order) {
-        Specification<User> spec = UserSpecifications.emailContains(email)
-            .and(UserSpecifications.nameContains(name))
-            .and(UserSpecifications.roleEquals(role))
-            .and(UserSpecifications.isActive(active));
-        Sort sort = Sort.by(Sort.Direction.ASC, "id");
-        if (sortBy != null) {
-            Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            sort = switch (sortBy.toLowerCase()) {
-                case "email" -> Sort.by(direction, "email");
-                case "name" -> Sort.by(direction, "name");
-                case "createdat" -> Sort.by(direction, "createdAt");
-                default -> Sort.by(direction, "id");
-            };
-        }
+    @Override
+    public List<User> listUsers(UserDto.UserFilter filter) {
+        String email    = filter != null ? filter.email()    : null;
+        String username = filter != null ? filter.username() : null;
+        SystemRole role = filter != null ? filter.role()     : null;
+        Boolean active  = filter != null ? filter.active()   : null;
+        String sortBy  = filter != null ? filter.sortBy()  : null;
+        String sortDir = filter != null ? filter.sortDir() : null;
+
+        Specification<User> spec = Specification.allOf(
+            UserSpecifications.emailContains(email),
+            UserSpecifications.nameContains(username),
+            UserSpecifications.roleEquals(role),
+            UserSpecifications.isActive(active));
+
+        Sort sort = buildUserSort(sortBy, sortDir);
         return authRepository.findAll(spec, sort);
+    }
+
+    /**
+     * Builds a {@link Sort} instance for user listing.
+     * If sortBy is null/blank, returns {@link Sort#unsorted()} so the DB natural order is used.
+     */
+    private Sort buildUserSort(String sortBy, String sortDir) {
+        if (sortBy == null || sortBy.isBlank()) return Sort.unsorted();
+
+        String key = sortBy.trim().toLowerCase();
+        String property = switch (key) {
+            case "email"     -> "email";
+            case "username"  -> "name";
+            case "created.at" -> "createdAt";
+            default          -> "id";
+        };
+
+        Sort.Direction direction =
+            (sortDir != null && sortDir.equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        return Sort.by(direction, property);
     }
 
     /**
@@ -249,42 +274,5 @@ public class UserServiceImplementation implements UserService {
     @Override
     public String getImageType(User user) {
         return user.getProfileImage().getImageType();
-    }
-
-    /**
-     * Updates the password for the specified user.
-     * <p>
-     * Verifies that the old password matches before setting the new password.
-     *
-     * @param user    the user whose password will be updated
-     * @param request a {@link UserDto.UpdatePassword} containing the old and new passwords
-     * @return the updated {@link User} object after the password change
-     * @throws RuntimeException if the old password does not match
-     */
-    @Override
-    public User updatePassword(User user, UserDto.UpdatePassword request) {
-        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Old password does not match" );
-        }
-        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
-        return authRepository.save(user);
-    }
-
-    /**
-     * Updates the profile information of the specified user.
-     * <p>
-     * Currently supports updating username and gender.
-     *
-     * @param user    the user whose profile will be updated
-     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
-     * @return the updated {@link User} object after the profile change
-     */
-    @Override
-    public User updateProfile(User user, UserDto.UpdateProfileRequest request) {
-        if (request.username() != null) user.setName(request.username());
-        if (request.gender() != null) {
-            user.setGender(request.gender());
-        }
-        return authRepository.save(user);
     }
 }

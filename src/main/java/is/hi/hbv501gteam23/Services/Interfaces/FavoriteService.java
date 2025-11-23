@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
 import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
-
 import java.util.List;
 
 /**
@@ -30,16 +29,6 @@ public interface FavoriteService {
     void removeFavorite(Long userId, FavoriteType type, Long entityId);
 
     /**
-     * Checks whether a given entity is a favorite for the user.
-     *
-     * @param userId   the ID of the user
-     * @param type     the type of the entity
-     * @param entityId the ID of the entity
-     * @return {@code true} if the entity is a favorite, otherwise {@code false}
-     */
-    boolean isFavorite(Long userId, FavoriteType type, Long entityId);
-
-    /**
      * Lists all favorites for a given user.
      *
      * @param userId the ID of the user
@@ -51,7 +40,7 @@ public interface FavoriteService {
      * Lists favorites for a given user filtered by entity type.
      *
      * @param userId the ID of the user
-     * @param type   the type of the favorited entities
+     * @param type   the type of the entities marked as favorite
      * @return list of favorites of the given type for the user
      */
     List<FavoriteDto.FavoriteResponse> listForUserAndType(Long userId, FavoriteType type);

@@ -91,15 +91,23 @@ public class UserDto {
     ) {}
 
     /**
-     * Request body for updating own password
-     * @param newPassword The new password for the user
-     * @param oldPassword The old password for the user
+     * Filter parameters for listing users.
+     * All fields are optional; when {@code null} or blank, the filter is ignored.
+     *
+     * @param email    email filter (contains, case-insensitive)
+     * @param username username filter (contains, case-insensitive)
+     * @param role     system role filter
+     * @param active   active status filter
+     * @param sortBy   sort field (e.g. "id", "email", "username", "createdAt")
+     * @param sortDir  sort direction, either {@code "ASC"} or {@code "DESC"}
      */
-    public record UpdatePassword(
-        @Schema(example = "newPassword456")
-        String newPassword,
-        @Schema(example = "oldPassword123")
-        String oldPassword
+    public record UserFilter(
+        String email,
+        String username,
+        SystemRole role,
+        Boolean active,
+        String sortBy,
+        String sortDir
     ) {}
 
     /**

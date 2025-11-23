@@ -34,30 +34,51 @@ public class TeamServiceImplementation implements TeamService {
      * Finds teams using optional filters, with sorting.
      * All filter parameters are optional; when {@code null}, they are ignored.
      *
-     * @param name      team name filter
-     * @param isActive  active status filter
-     * @param country   country code filter
-     * @param venueName venue name filter
-     * @param sortBy    field to sort by
-     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @param filter the filters and sorting parameters for a team
      * @return list of {@link Team} entities matching the given filters
      */
     @Override
-    public List<Team> findTeamFilter(String name, Boolean isActive,
-                                     String country, String venueName,
-                                     String sortBy, String sortDir) {
+    public List<Team> listTeams(TeamDto.TeamFilter filter) {
+        String name      = filter != null ? filter.name()      : null;
+        Boolean isActive = filter != null ? filter.isActive()  : null;
+        String country   = filter != null ? filter.country()   : null;
+        String venueName = filter != null ? filter.venueName() : null;
+        String sortBy  = filter != null ? filter.sortBy()  : null;
+        String sortDir = filter != null ? filter.sortDir() : null;
 
         Specification<Team> spec= Specification.allOf(
-                TeamSpecifications.teamName(name),
-                TeamSpecifications.teamStatus(isActive),
-                TeamSpecifications.teamCountry(country),
-                TeamSpecifications.teamVenueName(venueName)
-                );
+                TeamSpecifications.nameContains(name),
+                TeamSpecifications.hasActiveStatus(isActive),
+                TeamSpecifications.hasCountry(country),
+                TeamSpecifications.venueNameContains(venueName)
+        );
 
-        Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Sort sort = buildTeamSort(sortBy, sortDir);
 
         return teamRepository.findAll(spec,sort);
+    }
+
+    /**
+     * Builds a {@link Sort} instance for team listing.
+     * If no sortBy is provided, returns {@link Sort#unsorted()}.
+     */
+    private Sort buildTeamSort(String sortBy, String sortDir) {
+        if (sortBy == null || sortBy.isBlank()) return Sort.unsorted();
+
+        String property = switch (sortBy.trim()) {
+            case "name"       -> "name";
+            case "country"    -> "country";
+            case "venueName"  -> "venue.name";
+            default           -> "id";
+        };
+
+        Sort.Direction direction =
+            (sortDir != null && sortDir.equalsIgnoreCase("desc"))
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        if ("venue.name".equals(property)) return Sort.by(direction, "venue.name");
+        return Sort.by(direction, property);
     }
 
     /**
@@ -74,43 +95,6 @@ public class TeamServiceImplementation implements TeamService {
     }
 
     /**
-     * Retrieves a single team by its name.
-     *
-     * @param name the name of the team
-     * @return the {@link Team} with the specified name
-     * @throws ResponseStatusException with status 404 if the team is not found
-     */
-    @Override
-    public Team findByName(String name){
-        Team t = teamRepository.findByNameContainingIgnoreCase(name);
-        if (t == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team "+name+" not found");
-        }
-        return t;
-    }
-
-    /**
-     * Retrieves teams by their country of origin.
-     *
-     * @param countryCode the team's country of origin
-     * @return a list of {@link Team} entities from the specified country
-     * @throws ResponseStatusException with status 400 if the country is null or blank
-     * @throws ResponseStatusException with status 404 if no teams are found for the country
-     */
-    @Override
-    public List<Team> findByCountry(String countryCode) {
-        if (countryCode == null || countryCode.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "country is required");
-        }
-        Country country = countryRepository.findById(countryCode.toUpperCase())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Country " + countryCode + " not found"));
-
-        List<Team> teams = teamRepository.findByCountry(country);
-        if (teams.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No teams found for country " + country);
-        return teams;
-    }
-
-    /**
      * Retrieves all teams that play at a specific venue.
      *
      * @param venueId the id of the venue
@@ -123,17 +107,6 @@ public class TeamServiceImplementation implements TeamService {
             return teamRepository.findByVenueId(venueId);
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + venueId + " not found");
-    }
-
-    /**
-     * Retrieves all teams with a specific active status.
-     *
-     * @param isActive the active status of a team
-     * @return a list of teams with the same active status
-     */
-    @Override
-    public List<Team> findByActiveStatus(Boolean isActive){
-        return teamRepository.findByIsActive(isActive);
     }
 
     /**

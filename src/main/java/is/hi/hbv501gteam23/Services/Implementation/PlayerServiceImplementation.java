@@ -6,21 +6,18 @@ import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.Repositories.CountryRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
 import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.Specifications.PlayerSpecifications;
 import is.hi.hbv501gteam23.Persistence.dto.PlayerDto;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import is.hi.hbv501gteam23.Utils.MetadataUtils;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 /**
@@ -38,69 +35,59 @@ public class PlayerServiceImplementation implements PlayerService {
      * Finds players using optional filters, with sorting and pagination.
      * All filter parameters are optional; when {@code null} or blank, they are ignored.
      *
-     * @param name     player name to filter by
-     * @param teamId   team ID to filter by
-     * @param teamName team name filter
-     * @param countryCode  country code to filter by
-     * @param isActive active status filter
-     * @param sortBy   field to sort by
-     * @param sortDir  sort direction, either {@code "ASC"} or {@code "DESC"}
-     * @param page     zero-based page index
-     * @param size     page size (max number of players per page)
+     * @param filter filter and sort parameters
      * @return list of {@link Player} entities matching the given filters
      */
     @Override
-    public List<Player> findPlayers(
-            String name,
-            Long teamId,
-            String teamName,
-            String countryCode,
-            Boolean isActive,
-            String sortBy,
-            String sortDir,
-            int page,
-            int size
-    ) {
-        Specification<Player> spec = (root, query, cb) -> {
-            Predicate p = cb.conjunction();
+    public List<Player> findPlayers(PlayerDto.PlayerFilter filter) {
+        String name = filter != null ? filter.name() : null;
+        Long teamId = filter != null ? filter.teamId() : null;
+        String teamName = filter != null ? filter.teamName() : null;
+        String countryCode = filter != null ? filter.country() : null;
+        Boolean isActive = filter != null ? filter.isActive() : null;
 
-            if (name != null && !name.isBlank()) {
-                p = cb.and(p, cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
-            }
+        String sortBy = (filter != null && filter.sortBy() != null && !filter.sortBy().isBlank())
+            ? filter.sortBy()
+            : "name";
 
-            if (teamId != null) {
-                p = cb.and(p, cb.equal(root.get("team").get("id"), teamId));
-            }
+        String sortDir = (filter != null && filter.sortDir() != null && !filter.sortDir().isBlank())
+            ? filter.sortDir()
+            : "asc";
 
-            if (teamName != null && !teamName.isBlank()) {
-                p = cb.and(p, cb.like(cb.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%"));
-            }
-
-            if (countryCode != null && !countryCode.isBlank()) {
-                p = cb.and(p, cb.equal(root.get("country").get("code"), countryCode.toUpperCase()));
-            }
-
-            if (isActive != null) {
-                p = cb.and(p, cb.equal(root.get("active"), isActive));
-            }
-
-            return p;
-        };
-
-        Sort.Direction direction = "DESC".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        return playerRepository.findAll(spec, pageable).getContent();
+        Specification<Player> spec = Specification.allOf(
+                PlayerSpecifications.nameContains(name),
+                PlayerSpecifications.hasTeamId(teamId),
+                PlayerSpecifications.hasTeamName(teamName),
+                PlayerSpecifications.hasCountry(countryCode),
+                PlayerSpecifications.isActive(isActive)
+        );
+        Sort sort = buildPlayerSort(sortBy, sortDir);
+        return playerRepository.findAll(spec, sort);
     }
 
     /**
-     * Retrieves all players
+     * Builds a {@link Sort} instance for player listing.
      *
-     * @return a list of all {@link Player} entities
+     * @param sortBy  requested sort field
+     * @param sortDir requested sort direction (ASC/DESC)
+     * @return a {@link Sort} configured for the requested field and direction
      */
-    @Override
-    public List<Player> getAllPlayers() {
-        return playerRepository.findAll();
+    private Sort buildPlayerSort(String sortBy, String sortDir) {
+        String key = sortBy == null ? "" : sortBy.trim();
+
+        String property = switch (key) {
+            case "goals"       -> "goals";
+            case "dateOfBirth" -> "dateOfBirth";
+            case "country"     -> "country.code";
+            case "nameContains"    -> "team.name";
+            default            -> "name";
+        };
+
+        Sort.Direction direction;
+        if (sortDir == null) direction = Sort.Direction.ASC;
+        else if (sortDir.equalsIgnoreCase("desc")) direction = Sort.Direction.DESC;
+        else direction = Sort.Direction.ASC;
+        return Sort.by(direction, property);
     }
 
     /**
@@ -115,76 +102,6 @@ public class PlayerServiceImplementation implements PlayerService {
         return playerRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player "+id+" not found"));
     }
-
-    /**
-     * Retrieves a single player by name.
-     *
-     * @param name the name (or part of a name) of the player
-     * @return the {@link Player} matching the name
-     * @throws ResponseStatusException with status 404 if no player is found
-     */
-    @Override
-    public Player searchPlayersByName(String name) {
-        Player p = playerRepository.findByNameContainingIgnoreCase(name);
-        if (p == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player "+name+" not found");
-        }
-        return p;
-    }
-
-    /**
-     * Retrieves a list of players by their team name.
-     *
-     * @param teamName the name of the team
-     * @return a list of {@link Player} entities that belong to the specified team name
-     * @throws ResponseStatusException with status 404 if no players are found for the team name
-     */
-    @Override
-    public List<Player> getByTeamName(String teamName) {
-        List<Player> nameOfTeam = playerRepository.findByTeam_NameIgnoreCase(teamName);
-        if (nameOfTeam == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No teams with name "+teamName+" found");
-        }
-        return nameOfTeam;
-    }
-
-    /**
-     * Retrieves a list of players by their team's unique identifier.
-     *
-     * @param teamId the ID of the team
-     * @return a list of {@link Player} entities belonging to the specified team
-     * @throws ResponseStatusException with status 404 if the team does not exist
-     */
-    @Override
-    public List<Player> getByTeamId(Long teamId) {
-        if (teamRepository.existsById(teamId)) {
-            return playerRepository.findByTeamId(teamId);
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Team "+teamId+" not found");
-    }
-
-    /**
-     * Retrieves players by their active status.
-     *
-     * @param isActive the active status to filter by
-     * @return a list of {@link Player} entities with the given active status
-     */
-    @Override
-    public List<Player> getActivePlayers(Boolean isActive) {
-        return playerRepository.findByIsActive(isActive);
-    }
-
-    /**
-     * Retrieves players by country.
-     *
-     * @param country the country to filter by
-     * @return a list of {@link Player} entities from the given country
-     */
-    @Override
-    public List<Player> findByPlayerCountry(Country country) {
-        return playerRepository.findByCountry(country);
-    }
-
 
     /**
      * Creates a new player from the given request.
@@ -236,7 +153,6 @@ public class PlayerServiceImplementation implements PlayerService {
 
         return playerRepository.save(p);
     }
-
 
     /**
      * Partially updates a {@link Player} by id.

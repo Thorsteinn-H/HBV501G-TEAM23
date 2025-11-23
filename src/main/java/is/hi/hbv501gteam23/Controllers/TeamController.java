@@ -9,6 +9,7 @@ import is.hi.hbv501gteam23.Persistence.dto.TeamDto.TeamResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
 import is.hi.hbv501gteam23.Services.Interfaces.TeamService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,29 +50,21 @@ public class TeamController {
     @GetMapping
     @Operation(summary = "List teams")
     public ResponseEntity<List<TeamDto.TeamResponse>> listTeams(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) Boolean isActive,
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) String venueName,
-            @Parameter @RequestParam(required = false,defaultValue = "name") String sortBy,
-            @Parameter @RequestParam(required = false,defaultValue = "ASC") String sortDir
-    )
-    {
-        if (country != null) {
+            @ParameterObject @ModelAttribute TeamDto.TeamFilter filter
+    ) {
+        if (filter != null && filter.country() != null) {
             boolean validCountry = metadataService.getAllCountries().stream()
-                    .anyMatch(c -> c.value().equalsIgnoreCase(country));
+                    .anyMatch(c -> c.value().equalsIgnoreCase(filter.country()));
             if (!validCountry) {
                 return ResponseEntity
                         .badRequest()
                         .body(Collections.emptyList());
             }
         }
-
-        List<Team> teams=teamService.findTeamFilter(name,isActive,country,venueName,sortBy,sortDir);
-
+        List<Team> teams=teamService.listTeams(filter);
         List<TeamDto.TeamResponse> response = teams.stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(response);
     }

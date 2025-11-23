@@ -5,19 +5,15 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class VenueSpecifications {
 
-    public static Specification<Venue> hasId(Long id) {
-        return (root, query, builder) -> (id == null) ? null : builder.equal(root.get("id"), id);
-    }
-
-    public static Specification<Venue> hasName(String name) {
-        return (root, query, builder) ->
+    public static Specification<Venue> nameContains(String name) {
+        return (root, query, cb) ->
                 (name == null || name.isBlank()) ? null :
-                        builder.like(builder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
-    public static Specification<Venue> hasAddress(String address) {
-        return (root, query, builder) ->
+    public static Specification<Venue> addressContains(String address) {
+        return (root, query, cb) ->
                 (address == null || address.isBlank()) ? null :
-                        builder.like(builder.lower(root.get("address")), "%" + address.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("address")), "%" + address.toLowerCase() + "%");
     }
 }

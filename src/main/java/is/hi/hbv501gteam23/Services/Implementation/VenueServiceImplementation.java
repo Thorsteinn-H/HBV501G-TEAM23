@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.data.domain.Sort;
 import java.util.List;
 
 /**
@@ -24,38 +24,50 @@ public class VenueServiceImplementation implements VenueService {
     private final VenueRepository venueRepository;
 
     /**
-     * Retrieves all venue
+     * Finds venues using optional filters and sorting.
+     * <p>
+     * All fields in {@link VenueDto.VenueFilter} are optional; when {@code null} or blank, they are ignored.
      *
-     * @return a list of all {@link Venue} entities
+     * @param filter filter and sort parameters
+     * @return list of {@link Venue} entities matching the given filters
      */
     @Override
-    public List<Venue> getAllVenues() {
-        return venueRepository.findAll();
+    public List<Venue> listVenues(VenueDto.VenueFilter filter) {
+        String name    = filter != null ? filter.name()    : null;
+        String address = filter != null ? filter.address() : null;
+        String sortBy = filter != null ? filter.sortBy() : null;
+        String sortDir = filter != null ? filter.sortDir() : null;
+
+        Specification<Venue> spec = Specification.allOf(
+                VenueSpecifications.nameContains(name),
+                VenueSpecifications.addressContains(address)
+        );
+        Sort sort = buildVenueSort(sortBy, sortDir);
+        return venueRepository.findAll(spec, sort);
     }
 
     /**
-     * Retrieves venues filtered by optional name and address.
-     * <p>
-     * Both filters are optional; when provided, they are combined with a logical AND.
-     * If both {@code name} and {@code address} are {@code null} or blank,
-     * all venues are returned.
+     * Builds a {@link Sort} instance for venue listing.
      *
-     * @param name    venue name filter (case-insensitive, partial matches allowed)
-     * @param address venue address filter (case-insensitive, partial matches allowed)
-     * @return a list of {@link Venue} entities matching the given filters
+     * @param sortBy  requested sort field
+     * @param sortDir requested sort direction (ASC/DESC)
+     * @return a {@link Sort} configured for the requested field and direction
      */
-    @Override
-    public List<Venue> findByFilters(String name, String address) {
-        Specification<Venue> spec = null;
+    private Sort buildVenueSort(String sortBy, String sortDir) {
+        String key = sortBy == null ? "" : sortBy.trim();
 
-        if (name != null && !name.isBlank()) {
-            spec = VenueSpecifications.hasName(name);
-        }
+        String property = switch (key) {
+            case "name"       -> "name";
+            case "address"    -> "address";
+            default           -> "id";
+        };
 
-        if (address != null && !address.isBlank()) {
-            spec = VenueSpecifications.hasAddress(address);
-        }
-        return venueRepository.findAll(spec);
+        Sort.Direction direction;
+        if (sortDir == null) direction = Sort.Direction.ASC;
+        else if (sortDir.equalsIgnoreCase("desc")) direction = Sort.Direction.DESC;
+        else direction = Sort.Direction.ASC;
+
+        return Sort.by(direction, property);
     }
 
     /**
@@ -69,22 +81,6 @@ public class VenueServiceImplementation implements VenueService {
     public Venue findById(Long id) {
         return venueRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue " + id + " not found"));
-    }
-
-    /**
-     * Retrieves a single venue by its name.
-     *
-     * @param name the name of the venue
-     * @return the {@link Venue} with the specified name
-     * @throws ResponseStatusException with status 404 if the venue is not found
-     */
-    @Override
-    public Venue findByName(String name) {
-        Venue v = venueRepository.findByNameIgnoreCase(name);
-        if (v == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue '" + name + "' not found");
-        }
-        return v;
     }
 
     /**

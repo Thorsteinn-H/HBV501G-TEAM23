@@ -6,27 +6,27 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class TeamSpecifications {
 
-    public static Specification<Team> teamName(String name) {
-        return (root, query, criteriaBuilder) ->
+    public static Specification<Team> nameContains(String name) {
+        return (root, query, cb) ->
                 (name == null || name.isBlank()) ? null:
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%");
     }
 
-    public static Specification<Team> teamStatus(Boolean isActive) {
-        return (root, query, criteriaBuilder) ->
+    public static Specification<Team> hasActiveStatus(Boolean isActive) {
+        return (root, query, cb) ->
                 (isActive == null) ? null:
-                criteriaBuilder.equal(root.get("isActive"), isActive);
+                cb.equal(root.get("isActive"), isActive);
     }
 
-    public static Specification<Team> teamCountry(String country) {
-        return (root, query, criteriaBuilder) ->
+    public static Specification<Team> hasCountry(String country) {
+        return (root, query, cb) ->
                 (country == null || country.isBlank()) ? null:
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("country")), "%" + country.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("country")), "%" + country.toLowerCase() + "%");
     }
 
-    public static Specification<Team> teamVenueName(String venueName){
-        return (root, query, criteriaBuilder) ->
+    public static Specification<Team> venueNameContains(String venueName){
+        return (root, query, cb) ->
                 (venueName == null || venueName.isBlank()) ? null:
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("venue").get("name")), "%" + venueName.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("venue").get("name")), "%" + venueName.toLowerCase() + "%");
     }
 }

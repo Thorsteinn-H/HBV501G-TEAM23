@@ -7,23 +7,16 @@ import java.util.List;
 
 
 public interface VenueService {
-    /**
-     * Retrieves all venue
-     *
-     * @return a list of all {@link Venue} entities
-     */
-    List<Venue> getAllVenues();
 
     /**
-     * Retrieves venues filtered by optional name and address.
+     * Finds venues using optional filters and sorting.
      * <p>
-     * Both filters are optional, when {@code null} or blank, they are ignored.
+     * All fields in {@link VenueDto.VenueFilter} are optional; when {@code null} or blank, they are ignored.
      *
-     * @param name    venue name filter (case-insensitive, partial matches allowed)
-     * @param address venue address filter (case-insensitive, partial matches allowed)
-     * @return a list of {@link Venue} entities matching the given filters
+     * @param filter filter and sort parameters
+     * @return list of {@link Venue} entities matching the given filters
      */
-    List<Venue> findByFilters(String name, String address);
+    List<Venue> listVenues(VenueDto.VenueFilter filter);
 
     /**
      * Retrieves a single venue by its unique identifier.
@@ -32,14 +25,6 @@ public interface VenueService {
      * @return the {@link Venue} with the specified id
      */
     Venue findById(Long id);
-
-    /**
-     * Retrieves a single venue by its name.
-     *
-     * @param name the name of the venue
-     * @return the {@link Venue} with the specified name
-     */
-    Venue findByName(String name);
 
     /**
      * Creates a new venue
