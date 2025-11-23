@@ -1,7 +1,5 @@
 package is.hi.hbv501gteam23.Persistence.Repositories;
 
-
-import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -28,18 +26,4 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
      */
     @Query("SELECT t FROM Team t WHERE t.venue.id = :venueId")
     List<Team> findByVenueId(Long venueId);
-
-    /**
-     * Retrieves all teams with a specific active status
-     * @param isActive the active status of a team
-     * @return List of all teams that have the same active status
-     */
-    List<Team> findByIsActive(Boolean isActive);
-
-    /**
-     * Retrieves all teams from a specific country
-     * @param country the country the team is from
-     * @return List of all teams from the same country
-     */
-    List<Team> findByCountry(Country country);
 }

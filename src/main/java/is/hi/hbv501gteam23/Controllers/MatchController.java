@@ -1,7 +1,6 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
@@ -12,11 +11,8 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Match} resources.
@@ -41,15 +37,13 @@ public class MatchController {
      */
     @GetMapping
     @Operation(summary = "List matches")
-    public ResponseEntity<List<MatchDto.MatchResponse>> listMatches(
-            @ParameterObject @ModelAttribute MatchDto.MatchFilter filter) {
+    public List<MatchResponse> listMatches(
+        @ParameterObject @ModelAttribute MatchDto.MatchFilter filter
+    ) {
         List<Match> matches = matchService.findMatchFilter(filter);
-
-        List<MatchDto.MatchResponse> response = matches.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
+        return matches.stream()
+                      .map(this::toResponse)
+                      .toList();
     }
 
     /**

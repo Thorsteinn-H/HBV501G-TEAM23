@@ -7,6 +7,7 @@ import is.hi.hbv501gteam23.Persistence.Entities.Venue;
 import is.hi.hbv501gteam23.Persistence.dto.VenueDto;
 import is.hi.hbv501gteam23.Services.Interfaces.VenueService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Venue} resources.
@@ -29,31 +31,23 @@ public class VenueController {
     private final VenueService venueService;
 
     /**
-     * Lists all venues with optional filters
-     * * If {@code name} and/or {@code address} are provided, they are used to filter the results.
-     *      * Matching is typically case-insensitive and may support partial matches,
-     *      * depending on the {@link VenueService} implementation.
+     * Lists venues using optional filters, with sorting.
+     * <p>
+     * All fields in {@link VenueDto.VenueFilter} are optional; when {@code null} or blank, they are ignored.
      *
-     * @param name    name filter (case-insensitive, partial matches allowed)
-     * @param address address filter (case-insensitive, partial matches allowed)
-     * @return list of {@link VenueDto.VenueResponse} matching the criteria
-     * @throws ResponseStatusException with status 500 if an unexpected error occurs while retrieving venues
+     * @param filter filter and sort parameters bound from query parameters
+     * @return 200 OK with a list of {@link VenueDto.VenueResponse}
      */
     @GetMapping
-    @ResponseBody
-    @Operation(summary = "List venues", description = "List all venues or filter by optional parameters.")
-    public List<VenueDto.VenueResponse> getVenues(
-        @RequestParam(required = false) String name,
-        @RequestParam(required = false) String address
+    @Operation(summary = "List venues", description = "List all venues or filter by optional parameters. Supports sorting.")
+    public ResponseEntity<List<VenueDto.VenueResponse>> listVenues(
+        @ParameterObject @ModelAttribute VenueDto.VenueFilter filter
     ) {
-        try {
-            return venueService.findByFilters(name, address)
-                .stream()
+        List<Venue> venues = venueService.listVenues(filter);
+        List<VenueDto.VenueResponse> response = venues.stream()
                 .map(this::toResponse)
-                .toList();
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving venues", e);
-        }
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -134,7 +128,9 @@ public class VenueController {
         return new VenueDto.VenueResponse(
                 v.getId(),
                 v.getName(),
-                v.getAddress()
+                v.getAddress(),
+                v.getLatitude(),
+                v.getLongitude()
         );
     }
 }

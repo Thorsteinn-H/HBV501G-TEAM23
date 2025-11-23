@@ -93,32 +93,10 @@ public interface UserService {
     String getImageType(User user);
 
     /**
-     * Updates the profile information of the specified user.
+     * Finds users using optional filters and sorting.
      *
-     * @param user    the user whose profile will be updated
-     * @param request a {@link UserDto.UpdateProfileRequest} containing the new profile values
-     * @return the updated {@link User} entity after the profile change
+     * @param filter filter and sort parameters
+     * @return list of {@link User} entities matching the filters
      */
-    User updateProfile(User user, UserDto.UpdateProfileRequest request);
-
-    /**
-     * Updates the password for the specified user.
-     *
-     * @param user     the user whose password will be updated
-     * @param request  a {@link UserDto.UpdatePassword} object containing the old and new passwords
-     * @return the updated {@link User} entity after the password change
-     */
-    User updatePassword(User user, UserDto.UpdatePassword request);
-
-    /**
-     *
-     * @param email
-     * @param name
-     * @param role
-     * @param active
-     * @param sortBy
-     * @param order
-     * @return
-     */
-    List<User> findUsers(String email, String name, String role, Boolean active, String sortBy, String order);
+    List<User> listUsers(UserDto.UserFilter filter);
 }

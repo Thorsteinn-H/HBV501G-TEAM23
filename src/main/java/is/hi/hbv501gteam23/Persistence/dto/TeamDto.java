@@ -39,6 +39,27 @@ public final class TeamDto {
     ) {}
 
     /**
+     * Filter parameters for listing teams.
+     *
+     * All fields are optional; when {@code null} or blank, they are ignored.
+     *
+     * @param name      team name filter (contains, case-insensitive)
+     * @param isActive  active status filter
+     * @param country   country code filter (case-insensitive)
+     * @param venueName venue name filter (contains, case-insensitive)
+     * @param sortBy    sort field (e.g. "id", "name", "country", "venueName")
+     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     */
+    public record TeamFilter(
+            String name,
+            Boolean isActive,
+            String country,
+            String venueName,
+            String sortBy,
+            String sortDir
+    ) {}
+
+    /**
      * Request body for retrieving a team
      *
      * <p>

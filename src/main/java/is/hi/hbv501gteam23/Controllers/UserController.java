@@ -7,6 +7,7 @@ import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,25 +36,15 @@ public class UserController {
     /**
      * Lists all users with optional filtering and sorting.
      *
-     * @param email   filter by email
-     * @param username filter by username
-     * @param role    filter by system role
-     * @param active  filter by active status
-     * @param sortBy  field to sort by
-     * @param order   sorting order (asc/desc)
+     * @param filter   filter and sorting parameters
      * @return a list of {@link UserDto.UserResponse}
      */
     @GetMapping
     @Operation(summary = "List users", description = "Lists all users with optional filtering and sorting. Admin only.")
-    public ResponseEntity<List<UserDto.UserResponse>> getUsers(
-        @RequestParam(required = false) String email,
-        @RequestParam(required = false) String username,
-        @RequestParam(required = false) String role,
-        @RequestParam(required = false) Boolean active,
-        @RequestParam(required = false) String sortBy,
-        @RequestParam(required = false, defaultValue = "asc") String order
+    public ResponseEntity<List<UserDto.UserResponse>> listUsers(
+            @ParameterObject @ModelAttribute UserDto.UserFilter filter
     ) {
-        List<UserDto.UserResponse> users = userService.findUsers(email, username, role, active, sortBy, order)
+        List<UserDto.UserResponse> users = userService.listUsers(filter)
             .stream()
             .map(this::toResponse)
             .toList();

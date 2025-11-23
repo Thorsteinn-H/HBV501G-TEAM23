@@ -9,6 +9,7 @@ import is.hi.hbv501gteam23.Persistence.dto.PlayerDto.PlayerResponse;
 import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
 import is.hi.hbv501gteam23.Services.Interfaces.PlayerService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,34 +39,19 @@ public class PlayerController {
      * If a country is provided, it must be one of the configured countries from {@link MetadataService},
      * otherwise a 400 (Bad Request) is returned with an empty list.
      *
-     * @param name      player name to filter by
-     * @param teamId    team ID to filter by
-     * @param teamName  team name to filter by
-     * @param country   country code to filter by; must be a valid-configured country
-     * @param isActive  active status filter (e.g. only active players)
-     * @param sortBy    field to sort by (defaults to {@code "name"})
-     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
-     * @param page      zero-based page index (defaults to 0)
-     * @param size      page size, i.e. maximum number of players per page (defaults to 20)
+     * @param filter optional filter parameters
      * @return {@link ResponseEntity} with status 200 (OK) containing a list of {@link PlayerResponse},
      * or 400 (Bad Request) with an empty list if the country is invalid
      */
     @GetMapping
     @Operation(
         summary = "List players",
-        description = "List all players or use optional filters. Supports sorting and pagination."
+        description = "List all players or use optional filters and sorting."
     )
     public ResponseEntity<List<PlayerDto.PlayerResponse>> listPlayers(
-        @Parameter @RequestParam(required = false) String name,
-        @Parameter @RequestParam(required = false) Long teamId,
-        @Parameter @RequestParam(required = false) String teamName,
-        @Parameter @RequestParam(required = false) String country,
-        @Parameter @RequestParam(required = false) Boolean isActive,
-        @Parameter @RequestParam(defaultValue = "name") String sortBy,
-        @Parameter @RequestParam(defaultValue = "ASC") String sortDir,
-        @Parameter @RequestParam(defaultValue = "0") int page,
-        @Parameter @RequestParam(defaultValue = "20") int size
+            @ParameterObject @ModelAttribute PlayerDto.PlayerFilter filter
     ) {
+        String country = filter != null ? filter.country() : null;
         if (country != null) {
             boolean validCountry = metadataService.getAllCountries().stream()
                 .anyMatch(c -> c.value().equalsIgnoreCase(country));
@@ -76,9 +62,7 @@ public class PlayerController {
             }
         }
 
-        List<Player> players = playerService.findPlayers(
-            name, teamId, teamName, country, isActive, sortBy, sortDir, page, size
-        );
+        List<Player> players = playerService.findPlayers(filter);
 
         List<PlayerDto.PlayerResponse> response = players.stream()
             .map(this::toResponse)
@@ -140,13 +124,14 @@ public class PlayerController {
         return new PlayerResponse(
                 p.getId(),
                 p.getName(),
-                p.isActive(),
+                p.getDateOfBirth(),
+                p.getGender(),
+                p.getCountry() != null ? p.getCountry().getCode() : null,
+                p.getTeam() != null ? p.getTeam().getId()   : null,
+                p.getTeam() != null ? p.getTeam().getName() : null,
                 p.getPosition(),
                 p.getGoals(),
-                p.getCountry() != null ? p.getCountry().getCode() : null,
-                p.getDateOfBirth(),
-                p.getTeam() != null ? p.getTeam().getId()   : null,
-                p.getTeam() != null ? p.getTeam().getName() : null
+                p.isActive()
         );
     }
 }

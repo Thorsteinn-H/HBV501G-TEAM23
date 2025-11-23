@@ -2,8 +2,6 @@ package is.hi.hbv501gteam23.Services.Interfaces;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import is.hi.hbv501gteam23.Persistence.dto.MatchDto;
-
-import java.time.LocalDate;
 import java.util.List;
 
 public interface MatchService {
@@ -15,6 +13,7 @@ public interface MatchService {
      * @return a list of {@link Match} entities matching the filters
      */
     List<Match> findMatchFilter(MatchDto.MatchFilter filter);
+
     /**
      * Retrieves a single match by its unique identifier.
      *
@@ -22,24 +21,6 @@ public interface MatchService {
      * @return the {@link Match} with the specified id
      */
     Match getMatchById(Long id);
-
-
-    /**
-     * Retrieves all matches in which a specific team has participated.
-     *
-     * @param teamId the ID of the team
-     * @return a list of {@link Match} entities involving the specified team
-     */
-    List<Match> getMatchesByTeamId(Long teamId);
-
-    /**
-     * Retrieves all matches in a specific time frame
-     * @param from start of the time fram
-     * @param to end of the time framm
-     * @return a list of {@link Match} entities that happened in the time frame
-     */
-    List<Match> getMatchesBetween(LocalDate from, LocalDate to);
-
 
     /**
      * Updates existing match
@@ -55,7 +36,6 @@ public interface MatchService {
      * @return the created match
      */
     Match createMatch(MatchDto.CreateMatchRequest body);
-
 
     /**
      * Deletes a match by its id

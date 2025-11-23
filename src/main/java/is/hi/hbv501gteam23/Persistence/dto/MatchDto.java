@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ public final class MatchDto {
      * @param awayGoals away teams goals
      */
     public record CreateMatchRequest(
-            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
             OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
@@ -40,37 +41,11 @@ public final class MatchDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record PatchMatchRequest(
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
             OffsetDateTime matchDate,
             Long homeTeamId,
             Long awayTeamId,
             Long venueId,
-            Integer homeGoals,
-            Integer awayGoals
-    ) {}
-
-    /**
-     * Request body for retrieving a match
-     *
-     * @param id the id of the match
-     * @param matchDate when the match took place
-     * @param homeTeamId the id of the home team
-     * @param homeTeamName the name of the home team
-     * @param awayTeamId the id of the away team
-     * @param awayTeamName the name of the away team
-     * @param venueId the id of the home teams venue
-     * @param venueName the name of the home teams venue
-     * @param homeGoals home teams goals
-     * @param awayGoals away teams goals
-     */
-    public record MatchResponse(
-            Long id,
-            OffsetDateTime matchDate,
-            Long homeTeamId,
-            String homeTeamName,
-            Long awayTeamId,
-            String awayTeamName,
-            Long venueId,
-            String venueName,
             Integer homeGoals,
             Integer awayGoals
     ) {}
@@ -93,9 +68,7 @@ public final class MatchDto {
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record MatchFilter(
-            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
             LocalDate startDate,
-            @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd")
             LocalDate endDate,
             Integer homeGoals,
             Integer awayGoals,
@@ -104,5 +77,33 @@ public final class MatchDto {
             String venueName,
             String sortBy,
             String sortDir
+    ) {}
+
+    /**
+     * Request body for retrieving a match
+     *
+     * @param id the id of the match
+     * @param matchDate when the match took place
+     * @param homeTeamId the id of the home team
+     * @param homeTeamName the name of the home team
+     * @param awayTeamId the id of the away team
+     * @param awayTeamName the name of the away team
+     * @param venueId the id of the home teams venue
+     * @param venueName the name of the home teams venue
+     * @param homeGoals home teams goals
+     * @param awayGoals away teams goals
+     */
+    public record MatchResponse(
+            Long id,
+            @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm[:ss][XXX]]")
+            OffsetDateTime matchDate,
+            Long homeTeamId,
+            String homeTeamName,
+            Long awayTeamId,
+            String awayTeamName,
+            Long venueId,
+            String venueName,
+            Integer homeGoals,
+            Integer awayGoals
     ) {}
 }

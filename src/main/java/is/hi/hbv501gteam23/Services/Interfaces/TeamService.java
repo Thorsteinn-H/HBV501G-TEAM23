@@ -12,19 +12,10 @@ public interface TeamService {
      * All filter parameters are optional; when {@code null}, they are ignored.
      * Supports filtering by name, active status, country and venue name.
      *
-     * @param name      team name filter (partial, case-insensitive)
-     * @param isActive  active status filter
-     * @param country   country code filter
-     * @param venueName venue name filter (partial, case-insensitive)
-     * @param sortBy    field to sort by
-     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"}
+     * @param filter filter and sort parameters
      * @return list of {@link Team} entities matching the given filters
      */
-    List<Team> findTeamFilter(
-             String name, Boolean isActive,
-            String country, String venueName,
-            String sortBy, String sortDir
-    );
+    List<Team> listTeams(TeamDto.TeamFilter filter);
 
     /**
      * Retrieves a single team by its unique identifier.
@@ -35,36 +26,12 @@ public interface TeamService {
     Team getTeamById(Long id);
 
     /**
-     * Retrieves a single team by its name
-     *
-     * @param name the name of the team
-     * @return the {@link Team} with the specified name
-     */
-    Team findByName(String name);
-
-    /**
-     * Retrieves a single team by its country of origin
-     *
-     * @param country the teams country of origin
-     * @return a list of {@link Team} entities from a specific country
-     */
-    List<Team> findByCountry(String country);
-
-    /**
      * Retrieves all teams in a specific venue
      *
      * @param venueId the id of the team
      * @return a list of {@link Team} entities involving the specified team
      */
     List<Team> findByVenueId(Long venueId);
-
-    /**
-     * Retrieves all teams with the same active status
-     *
-     * @param isActive the active status of a team
-     * @return a list of {@link Team} entities with the same active status
-     */
-    List<Team> findByActiveStatus(Boolean isActive);
 
     /**
      * Creates a new team
