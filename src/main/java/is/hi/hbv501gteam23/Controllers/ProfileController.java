@@ -61,12 +61,10 @@ public class ProfileController {
             @Valid @RequestBody UserDto.UpdateProfileRequest request
     ) {
         User user = getAuthenticatedUser(userDetails);
-
         user = profileService.updateProfile(
-                user,
-                new ProfileDto.UpdateProfileRequest(request.username(), request.gender())
+            user,
+            new ProfileDto.UpdateProfileRequest(request.username(), request.gender())
         );
-
         return ResponseEntity.ok(toResponse(user));
     }
 
@@ -82,10 +80,10 @@ public class ProfileController {
     @Operation(summary = "Change password", description = "Update the logged-in user's password.")
     public ResponseEntity<ProfileDto.ProfileResponse> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody UserDto.UpdatePassword request
+            @Valid @RequestBody ProfileDto.UpdatePassword request
     ) {
         User user = getAuthenticatedUser(userDetails);
-        User updatedUser = userService.updatePassword(user, new UserDto.UpdatePassword(request.newPassword(), request.oldPassword()));
+        User updatedUser = profileService.updatePassword(user, new ProfileDto.UpdatePassword(request.oldPassword(), request.newPassword()));
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 

@@ -1,6 +1,5 @@
 package is.hi.hbv501gteam23.Persistence.Repositories;
 
-import is.hi.hbv501gteam23.Persistence.Entities.Country;
 import is.hi.hbv501gteam23.Persistence.Entities.Player;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -8,8 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * Repository for accessing and managing {@link Player} entities.
@@ -22,34 +19,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long>, JpaSpecif
      * @return A player matching the name
      */
     Player findByNameContainingIgnoreCase(String name);
-
-    /**
-     * Retrieves all players from the same team
-     * @param name the name of the team
-     * @return A list of players from the same team
-     */
-    List<Player> findByTeam_NameIgnoreCase(String name);
-
-    /**
-     * Retrieves all players from the same team
-     * @param teamId a teams specific id
-     * @return A list of players from the same team
-     */
-    List<Player> findByTeamId(Long teamId);
-
-    /**
-     * Retrieves all players with the same active status
-     * @param isActive a player's active status
-     * @return A list of players with the same active status
-     */
-    List<Player> findByIsActive(Boolean isActive);
-
-    /**
-     *  Retrieves all players from the same country
-     * @param country a players country of origin
-     * @return A list of players from the same country
-     */
-    List<Player> findByCountry(Country country);
 
     /**
      * This serves as a purpose when a team is deleted

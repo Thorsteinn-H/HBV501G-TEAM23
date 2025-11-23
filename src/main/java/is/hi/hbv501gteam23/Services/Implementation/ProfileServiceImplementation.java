@@ -1,24 +1,26 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.User;
+import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.ProfileDto;
 import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.ProfileService;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ProfileServiceImplementation implements ProfileService {
-
+    private final AuthRepository authRepository;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Retrieves an active user profile by email.
@@ -35,39 +37,40 @@ public class ProfileServiceImplementation implements ProfileService {
     }
 
     /**
-     * Updates profile information (username or gender) for a given user.
+     * Updates the profile information of the specified user.
+     * <p>
+     * Currently supports updating username and gender.
      *
-     * @param user    the user whose profile should be updated
-     * @param request profile update request containing new profile values
-     * @return the updated {@link User}
-     * @throws IllegalArgumentException if the request is null
+     * @param user    the user whose profile will be updated
+     * @param request a {@link ProfileDto.UpdateProfileRequest} containing the new profile values
+     * @return the updated {@link User} object after the profile change
      */
     @Override
     public User updateProfile(User user, ProfileDto.UpdateProfileRequest request) {
-        if (request == null) throw new IllegalArgumentException("UpdateProfileRequest cannot be null");
-        UserDto.UpdateProfileRequest userRequest = new UserDto.UpdateProfileRequest(
-            request.username(),
-            request.gender()
-        );
-        return userService.updateProfile(user, userRequest);
+        if (request.username() != null) user.setName(request.username());
+        if (request.gender() != null) {
+            user.setGender(request.gender());
+        }
+        return authRepository.save(user);
     }
 
     /**
-     * Updates the password for a given user.
+     * Updates the password for the specified user.
+     * <p>
+     * Verifies that the old password matches before setting the new password.
      *
-     * @param user    the user whose password should be changed
-     * @param request an object containing the old and new passwords
-     * @return the updated {@link User} after password change
-     * @throws IllegalArgumentException if the request is null
+     * @param user    the user whose password will be updated
+     * @param request a {@link ProfileDto.UpdatePassword} containing the old and new passwords
+     * @return the updated {@link User} object after the password change
+     * @throws RuntimeException if the old password does not match
      */
     @Override
     public User updatePassword(User user, ProfileDto.UpdatePassword request) {
-        if (request == null) throw new IllegalArgumentException("UpdatePassword request cannot be null");
-        UserDto.UpdatePassword userRequest = new UserDto.UpdatePassword(
-            request.newPassword(),
-            request.oldPassword()
-        );
-        return userService.updatePassword(user, userRequest);
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Old password does not match" );
+        }
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        return authRepository.save(user);
     }
 
     /**

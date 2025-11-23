@@ -26,18 +26,18 @@ public final class ProfileDto {
     /**
      * Request body for updating own password
      *
-     * @param newPassword The new password for the user
      * @param oldPassword The old password for the user
+     * @param newPassword The new password for the user
      */
     public record UpdatePassword(
+            @Schema(example = "oldPassword123")
+            @NotBlank(message = "Old password is required")
+            String oldPassword,
+
             @Schema(example = "newPassword456")
             @NotBlank(message = "New password is required")
             @Size(min = 8, message = "New password must be at least 8 characters")
-            String newPassword,
-
-            @Schema(example = "oldPassword123")
-            @NotBlank(message = "Old password is required")
-            String oldPassword
+            String newPassword
     ) {}
 
     /**

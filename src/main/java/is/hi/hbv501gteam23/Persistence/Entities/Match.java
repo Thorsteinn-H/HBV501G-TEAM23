@@ -1,5 +1,6 @@
 package is.hi.hbv501gteam23.Persistence.Entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,6 +23,7 @@ public class Match {
     @Column(name = "match_id")
     private Long id;
 
+    @JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm:ssXXX]")
     @Column(name = "match_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime matchDate;
 
