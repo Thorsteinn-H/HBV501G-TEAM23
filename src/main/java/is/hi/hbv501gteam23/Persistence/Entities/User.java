@@ -8,7 +8,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -39,7 +38,7 @@ public class User implements Serializable {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = true, columnDefinition = "gender_enum")
+    @Column(name = "gender", columnDefinition = "gender_enum")
     private Gender gender;
 
     @JsonIgnore
@@ -48,7 +47,7 @@ public class User implements Serializable {
     private boolean isActive = true;
 
     @JsonIgnore
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

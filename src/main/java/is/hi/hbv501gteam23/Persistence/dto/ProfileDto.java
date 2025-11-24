@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDateTime;
 
 public final class ProfileDto {

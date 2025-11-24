@@ -2,7 +2,6 @@ package is.hi.hbv501gteam23.Persistence.Specifications;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Match;
 import org.springframework.data.jpa.domain.Specification;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 

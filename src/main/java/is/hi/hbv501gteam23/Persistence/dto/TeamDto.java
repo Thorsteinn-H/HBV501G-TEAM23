@@ -40,7 +40,6 @@ public final class TeamDto {
 
     /**
      * Filter parameters for listing teams.
-     *
      * All fields are optional; when {@code null} or blank, they are ignored.
      *
      * @param name      team name filter (contains, case-insensitive)

@@ -6,7 +6,6 @@ import is.hi.hbv501gteam23.Persistence.enums.Gender;
 import is.hi.hbv501gteam23.Persistence.enums.SystemRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
 import java.time.LocalDateTime;
 
 public class UserDto {

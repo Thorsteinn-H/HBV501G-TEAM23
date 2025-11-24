@@ -1,7 +1,6 @@
 package is.hi.hbv501gteam23.Security;
 
 import org.passay.*;
-
 import java.util.List;
 
 public class PasswordValidationUtil {

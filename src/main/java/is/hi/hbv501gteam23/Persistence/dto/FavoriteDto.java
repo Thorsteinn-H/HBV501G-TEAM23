@@ -23,8 +23,8 @@ public final class FavoriteDto {
      *
      * @param id         the ID of the favorite
      * @param userId     the ID of the user that owns the favorite
-     * @param favoriteType the type of the favorited entity
-     * @param entityId   the ID of the favorited entity
+     * @param favoriteType the type of the entity
+     * @param entityId   the ID of the entity
      */
     public record FavoriteResponse(
         Long id,
