@@ -3,7 +3,6 @@ package is.hi.hbv501gteam23.Services.Implementation;
 import is.hi.hbv501gteam23.Persistence.Entities.User;
 import is.hi.hbv501gteam23.Persistence.Repositories.AuthRepository;
 import is.hi.hbv501gteam23.Persistence.dto.ProfileDto;
-import is.hi.hbv501gteam23.Persistence.dto.UserDto;
 import is.hi.hbv501gteam23.Services.Interfaces.ProfileService;
 import is.hi.hbv501gteam23.Services.Interfaces.UserService;
 import jakarta.persistence.EntityNotFoundException;
