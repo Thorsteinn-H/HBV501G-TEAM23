@@ -101,12 +101,10 @@ public class SecurityConfig {
                 .referrerPolicy(ref -> ref
                     .policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
                 )
-                .addHeaderWriter((request, response) -> {
-                    response.setHeader(
-                        "Permissions-Policy",
-                        "geolocation=(), microphone=(), payment=(), usb=()"
-                    );
-                })
+                .addHeaderWriter((request, response) -> response.setHeader(
+                    "Permissions-Policy",
+                    "geolocation=(), microphone=(), payment=(), usb=()"
+                ))
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(auditCleanupFilter, JwtAuthenticationFilter.class);

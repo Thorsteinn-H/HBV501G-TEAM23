@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -31,11 +30,11 @@ public class Player {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @Column(name = "date_of_birth",  nullable = true)
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = true, columnDefinition = "gender_enum")
+    @Column(name = "gender", columnDefinition = "gender_enum")
     private Gender gender;
 
     @ManyToOne(fetch = FetchType.EAGER)

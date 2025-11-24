@@ -10,7 +10,6 @@ public class CountryScheduledSync {
 
     private final CountrySyncService countrySyncService;
 
-    /** Runs daily at midnight */
     @Scheduled(cron = "0 0 0 * * ?")
     public void dailySync() {
         countrySyncService.syncCountriesBulk();

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -25,7 +24,7 @@ public class Venue {
     @Column(name = "venue_name", nullable = false, length = 160)
     private String name;
 
-    @Column(name = "address", nullable = true, length = 255)
+    @Column(name = "address")
     private String address;
 
     @Column(name = "latitude")

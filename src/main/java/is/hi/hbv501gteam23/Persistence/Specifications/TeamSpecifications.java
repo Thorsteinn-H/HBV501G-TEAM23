@@ -3,7 +3,6 @@ package is.hi.hbv501gteam23.Persistence.Specifications;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import org.springframework.data.jpa.domain.Specification;
 
-
 public class TeamSpecifications {
 
     public static Specification<Team> nameContains(String name) {

@@ -1,7 +1,6 @@
 package is.hi.hbv501gteam23.Controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import is.hi.hbv501gteam23.Persistence.Entities.Team;
 import is.hi.hbv501gteam23.Persistence.dto.TeamDto;
@@ -13,11 +12,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * REST controller that exposes read/write operations for {@link Team} resources.
@@ -38,12 +35,7 @@ public class TeamController {
      * If a country is provided, it must be one of the configured countries in {@link MetadataService},
      * otherwise a 400 (Bad Request) response is returned with an empty list.
      *
-     * @param name      team name
-     * @param isActive  active status of the team
-     * @param country   country code to filter by
-     * @param venueName venue name to filter by
-     * @param sortBy    field to sort by (defaults to {@code "name"})
-     * @param sortDir   sort direction, either {@code "ASC"} or {@code "DESC"} (defaults to {@code "ASC"})
+     * @param filter  filter for filtering and sorting params
      * @return {@link ResponseEntity} with status 200 (OK) containing a list of {@link TeamResponse},
      * or 400 (Bad Request) with an empty list if the country is invalid
      */

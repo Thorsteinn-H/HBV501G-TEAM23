@@ -12,7 +12,7 @@ public class AppStartupRunner implements ApplicationRunner {
     private final CountrySyncService countrySyncService;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         countrySyncService.syncCountriesBulk();
         System.out.println("Countries table synchronized on startup.");
     }

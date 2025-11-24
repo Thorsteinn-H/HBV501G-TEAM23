@@ -5,7 +5,6 @@ import is.hi.hbv501gteam23.Persistence.dto.MetadataDto;
 import is.hi.hbv501gteam23.Services.Interfaces.MetadataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MetadataServiceImplementation implements MetadataService {
     private final CountryRepository countryRepository;
-  
+
     /**
      * Retrieves all countries as ISO 3166-1 alpha-2 codes with their English display names.
      * <p>

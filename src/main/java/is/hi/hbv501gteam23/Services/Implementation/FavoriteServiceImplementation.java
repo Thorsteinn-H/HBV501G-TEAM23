@@ -1,10 +1,10 @@
 package is.hi.hbv501gteam23.Services.Implementation;
 
 import is.hi.hbv501gteam23.Persistence.Entities.Favorite;
-import is.hi.hbv501gteam23.Persistence.Repositories.FavoriteRepository;
-import is.hi.hbv501gteam23.Persistence.Repositories.MatchRepository;
-import is.hi.hbv501gteam23.Persistence.Repositories.PlayerRepository;
-import is.hi.hbv501gteam23.Persistence.Repositories.TeamRepository;
+import is.hi.hbv501gteam23.Persistence.Entities.Match;
+import is.hi.hbv501gteam23.Persistence.Entities.Player;
+import is.hi.hbv501gteam23.Persistence.Entities.Team;
+import is.hi.hbv501gteam23.Persistence.Repositories.*;
 import is.hi.hbv501gteam23.Persistence.dto.FavoriteDto;
 import is.hi.hbv501gteam23.Persistence.enums.FavoriteType;
 import is.hi.hbv501gteam23.Services.Interfaces.FavoriteService;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 /**
@@ -28,6 +27,7 @@ public class FavoriteServiceImplementation implements FavoriteService {
     private final MatchRepository matchRepository;
     private final PlayerRepository playerRepository;
     private final TeamRepository teamRepository;
+    private final AuthRepository authRepository;
 
     /**
      * Adds a new favorite item for the given user and entity.
@@ -42,16 +42,6 @@ public class FavoriteServiceImplementation implements FavoriteService {
     @Override
     @Transactional
     public FavoriteDto.FavoriteResponse addFavorite(Long userId, FavoriteType type, Long entityId) {
-        boolean targetExists = switch (type) {
-            case MATCH  -> matchRepository.existsById(entityId);
-            case PLAYER -> playerRepository.existsById(entityId);
-            case TEAM   -> teamRepository.existsById(entityId);
-        };
-        if (!targetExists) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, type + " " + entityId + " not found");
-        }
-
         var existing = favoriteRepository.findByUserIdAndEntityTypeAndEntityId(userId, type, entityId);
         if (existing.isPresent()) {
             throw new ResponseStatusException(
@@ -118,11 +108,23 @@ public class FavoriteServiceImplementation implements FavoriteService {
      * @return the mapped {@link FavoriteDto.FavoriteResponse}
      */
     private FavoriteDto.FavoriteResponse toResponse(Favorite f) {
+        Object entity = switch (f.getEntityType()) {
+            case MATCH  -> matchRepository.findById(f.getEntityId()).orElse(null);
+            case PLAYER -> playerRepository.findById(f.getEntityId()).orElse(null);
+            case TEAM   -> teamRepository.findById(f.getEntityId()).orElse(null);
+        };
+
+        String name = switch (f.getEntityType()) {
+            case MATCH -> entity instanceof Match m ? m.getHomeTeam().getName() + " vs " + m.getAwayTeam().getName() : "Unknown Match";
+            case PLAYER -> entity instanceof Player p ? p.getName() : "Unknown Player";
+            case TEAM -> entity instanceof Team t ? t.getName() : "Unknown Team";
+        };
+
         return new FavoriteDto.FavoriteResponse(
                 f.getId(),
-                f.getUserId(),
                 f.getEntityType(),
-                f.getEntityId()
+                f.getEntityId(),
+                name
         );
     }
 }
